@@ -1,0 +1,625 @@
+/**
+ * Simple Audio Player - Admin Styles
+ * Professional Dark Theme with Full Responsiveness
+ */
+
+/* ===== Variables ===== */
+:root {
+    --sap-admin-bg: #0f0f12;
+    --sap-admin-card: #18181b;
+    --sap-admin-card-hover: #1f1f23;
+    --sap-admin-border: #27272a;
+    --sap-admin-border-hover: #3f3f46;
+    --sap-admin-text: #fafafa;
+    --sap-admin-text-secondary: #a1a1aa;
+    --sap-admin-muted: #71717a;
+    --sap-admin-accent: #6366f1;
+    --sap-admin-accent-hover: #818cf8;
+    --sap-admin-success: #22c55e;
+    --sap-admin-danger: #ef4444;
+    --sap-admin-danger-bg: #450a0a;
+    --sap-admin-radius: 12px;
+    --sap-admin-radius-sm: 8px;
+}
+
+/* ===== Metabox Override ===== */
+#sap_tracks.postbox {
+    background: var(--sap-admin-card) !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+#sap_tracks .postbox-header {
+    background: var(--sap-admin-bg) !important;
+    border-bottom: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius) var(--sap-admin-radius) 0 0 !important;
+}
+
+#sap_tracks .postbox-header h2 {
+    color: var(--sap-admin-text) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+}
+
+#sap_tracks .inside {
+    padding: 20px !important;
+    margin: 0 !important;
+}
+
+/* ===== Track Container ===== */
+#sap-tracks-container {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* ===== Track Card ===== */
+.sap-track-row {
+    display: grid;
+    grid-template-columns: auto 56px auto 1fr auto auto auto auto auto auto auto auto;
+    grid-template-areas: "handle cover coverbtn title artist filename audio links1 links2 links3 download remove";
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    background: var(--sap-admin-bg);
+    border: 1px solid var(--sap-admin-border);
+    border-radius: var(--sap-admin-radius);
+    transition: all 0.2s ease;
+    position: relative;
+}
+
+.sap-track-row:hover {
+    border-color: var(--sap-admin-border-hover);
+    background: var(--sap-admin-card-hover);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.sap-track-row::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--sap-admin-accent);
+    border-radius: var(--sap-admin-radius) 0 0 var(--sap-admin-radius);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.sap-track-row:hover::before {
+    opacity: 1;
+}
+
+/* ===== Grid Areas ===== */
+.sap-track-row > .sap-track-handle { grid-area: handle; }
+.sap-track-row > .sap-track-cover-preview { grid-area: cover; }
+.sap-track-row > .sap-select-cover { grid-area: coverbtn; }
+.sap-track-row > input.sap-track-title { grid-area: title; }
+.sap-track-row > input.sap-track-artist { grid-area: artist; }
+.sap-track-row > .sap-track-filename { grid-area: filename; }
+.sap-track-row > .sap-select-audio { grid-area: audio; }
+.sap-track-row > .sap-link-spotify { grid-area: links1; }
+.sap-track-row > .sap-link-apple { grid-area: links2; }
+.sap-track-row > .sap-link-amazon { grid-area: links3; }
+.sap-track-row > .sap-download-label { grid-area: download; }
+.sap-track-row > .sap-remove-track { grid-area: remove; }
+
+/* ===== Drag Handle ===== */
+.sap-track-handle {
+    cursor: grab;
+    color: var(--sap-admin-muted);
+    font-size: 16px;
+    padding: 8px;
+    border-radius: var(--sap-admin-radius-sm);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sap-track-handle:hover {
+    background: var(--sap-admin-card);
+    color: var(--sap-admin-text);
+}
+
+.sap-track-handle:active {
+    cursor: grabbing;
+}
+
+/* ===== Cover Preview ===== */
+.sap-track-cover-preview {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--sap-admin-radius-sm);
+    background: var(--sap-admin-card);
+    border: 2px solid var(--sap-admin-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+    transition: all 0.2s;
+}
+
+.sap-track-cover-preview:hover {
+    border-color: var(--sap-admin-accent);
+}
+
+.sap-track-cover-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.sap-no-cover {
+    font-size: 24px;
+    opacity: 0.3;
+}
+
+/* ===== Input Base ===== */
+.sap-track-row input[type="text"],
+.sap-track-row input[type="url"] {
+    background: var(--sap-admin-card) !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    color: var(--sap-admin-text) !important;
+    padding: 12px 14px !important;
+    font-size: 13px !important;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    transition: all 0.2s !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+.sap-track-row input[type="text"]:focus,
+.sap-track-row input[type="url"]:focus {
+    border-color: var(--sap-admin-accent) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
+    background: var(--sap-admin-card-hover) !important;
+}
+
+.sap-track-row input::placeholder {
+    color: var(--sap-admin-muted) !important;
+    font-weight: 400 !important;
+}
+
+/* ===== Specific Inputs ===== */
+input.sap-track-title {
+    min-width: 160px;
+    font-weight: 600 !important;
+}
+
+input.sap-track-artist {
+    width: 140px;
+    min-width: 100px;
+}
+
+input.sap-track-link {
+    width: 120px;
+    min-width: 100px;
+    font-size: 12px !important;
+}
+
+/* ===== Filename Display ===== */
+.sap-track-filename {
+    color: var(--sap-admin-text-secondary);
+    font-size: 11px;
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+    max-width: 140px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background: var(--sap-admin-card);
+    padding: 10px 12px;
+    border-radius: var(--sap-admin-radius-sm);
+    border: 1px solid var(--sap-admin-border);
+}
+
+/* ===== Buttons Base ===== */
+.sap-select-cover,
+.sap-select-audio {
+    background: var(--sap-admin-card) !important;
+    color: var(--sap-admin-text) !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    padding: 10px 16px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    white-space: nowrap;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+.sap-select-cover:hover,
+.sap-select-audio:hover {
+    background: var(--sap-admin-accent) !important;
+    border-color: var(--sap-admin-accent) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
+}
+
+.sap-select-cover:active,
+.sap-select-audio:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* ===== Remove Button ===== */
+.sap-remove-track {
+    background: transparent !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    color: var(--sap-admin-muted) !important;
+    padding: 10px 14px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    transition: all 0.2s !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+.sap-remove-track:hover {
+    background: var(--sap-admin-danger-bg) !important;
+    border-color: var(--sap-admin-danger) !important;
+    color: #fca5a5 !important;
+}
+
+/* ===== Download Label ===== */
+.sap-download-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--sap-admin-text-secondary);
+    white-space: nowrap;
+    background: var(--sap-admin-card);
+    padding: 10px 14px;
+    border-radius: var(--sap-admin-radius-sm);
+    border: 1px solid var(--sap-admin-border);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sap-download-label:hover {
+    border-color: var(--sap-admin-success);
+    color: var(--sap-admin-success);
+}
+
+.sap-download-label input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: var(--sap-admin-success);
+    cursor: pointer;
+}
+
+/* ===== Sortable States ===== */
+.sap-track-row.ui-sortable-helper {
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5) !important;
+    transform: rotate(1deg);
+    z-index: 9999;
+}
+
+.sap-track-placeholder {
+    height: 90px;
+    background: var(--sap-admin-bg);
+    border: 2px dashed var(--sap-admin-accent);
+    border-radius: var(--sap-admin-radius);
+    opacity: 0.5;
+}
+
+/* ===== Action Buttons ===== */
+#sap-add-track,
+#sap-bulk-add {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    margin-right: 12px;
+    background: var(--sap-admin-card) !important;
+    color: var(--sap-admin-text) !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    padding: 12px 24px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    transition: all 0.2s !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+#sap-add-track:hover,
+#sap-bulk-add:hover {
+    background: var(--sap-admin-accent) !important;
+    border-color: var(--sap-admin-accent) !important;
+    color: white !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
+}
+
+#sap-add-track {
+    background: var(--sap-admin-accent) !important;
+    border-color: var(--sap-admin-accent) !important;
+    color: white !important;
+}
+
+#sap-add-track:hover {
+    background: var(--sap-admin-accent-hover) !important;
+    border-color: var(--sap-admin-accent-hover) !important;
+}
+
+/* ===== Empty State ===== */
+#sap-tracks-container:empty::after {
+    content: 'Keine Tracks vorhanden. Klicke auf "+ Track hinzufügen" um zu starten.';
+    display: block;
+    text-align: center;
+    padding: 48px 24px;
+    color: var(--sap-admin-muted);
+    font-size: 14px;
+    background: var(--sap-admin-bg);
+    border: 2px dashed var(--sap-admin-border);
+    border-radius: var(--sap-admin-radius);
+}
+
+/* ===== Responsive: Tablet ===== */
+@media screen and (max-width: 1400px) {
+    .sap-track-row {
+        grid-template-columns: auto 48px auto 1fr 120px auto;
+        grid-template-areas: 
+            "handle cover coverbtn title artist remove"
+            "handle filename audio links1 links2 links3"
+            "handle . . . download download";
+        gap: 10px;
+        padding: 16px;
+    }
+    
+    input.sap-track-link {
+        width: 100%;
+    }
+}
+
+/* ===== Responsive: Small Tablet ===== */
+@media screen and (max-width: 1000px) {
+    .sap-track-row {
+        grid-template-columns: auto 48px 1fr auto;
+        grid-template-areas: 
+            "handle cover title remove"
+            "handle cover artist artist"
+            "coverbtn audio filename filename"
+            "links1 links2 links3 download";
+        gap: 10px;
+        padding: 14px;
+    }
+    
+    .sap-track-cover-preview {
+        width: 48px;
+        height: 48px;
+    }
+    
+    input.sap-track-title,
+    input.sap-track-artist {
+        width: 100% !important;
+        min-width: unset;
+    }
+    
+    input.sap-track-link {
+        width: 100%;
+    }
+}
+
+/* ===== Responsive: Mobile ===== */
+@media screen and (max-width: 782px) {
+    #sap_tracks .inside {
+        padding: 12px !important;
+    }
+    
+    .sap-track-row {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 16px;
+    }
+    
+    .sap-track-row > * {
+        width: 100% !important;
+    }
+    
+    /* Mobile Header Row */
+    .sap-track-row::after {
+        content: '';
+        display: none;
+    }
+    
+    .sap-track-handle {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+        width: auto !important;
+        padding: 4px 8px;
+    }
+    
+    .sap-remove-track {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: auto !important;
+    }
+    
+    .sap-track-cover-preview {
+        width: 80px !important;
+        height: 80px;
+        margin: 24px auto 8px;
+    }
+    
+    .sap-select-cover,
+    .sap-select-audio {
+        width: 100% !important;
+    }
+    
+    input.sap-track-title,
+    input.sap-track-artist,
+    input.sap-track-link {
+        width: 100% !important;
+    }
+    
+    .sap-track-filename {
+        max-width: 100%;
+        text-align: center;
+    }
+    
+    .sap-download-label {
+        justify-content: center;
+    }
+    
+    /* Mobile Action Buttons */
+    #sap-add-track,
+    #sap-bulk-add {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+        margin-bottom: 8px;
+    }
+}
+
+/* ===== Responsive: Small Mobile ===== */
+@media screen and (max-width: 480px) {
+    #sap_tracks .inside {
+        padding: 8px !important;
+    }
+    
+    .sap-track-row {
+        padding: 12px;
+        gap: 10px;
+    }
+    
+    .sap-track-cover-preview {
+        width: 64px !important;
+        height: 64px;
+    }
+    
+    input.sap-track-title,
+    input.sap-track-artist,
+    input.sap-track-link {
+        padding: 10px 12px !important;
+        font-size: 14px !important;
+    }
+    
+    .sap-select-cover,
+    .sap-select-audio,
+    .sap-remove-track,
+    .sap-download-label {
+        padding: 12px 16px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* ===== Embed Info Box ===== */
+.sap-embed-info {
+    margin-top: 24px;
+    padding: 20px;
+    background: var(--sap-admin-bg);
+    border: 1px solid var(--sap-admin-border);
+    border-radius: var(--sap-admin-radius);
+}
+
+.sap-embed-info > label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sap-admin-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
+}
+
+.sap-embed-codes {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sap-embed-code {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sap-embed-label {
+    font-size: 12px;
+    color: var(--sap-admin-muted);
+    min-width: 80px;
+}
+
+.sap-shortcode {
+    flex: 1;
+    background: var(--sap-admin-card) !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    padding: 12px 16px !important;
+    font-family: 'SF Mono', Monaco, 'Courier New', monospace !important;
+    font-size: 13px !important;
+    color: var(--sap-admin-accent) !important;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: all;
+}
+
+.sap-shortcode:hover {
+    border-color: var(--sap-admin-accent) !important;
+    background: var(--sap-admin-card-hover) !important;
+}
+
+.sap-shortcode:active {
+    transform: scale(0.99);
+}
+
+/* iFrame code - smaller font for long code */
+.sap-iframe-code {
+    font-size: 11px !important;
+    word-break: break-all;
+    line-height: 1.4;
+}
+
+/* Responsive embed info */
+@media screen and (max-width: 600px) {
+    .sap-embed-code {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    
+    .sap-embed-label {
+        min-width: unset;
+    }
+}
+
+/* ===== Animations ===== */
+@keyframes sap-fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.sap-track-row {
+    animation: sap-fadeIn 0.3s ease backwards;
+}
+
+.sap-track-row:nth-child(1) { animation-delay: 0.02s; }
+.sap-track-row:nth-child(2) { animation-delay: 0.04s; }
+.sap-track-row:nth-child(3) { animation-delay: 0.06s; }
+.sap-track-row:nth-child(4) { animation-delay: 0.08s; }
+.sap-track-row:nth-child(5) { animation-delay: 0.10s; }
+.sap-track-row:nth-child(6) { animation-delay: 0.12s; }
+.sap-track-row:nth-child(7) { animation-delay: 0.14s; }
+.sap-track-row:nth-child(8) { animation-delay: 0.16s; }
