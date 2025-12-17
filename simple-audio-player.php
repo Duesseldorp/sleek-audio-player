@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Audio Player
  * Description: Minimaler Audio-Player mit Download, Shuffle, Cover und Streaming-Links
- * Version: 1.3.2
+ * Version: 1.4.0
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '1.3.2');
+define('SAP_VERSION', '1.4.0');
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
 

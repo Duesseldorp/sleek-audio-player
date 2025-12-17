@@ -703,6 +703,58 @@
             a.click();
             document.body.removeChild(a);
         }
+
+        // === Keyboard Shortcuts ===
+        document.addEventListener('keydown', function(e) {
+            // Ignore if typing in input/textarea
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
+            }
+            
+            // Only respond if this player is visible/in viewport
+            const rect = playerEl.getBoundingClientRect();
+            const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
+            if (!inViewport) return;
+            
+            switch(e.code) {
+                case 'Space':
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    if (audio.duration) {
+                        audio.currentTime = Math.max(0, audio.currentTime - 10);
+                    }
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    if (audio.duration) {
+                        audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                    }
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    audio.volume = Math.min(1, audio.volume + 0.1);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    audio.volume = Math.max(0, audio.volume - 0.1);
+                    break;
+                case 'KeyN':
+                    playNext();
+                    break;
+                case 'KeyP':
+                    playPrev();
+                    break;
+                case 'KeyM':
+                    audio.muted = !audio.muted;
+                    break;
+                case 'KeyS':
+                    toggleShuffle();
+                    break;
+            }
+        });
     }
 
 })();
