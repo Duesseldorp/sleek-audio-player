@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Audio Player
  * Description: Minimaler Audio-Player mit Download, Shuffle, Cover und Streaming-Links
- * Version: 1.5.0
+ * Version: 1.6.2
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '1.5.0');
+define('SAP_VERSION', '1.6.2');
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -37,6 +37,8 @@ class SAP_Theme_Manager {
             'sap-accent' => '#e85d3d',
             'sap-accent-light' => '#f4795d',
             'sap-accent-glow' => 'rgba(232, 93, 61, 0.35)',
+            'sap-accent-glow-strong' => 'rgba(232, 93, 61, 0.5)',
+            'sap-accent-glow-soft' => 'rgba(232, 93, 61, 0.12)',
             // Text colors
             'sap-white' => '#ffffff',
             'sap-gray-100' => 'rgba(255, 255, 255, 0.92)',
@@ -46,7 +48,8 @@ class SAP_Theme_Manager {
             // Effects
             'sap-blue-tint' => 'rgba(70, 130, 170, 0.1)',
             'sap-visualizer' => '#e85d3d',
-            'sap-track-active' => '#e85d3d',
+            'sap-waveform-inactive' => 'rgba(120, 150, 170, 0.4)',
+            'sap-track-active' => 'rgba(232, 93, 61, 0.12)',
         ),
         'settings' => array(
             'sap-radius' => '16px',
@@ -400,10 +403,13 @@ class SAP_Theme_Manager {
                 'title' => '✨ Akzent & Buttons',
                 'colors' => array(
                     'sap-accent' => 'Hauptakzent (Play-Button)',
-                    'sap-accent-light' => 'Akzent Hell',
-                    'sap-accent-glow' => 'Akzent Glow',
+                    'sap-accent-light' => 'Akzent Hell (Hover)',
+                    'sap-accent-glow' => 'Akzent Glow (Schatten)',
+                    'sap-accent-glow-strong' => 'Akzent Glow Stark',
+                    'sap-accent-glow-soft' => 'Akzent Glow Soft',
                     'sap-visualizer' => 'Visualizer Farbe',
-                    'sap-track-active' => 'Aktiver Track',
+                    'sap-waveform-inactive' => 'Waveform Inaktiv',
+                    'sap-track-active' => 'Aktiver Track Hintergrund',
                 )
             ),
             'text' => array(
@@ -680,13 +686,26 @@ class SAP_Theme_Manager {
                 border-radius: 50%;
                 background: var(--preview-gray-400, rgba(120, 150, 170, 0.4));
             }
-            .sap-preview-progress-section {
-                margin-bottom: 12px;
+            .sap-preview-waveform {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 2px;
+                height: 24px;
+                margin-bottom: 8px;
+            }
+            .sap-preview-waveform-bar {
+                width: 4px;
+                background: var(--preview-waveform-inactive, rgba(120, 150, 170, 0.4));
+                border-radius: 1px;
+            }
+            .sap-preview-waveform-bar.active {
+                background: var(--preview-accent, #e85d3d);
             }
             .sap-preview-times {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 4px;
+                margin-bottom: 12px;
             }
             .sap-preview-time {
                 font-size: 10px;
@@ -965,14 +984,24 @@ class SAP_Theme_Manager {
                                         <span class="sap-preview-meta-text">12:34</span>
                                     </div>
                                 </div>
-                                <div class="sap-preview-progress-section">
-                                    <div class="sap-preview-progress">
-                                        <div class="sap-preview-progress-bar"></div>
-                                    </div>
-                                    <div class="sap-preview-times">
-                                        <span class="sap-preview-time">1:23</span>
-                                        <span class="sap-preview-time">3:45</span>
-                                    </div>
+                                <!-- Waveform Preview -->
+                                <div class="sap-preview-waveform">
+                                    <div class="sap-preview-waveform-bar active" style="height:35%"></div>
+                                    <div class="sap-preview-waveform-bar active" style="height:55%"></div>
+                                    <div class="sap-preview-waveform-bar active" style="height:70%"></div>
+                                    <div class="sap-preview-waveform-bar active" style="height:45%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:60%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:80%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:50%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:65%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:40%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:55%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:75%"></div>
+                                    <div class="sap-preview-waveform-bar" style="height:45%"></div>
+                                </div>
+                                <div class="sap-preview-times">
+                                    <span class="sap-preview-time">1:23</span>
+                                    <span class="sap-preview-time">3:45</span>
                                 </div>
                                 <div class="sap-preview-controls">
                                     <div class="sap-preview-btn small"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></div>
@@ -1033,9 +1062,18 @@ class SAP_Theme_Manager {
                 preview.find('.sap-preview-cover').css('background', 'linear-gradient(135deg, ' + colors['sap-accent'] + ', ' + colors['sap-accent-light'] + ')');
                 preview.find('.sap-preview-progress-bar').css('background', colors['sap-accent']);
                 preview.find('.sap-preview-btn.play').css('background', colors['sap-accent']);
-                var trackActiveColor = colors['sap-track-active'] || colors['sap-accent'];
-                preview.find('.sap-preview-track.active').css('border-left-color', trackActiveColor);
-                preview.find('.sap-preview-track.active .sap-preview-track-num').css('color', trackActiveColor);
+                
+                // Track active background
+                var trackActiveBg = colors['sap-track-active'] || colors['sap-accent-glow-soft'] || 'rgba(232, 93, 61, 0.12)';
+                preview.find('.sap-preview-track.active').css({
+                    'background': trackActiveBg,
+                    'border-left-color': colors['sap-accent']
+                });
+                preview.find('.sap-preview-track.active .sap-preview-track-num').css('color', colors['sap-accent']);
+                
+                // Waveform colors
+                preview.find('.sap-preview-waveform-bar.active').css('background', colors['sap-accent']);
+                preview.find('.sap-preview-waveform-bar:not(.active)').css('background', colors['sap-waveform-inactive']);
                 
                 // Visualizer
                 preview.find('.sap-viz-bar').css('background', colors['sap-visualizer']);
@@ -1296,6 +1334,514 @@ SAP_Theme_Manager::get_instance();
 // Activation hook for creating table
 register_activation_hook(__FILE__, array('SAP_Theme_Manager', 'create_table'));
 
+/**
+ * Waveform Manager Class
+ * Generates and stores real waveform data for audio files
+ */
+class SAP_Waveform_Manager {
+    
+    private static $instance = null;
+    const PEAKS_COUNT = 100;
+    
+    public static function get_instance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    private function __construct() {
+        add_action('admin_menu', array($this, 'add_waveform_menu'));
+        add_action('wp_ajax_sap_analyze_waveform', array($this, 'ajax_analyze_waveform'));
+        add_action('wp_ajax_sap_save_waveform', array($this, 'ajax_save_waveform'));
+        add_action('wp_ajax_sap_get_pending_waveforms', array($this, 'ajax_get_pending_waveforms'));
+    }
+    
+    /**
+     * Add waveform menu
+     */
+    public function add_waveform_menu() {
+        add_submenu_page(
+            'edit.php?post_type=sap_playlist',
+            'Waveform Analyse',
+            'Waveforms',
+            'manage_options',
+            'sap-waveforms',
+            array($this, 'render_waveform_page')
+        );
+    }
+    
+    /**
+     * Get all audio attachments used in playlists
+     */
+    public function get_playlist_audio_attachments() {
+        global $wpdb;
+        
+        $playlists = get_posts(array(
+            'post_type' => 'sap_playlist',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+        ));
+        
+        $attachments = array();
+        
+        foreach ($playlists as $playlist) {
+            $tracks = get_post_meta($playlist->ID, '_sap_tracks', true);
+            if (!empty($tracks) && is_array($tracks)) {
+                foreach ($tracks as $track) {
+                    if (!empty($track['attachment_id'])) {
+                        $att_id = absint($track['attachment_id']);
+                        if (!isset($attachments[$att_id])) {
+                            $file_path = get_attached_file($att_id);
+                            $waveform = get_post_meta($att_id, '_sap_waveform', true);
+                            $attachments[$att_id] = array(
+                                'id' => $att_id,
+                                'title' => $track['title'] ?? get_the_title($att_id),
+                                'url' => wp_get_attachment_url($att_id),
+                                'file_path' => $file_path,
+                                'has_waveform' => !empty($waveform),
+                                'playlist' => $playlist->post_title,
+                            );
+                        }
+                    }
+                }
+            }
+        }
+        
+        return array_values($attachments);
+    }
+    
+    /**
+     * Get waveform data for an attachment
+     */
+    public static function get_waveform($attachment_id) {
+        $waveform = get_post_meta($attachment_id, '_sap_waveform', true);
+        if (!empty($waveform) && is_array($waveform)) {
+            return $waveform;
+        }
+        return null;
+    }
+    
+    /**
+     * Save waveform data for an attachment
+     */
+    public static function save_waveform($attachment_id, $peaks) {
+        if (!is_array($peaks) || count($peaks) < 10) {
+            return false;
+        }
+        
+        // Normalize peaks to 0-1 range
+        $max = max($peaks);
+        if ($max > 0) {
+            $peaks = array_map(function($p) use ($max) {
+                return round($p / $max, 3);
+            }, $peaks);
+        }
+        
+        update_post_meta($attachment_id, '_sap_waveform', $peaks);
+        return true;
+    }
+    
+    /**
+     * AJAX: Get pending waveforms
+     */
+    public function ajax_get_pending_waveforms() {
+        check_ajax_referer('sap_waveform_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $attachments = $this->get_playlist_audio_attachments();
+        $pending = array_filter($attachments, function($a) {
+            return !$a['has_waveform'];
+        });
+        
+        wp_send_json_success(array(
+            'pending' => array_values($pending),
+            'total' => count($attachments),
+            'analyzed' => count($attachments) - count($pending),
+        ));
+    }
+    
+    /**
+     * AJAX: Save waveform from client-side analysis
+     */
+    public function ajax_save_waveform() {
+        check_ajax_referer('sap_waveform_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $attachment_id = absint($_POST['attachment_id'] ?? 0);
+        $peaks = json_decode(stripslashes($_POST['peaks'] ?? '[]'), true);
+        
+        if (!$attachment_id || !is_array($peaks)) {
+            wp_send_json_error('Invalid data');
+        }
+        
+        if (self::save_waveform($attachment_id, $peaks)) {
+            wp_send_json_success('Waveform saved');
+        } else {
+            wp_send_json_error('Failed to save waveform');
+        }
+    }
+    
+    /**
+     * AJAX: Analyze single waveform (server-side with getID3)
+     */
+    public function ajax_analyze_waveform() {
+        check_ajax_referer('sap_waveform_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $attachment_id = absint($_POST['attachment_id'] ?? 0);
+        $file_path = get_attached_file($attachment_id);
+        
+        if (!$file_path || !file_exists($file_path)) {
+            wp_send_json_error('File not found');
+        }
+        
+        // Try server-side analysis (basic approach using file sampling)
+        $peaks = $this->analyze_audio_file($file_path);
+        
+        if ($peaks) {
+            self::save_waveform($attachment_id, $peaks);
+            wp_send_json_success(array('peaks' => $peaks, 'method' => 'server'));
+        } else {
+            // Return URL for client-side analysis
+            wp_send_json_success(array(
+                'needs_client_analysis' => true,
+                'url' => wp_get_attachment_url($attachment_id),
+            ));
+        }
+    }
+    
+    /**
+     * Analyze audio file server-side
+     * Basic approach: read MP3 frame headers to estimate amplitude
+     */
+    private function analyze_audio_file($file_path) {
+        // Check for getID3 (comes with WordPress)
+        if (!function_exists('wp_read_audio_metadata')) {
+            require_once ABSPATH . 'wp-admin/includes/media.php';
+        }
+        
+        $ext = strtolower(pathinfo($file_path, PATHINFO_EXTENSION));
+        
+        // For now, return null to trigger client-side analysis
+        // Server-side MP3 parsing is complex without FFmpeg
+        return null;
+    }
+    
+    /**
+     * Render waveform management page
+     */
+    public function render_waveform_page() {
+        $attachments = $this->get_playlist_audio_attachments();
+        $pending_count = count(array_filter($attachments, function($a) { return !$a['has_waveform']; }));
+        ?>
+        <div class="wrap">
+            <h1>🎵 Waveform Analyse</h1>
+            <p>Generiert echte Waveform-Daten aus deinen Audio-Dateien für eine authentische Wellenform-Anzeige im Player.</p>
+            
+            <div class="sap-waveform-stats" style="background:#fff;padding:20px;border:1px solid #ddd;border-radius:8px;margin:20px 0;">
+                <h2 style="margin-top:0;">Status</h2>
+                <p>
+                    <strong><?php echo count($attachments); ?></strong> Audio-Dateien in Playlists gefunden<br>
+                    <strong style="color:#46b450;"><?php echo count($attachments) - $pending_count; ?></strong> analysiert<br>
+                    <strong style="color:#dc3232;"><?php echo $pending_count; ?></strong> ausstehend
+                </p>
+                
+                <?php if ($pending_count > 0) : ?>
+                <button type="button" id="sap-analyze-all" class="button button-primary button-hero" data-mode="pending">
+                    🔬 <?php echo $pending_count; ?> ausstehende Dateien analysieren
+                </button>
+                <?php else : ?>
+                <p style="color:#46b450;font-weight:600;">✓ Alle Dateien wurden analysiert!</p>
+                <?php endif; ?>
+                
+                <?php if (count($attachments) > 0) : ?>
+                <button type="button" id="sap-reanalyze-all" class="button" style="margin-left:10px;">
+                    🔄 Alle <?php echo count($attachments); ?> Dateien neu analysieren
+                </button>
+                <?php endif; ?>
+                
+                <div id="sap-analysis-progress" style="display:none;margin-top:20px;">
+                    <div style="background:#e0e0e0;border-radius:4px;height:24px;overflow:hidden;">
+                        <div id="sap-progress-bar" style="background:#0073aa;height:100%;width:0%;transition:width 0.3s;"></div>
+                    </div>
+                    <p id="sap-progress-text" style="margin-top:10px;">Analysiere...</p>
+                </div>
+            </div>
+            
+            <h2>Audio-Dateien</h2>
+            <table class="wp-list-table widefat fixed striped">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">ID</th>
+                        <th>Titel</th>
+                        <th>Playlist</th>
+                        <th style="width:120px;">Status</th>
+                        <th style="width:200px;">Waveform</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($attachments as $att) : ?>
+                    <tr data-id="<?php echo $att['id']; ?>">
+                        <td><?php echo $att['id']; ?></td>
+                        <td><?php echo esc_html($att['title']); ?></td>
+                        <td><?php echo esc_html($att['playlist']); ?></td>
+                        <td>
+                            <?php if ($att['has_waveform']) : ?>
+                                <span style="color:#46b450;">✓ Analysiert</span>
+                            <?php else : ?>
+                                <span style="color:#dc3232;">⏳ Ausstehend</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <canvas class="sap-mini-waveform" data-id="<?php echo $att['id']; ?>" 
+                                    style="width:180px;height:30px;background:#f0f0f0;border-radius:4px;"
+                                    data-peaks='<?php echo esc_attr(json_encode(self::get_waveform($att['id']) ?: [])); ?>'></canvas>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            const nonce = '<?php echo wp_create_nonce('sap_waveform_nonce'); ?>';
+            
+            // Draw existing waveforms
+            $('.sap-mini-waveform').each(function() {
+                const canvas = this;
+                const peaks = JSON.parse($(this).attr('data-peaks') || '[]');
+                if (peaks.length > 0) {
+                    drawMiniWaveform(canvas, peaks);
+                }
+            });
+            
+            function drawMiniWaveform(canvas, peaks) {
+                const ctx = canvas.getContext('2d');
+                const width = canvas.offsetWidth;
+                const height = canvas.offsetHeight;
+                canvas.width = width * 2;
+                canvas.height = height * 2;
+                ctx.scale(2, 2);
+                
+                ctx.clearRect(0, 0, width, height);
+                const barWidth = width / peaks.length;
+                
+                for (let i = 0; i < peaks.length; i++) {
+                    const barHeight = peaks[i] * height * 0.8;
+                    const x = i * barWidth;
+                    const y = (height - barHeight) / 2;
+                    ctx.fillStyle = '#0073aa';
+                    ctx.fillRect(x, y, barWidth - 1, barHeight);
+                }
+            }
+            
+            // Analyze all button
+            $('#sap-analyze-all').on('click', async function() {
+                const $btn = $(this);
+                const $progress = $('#sap-analysis-progress');
+                const $bar = $('#sap-progress-bar');
+                const $text = $('#sap-progress-text');
+                
+                $btn.prop('disabled', true);
+                $progress.show();
+                
+                // Get pending files
+                const pending = [];
+                $('tr[data-id]').each(function() {
+                    if ($(this).find('td:eq(3)').text().includes('Ausstehend')) {
+                        pending.push({
+                            id: $(this).data('id'),
+                            row: $(this)
+                        });
+                    }
+                });
+                
+                for (let i = 0; i < pending.length; i++) {
+                    const item = pending[i];
+                    const percent = Math.round((i / pending.length) * 100);
+                    $bar.css('width', percent + '%');
+                    $text.text('Analysiere ' + (i + 1) + ' von ' + pending.length + '...');
+                    
+                    try {
+                        // First try server-side
+                        const response = await $.post(ajaxurl, {
+                            action: 'sap_analyze_waveform',
+                            nonce: nonce,
+                            attachment_id: item.id
+                        });
+                        
+                        if (response.success && response.data.needs_client_analysis) {
+                            // Client-side analysis needed
+                            const peaks = await analyzeAudioClient(response.data.url);
+                            if (peaks) {
+                                await $.post(ajaxurl, {
+                                    action: 'sap_save_waveform',
+                                    nonce: nonce,
+                                    attachment_id: item.id,
+                                    peaks: JSON.stringify(peaks)
+                                });
+                                
+                                // Update UI
+                                const canvas = item.row.find('.sap-mini-waveform')[0];
+                                drawMiniWaveform(canvas, peaks);
+                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                            }
+                        } else if (response.success && response.data.peaks) {
+                            // Server-side worked
+                            const canvas = item.row.find('.sap-mini-waveform')[0];
+                            drawMiniWaveform(canvas, response.data.peaks);
+                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                        }
+                    } catch (e) {
+                        console.error('Error analyzing', item.id, e);
+                    }
+                }
+                
+                $bar.css('width', '100%');
+                $text.text('✓ Analyse abgeschlossen!');
+                $btn.text('✓ Fertig').prop('disabled', true);
+            });
+            
+            // Re-analyze ALL files button
+            $('#sap-reanalyze-all').on('click', async function() {
+                const $btn = $(this);
+                const $progress = $('#sap-analysis-progress');
+                const $bar = $('#sap-progress-bar');
+                const $text = $('#sap-progress-text');
+                
+                $btn.prop('disabled', true);
+                $('#sap-analyze-all').prop('disabled', true);
+                $progress.show();
+                
+                // Get ALL files (not just pending)
+                const allFiles = [];
+                $('tr[data-id]').each(function() {
+                    allFiles.push({
+                        id: $(this).data('id'),
+                        row: $(this)
+                    });
+                });
+                
+                for (let i = 0; i < allFiles.length; i++) {
+                    const item = allFiles[i];
+                    const percent = Math.round((i / allFiles.length) * 100);
+                    $bar.css('width', percent + '%');
+                    $text.text('Analysiere ' + (i + 1) + ' von ' + allFiles.length + '...');
+                    
+                    try {
+                        // First try server-side
+                        const response = await $.post(ajaxurl, {
+                            action: 'sap_analyze_waveform',
+                            nonce: nonce,
+                            attachment_id: item.id
+                        });
+                        
+                        if (response.success && response.data.needs_client_analysis) {
+                            // Client-side analysis needed
+                            const peaks = await analyzeAudioClient(response.data.url);
+                            if (peaks) {
+                                await $.post(ajaxurl, {
+                                    action: 'sap_save_waveform',
+                                    nonce: nonce,
+                                    attachment_id: item.id,
+                                    peaks: JSON.stringify(peaks)
+                                });
+                                
+                                // Update UI
+                                const canvas = item.row.find('.sap-mini-waveform')[0];
+                                drawMiniWaveform(canvas, peaks);
+                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                            }
+                        } else if (response.success && response.data.peaks) {
+                            // Server-side worked
+                            const canvas = item.row.find('.sap-mini-waveform')[0];
+                            drawMiniWaveform(canvas, response.data.peaks);
+                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                        }
+                    } catch (e) {
+                        console.error('Error analyzing', item.id, e);
+                    }
+                }
+                
+                $bar.css('width', '100%');
+                $text.text('✓ Alle ' + allFiles.length + ' Dateien neu analysiert!');
+                $btn.text('✓ Fertig').prop('disabled', true);
+            });
+            
+            // Client-side audio analysis using Web Audio API
+            async function analyzeAudioClient(url) {
+                return new Promise((resolve) => {
+                    fetch(url)
+                        .then(response => response.arrayBuffer())
+                        .then(arrayBuffer => {
+                            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                            audioContext.decodeAudioData(arrayBuffer, function(audioBuffer) {
+                                const peaks = extractPeaks(audioBuffer, 150);
+                                audioContext.close();
+                                resolve(peaks);
+                            }, function(e) {
+                                console.error('Decode error', e);
+                                resolve(null);
+                            });
+                        })
+                        .catch(e => {
+                            console.error('Fetch error', e);
+                            resolve(null);
+                        });
+                });
+            }
+            
+            function extractPeaks(audioBuffer, peakCount) {
+                // Use both channels if stereo
+                const channelData = audioBuffer.getChannelData(0);
+                const channelData2 = audioBuffer.numberOfChannels > 1 ? audioBuffer.getChannelData(1) : null;
+                const samplesPerPeak = Math.floor(channelData.length / peakCount);
+                const peaks = [];
+                
+                for (let i = 0; i < peakCount; i++) {
+                    const start = i * samplesPerPeak;
+                    const end = start + samplesPerPeak;
+                    let sum = 0;
+                    let max = 0;
+                    
+                    // Calculate RMS and peak for this segment
+                    for (let j = start; j < end; j++) {
+                        let sample = Math.abs(channelData[j]);
+                        if (channelData2) {
+                            sample = Math.max(sample, Math.abs(channelData2[j]));
+                        }
+                        sum += sample * sample;
+                        if (sample > max) max = sample;
+                    }
+                    
+                    // Blend RMS and peak for natural look (70% RMS, 30% peak)
+                    const rms = Math.sqrt(sum / (end - start));
+                    const blended = rms * 0.7 + max * 0.3;
+                    peaks.push(blended);
+                }
+                
+                return peaks;
+            }
+        });
+        </script>
+        <?php
+    }
+}
+
+// Initialize waveform manager
+SAP_Waveform_Manager::get_instance();
+
 class Simple_Audio_Player {
 
     private static $instance = null;
@@ -1429,11 +1975,16 @@ class Simple_Audio_Player {
         $end = $file_size - 1;
         
         if (isset($_SERVER['HTTP_RANGE'])) {
-            $range = $_SERVER['HTTP_RANGE'];
-            if (preg_match('/bytes=(\d+)-(\d*)/', $range, $matches)) {
-                $start = intval($matches[1]);
+            $range = sanitize_text_field($_SERVER['HTTP_RANGE']);
+            if (preg_match('/^bytes=(\d+)-(\d*)$/', $range, $matches)) {
+                $start = min(intval($matches[1]), $file_size - 1);
                 if (!empty($matches[2])) {
-                    $end = intval($matches[2]);
+                    $end = min(intval($matches[2]), $file_size - 1);
+                }
+                // Validate range
+                if ($start > $end || $start < 0) {
+                    status_header(416); // Range Not Satisfiable
+                    die('Invalid range');
                 }
             }
             
@@ -1973,6 +2524,13 @@ class Simple_Audio_Player {
             if (!empty($track['cover_url'])) {
                 $track['cover_url'] = self::cdn_url($track['cover_url']);
             }
+            // Add waveform data if available
+            if (!empty($track['attachment_id'])) {
+                $waveform = SAP_Waveform_Manager::get_waveform($track['attachment_id']);
+                if ($waveform) {
+                    $track['waveform'] = $waveform;
+                }
+            }
         }
         unset($track);
 
@@ -2009,7 +2567,7 @@ class Simple_Audio_Player {
         // Note: No !important here so CSS media queries can override on mobile
         $wide_style = $is_wide ? 'display:grid;grid-template-columns:auto 1fr;max-width:100%;width:100%;' : '';
         ?>
-        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="'.$wide_style.'"'; ?> data-playlist='<?php echo esc_attr(json_encode($tracks)); ?>' data-default-cover='<?php echo esc_url($cover); ?>'>
+        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="'.$wide_style.'"'; ?> data-playlist='<?php echo esc_attr(json_encode($tracks)); ?>' data-default-cover='<?php echo esc_url($cover); ?>' role="region" aria-label="Audio Player">
             
             <!-- Cover Carousel -->
             <div class="sap-cover-carousel" <?php if($is_wide) echo 'style="height:100%;flex-shrink:0;"'; ?>>
@@ -2041,34 +2599,37 @@ class Simple_Audio_Player {
                     </div>
                 </div>
 
-                <!-- Progress -->
-                <div class="sap-progress-section">
-                    <div class="sap-progress">
-                        <div class="sap-progress-bar"></div>
+                <!-- Progress with Waveform -->
+                <div class="sap-progress-section" role="group" aria-label="Wiedergabe-Fortschritt">
+                    <div class="sap-waveform-container" role="slider" aria-label="Zeitposition" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <canvas class="sap-waveform" aria-hidden="true"></canvas>
+                        <div class="sap-progress">
+                            <div class="sap-progress-bar"></div>
+                        </div>
                     </div>
                     <div class="sap-time-row">
-                        <span class="sap-current">0:00</span>
+                        <span class="sap-current" aria-live="off">0:00</span>
                         <span class="sap-duration">0:00</span>
                     </div>
                 </div>
 
                 <!-- Controls -->
-                <div class="sap-controls">
-                    <button class="sap-btn sap-shuffle" title="Shuffle">
-                        <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                <div class="sap-controls" role="group" aria-label="Audio-Steuerung">
+                    <button class="sap-btn sap-btn-small sap-shuffle" title="Shuffle" aria-label="Zufällige Wiedergabe" aria-pressed="false">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
                     </button>
-                    <button class="sap-btn sap-prev" title="Zurück">
-                        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    <button class="sap-btn sap-prev" title="Zurück" aria-label="Vorheriger Track">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                     </button>
-                    <button class="sap-btn sap-play" title="Play/Pause">
-                        <svg class="sap-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                        <svg class="sap-icon-pause" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    <button class="sap-btn sap-play" title="Play/Pause" aria-label="Wiedergabe starten oder pausieren">
+                        <svg class="sap-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                        <svg class="sap-icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
-                    <button class="sap-btn sap-next" title="Weiter">
-                        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    <button class="sap-btn sap-next" title="Weiter" aria-label="Nächster Track">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                     </button>
-                    <button class="sap-btn sap-download" title="Download" style="display:none;">
-                        <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    <button class="sap-btn sap-btn-small sap-download" title="Download" aria-label="Track herunterladen" style="display:none;">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                     </button>
                 </div>
 
@@ -2094,10 +2655,10 @@ class Simple_Audio_Player {
                 <?php endif; ?>
 
                 <!-- Playlist -->
-                <ul class="sap-playlist">
+                <ul class="sap-playlist" role="listbox" aria-label="Playlist">
                     <?php foreach ($tracks as $index => $track) : ?>
-                        <li class="sap-track" data-index="<?php echo $index; ?>" data-url="<?php echo esc_url($track['url']); ?>" data-downloadable="<?php echo !empty($track['downloadable']) ? '1' : '0'; ?>">
-                            <span class="sap-track-num"><span><?php echo $index + 1; ?></span></span>
+                        <li class="sap-track" role="option" aria-selected="<?php echo $index === 0 ? 'true' : 'false'; ?>" tabindex="0" data-index="<?php echo $index; ?>" data-url="<?php echo esc_url($track['url']); ?>" data-downloadable="<?php echo !empty($track['downloadable']) ? '1' : '0'; ?>">
+                            <span class="sap-track-num" aria-hidden="true"><span><?php echo $index + 1; ?></span></span>
                             <div class="sap-track-details">
                                 <span class="sap-track-title"><?php echo esc_html($track['title']); ?></span>
                             </div>

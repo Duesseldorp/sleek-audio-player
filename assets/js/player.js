@@ -52,11 +52,15 @@
         const iconPlay = playerEl.querySelector('.sap-icon-play');
         const iconPause = playerEl.querySelector('.sap-icon-pause');
         
-        // Progress
+        // Progress & Waveform
+        const waveformContainer = playerEl.querySelector('.sap-waveform-container');
+        const waveformCanvas = playerEl.querySelector('.sap-waveform');
         const progressContainer = playerEl.querySelector('.sap-progress');
         const progressBar = playerEl.querySelector('.sap-progress-bar');
         const currentTimeEl = playerEl.querySelector('.sap-current');
         const durationEl = playerEl.querySelector('.sap-duration');
+        let waveformCtx = waveformCanvas ? waveformCanvas.getContext('2d') : null;
+        let currentWaveformData = null;
         
         // Info
         const nowPlayingEl = playerEl.querySelector('.sap-now-playing');
@@ -189,6 +193,121 @@
                 cancelAnimationFrame(animationId);
                 animationId = null;
             }
+        }
+
+        // === Waveform Generation ===
+        function generateWaveformData(seed, barCount = 100) {
+            // Generate pseudo-random waveform based on seed (track title hash)
+            const data = [];
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) {
+                hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+                hash = hash & hash;
+            }
+            
+            // Use seeded random for consistent waveform per track
+            const seededRandom = () => {
+                hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+                return (hash / 0x7fffffff);
+            };
+            
+            for (let i = 0; i < barCount; i++) {
+                // Create natural-looking waveform with peaks and valleys
+                const base = 0.3 + seededRandom() * 0.5;
+                const variation = Math.sin(i * 0.15) * 0.15;
+                data.push(Math.min(1, Math.max(0.1, base + variation)));
+            }
+            return data;
+        }
+
+        function drawWaveform(progress = 0) {
+            if (!waveformCtx || !waveformCanvas || !currentWaveformData) return;
+            
+            // Use container dimensions (not scaled canvas dimensions)
+            const container = waveformCanvas.parentElement;
+            if (!container) return;
+            
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            const barCount = currentWaveformData.length;
+            const barWidth = width / barCount;
+            const gap = 1;
+            const minBarHeight = 2; // Minimum height for visibility
+            const cornerRadius = 1; // Rounded corners
+            
+            // Get colors from CSS
+            const computedStyle = getComputedStyle(document.documentElement);
+            const accentColor = computedStyle.getPropertyValue('--sap-visualizer').trim() || '#e85d3d';
+            const grayColor = computedStyle.getPropertyValue('--sap-waveform-inactive').trim() || 'rgba(120, 150, 170, 0.4)';
+            
+            waveformCtx.clearRect(0, 0, width, height);
+            
+            for (let i = 0; i < barCount; i++) {
+                // Apply slight curve to enhance peaks (power of 0.8 boosts quiet parts, 1.2 would compress them)
+                const value = Math.pow(currentWaveformData[i], 0.85);
+                const barHeight = Math.max(minBarHeight, value * height * 0.9);
+                const x = i * barWidth + gap / 2;
+                const y = (height - barHeight) / 2;
+                const w = Math.max(1, barWidth - gap);
+                const progressPoint = (i + 0.5) / barCount;
+                
+                // Color based on progress
+                waveformCtx.fillStyle = progressPoint <= progress ? accentColor : grayColor;
+                
+                // Draw rounded rectangle
+                if (cornerRadius > 0 && barHeight > cornerRadius * 2) {
+                    waveformCtx.beginPath();
+                    waveformCtx.roundRect(x, y, w, barHeight, cornerRadius);
+                    waveformCtx.fill();
+                } else {
+                    waveformCtx.fillRect(x, y, w, barHeight);
+                }
+            }
+        }
+
+        function initWaveform() {
+            if (!waveformCanvas || !waveformCtx) return;
+            
+            // Get container size
+            const container = waveformCanvas.parentElement;
+            if (!container) return;
+            
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            
+            // Set canvas size for retina
+            waveformCanvas.width = width * 2;
+            waveformCanvas.height = height * 2;
+            waveformCanvas.style.width = width + 'px';
+            waveformCanvas.style.height = height + 'px';
+            
+            // Reset and scale context
+            waveformCtx.setTransform(1, 0, 0, 1, 0, 0);
+            waveformCtx.scale(2, 2);
+        }
+
+        function updateWaveformForTrack(track) {
+            if (!waveformCanvas) return;
+            
+            // Use real waveform data if available, otherwise generate pseudo-random
+            if (track.waveform && Array.isArray(track.waveform) && track.waveform.length > 0) {
+                currentWaveformData = track.waveform;
+            } else {
+                // Fallback: Generate waveform based on track title as seed
+                const seed = track.title + (track.artist || '');
+                currentWaveformData = generateWaveformData(seed);
+            }
+            initWaveform();
+            drawWaveform(0);
+        }
+
+        // Initialize waveform on resize
+        if (waveformCanvas) {
+            window.addEventListener('resize', () => {
+                initWaveform();
+                const percent = audio.duration ? audio.currentTime / audio.duration : 0;
+                drawWaveform(percent);
+            });
         }
 
         // === Auto-Calculate Total Duration ===
@@ -337,6 +456,9 @@
                 }
             }
             
+            // Initialize waveform for first track
+            updateWaveformForTrack(firstTrack);
+            
             // Zweiten Track vorpuffern
             if (playlist.length > 1) {
                 preloadAudio.src = playlist[1].url;
@@ -346,10 +468,22 @@
 
         // --- Event Listeners ---
 
-        if (playBtn) playBtn.addEventListener('click', togglePlay);
-        if (prevBtn) prevBtn.addEventListener('click', playPrev);
-        if (nextBtn) nextBtn.addEventListener('click', playNext);
-        if (shuffleBtn) shuffleBtn.addEventListener('click', toggleShuffle);
+        if (playBtn) playBtn.addEventListener('click', function() {
+            togglePlay();
+            this.blur();
+        });
+        if (prevBtn) prevBtn.addEventListener('click', function() {
+            playPrev();
+            this.blur();
+        });
+        if (nextBtn) nextBtn.addEventListener('click', function() {
+            playNext();
+            this.blur();
+        });
+        if (shuffleBtn) shuffleBtn.addEventListener('click', function() {
+            toggleShuffle();
+            this.blur();
+        });
         
         // === Swipe Gesture Support & Cover Click ===
         if (carousel && coverTrack) {
@@ -521,7 +655,8 @@
             });
         }
         
-        if (progressContainer) progressContainer.addEventListener('click', seek);
+        if (waveformContainer) waveformContainer.addEventListener('click', seek);
+        else if (progressContainer) progressContainer.addEventListener('click', seek);
         
         audio.addEventListener('timeupdate', updateProgress);
         audio.addEventListener('loadedmetadata', updateDuration);
@@ -604,6 +739,9 @@
             
             // Carousel aktualisieren
             updateCarousel();
+            
+            // Update waveform for new track
+            updateWaveformForTrack(track);
             
             // Set new source and play directly
             audio.src = track.url;
@@ -719,6 +857,9 @@
             const percent = (audio.currentTime / audio.duration) * 100;
             if (progressBar) progressBar.style.width = percent + '%';
             if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+            
+            // Update waveform progress
+            drawWaveform(percent / 100);
         }
 
         function updateDuration() {
@@ -726,8 +867,9 @@
         }
 
         function seek(e) {
-            if (!progressContainer || !audio.duration) return;
-            const rect = progressContainer.getBoundingClientRect();
+            const container = waveformContainer || progressContainer;
+            if (!container || !audio.duration) return;
+            const rect = container.getBoundingClientRect();
             const percent = (e.clientX - rect.left) / rect.width;
             audio.currentTime = percent * audio.duration;
         }

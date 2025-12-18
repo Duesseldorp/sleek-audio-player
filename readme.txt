@@ -5,8 +5,8 @@ Author URI: https://www.duesseldorp.de
 Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, mp3, playlist, spotify, apple music, amazon, visualizer, keyboard
 Requires at least: 5.0
-Tested up to: 6.4
-Stable tag: 1.4.0
+Tested up to: 6.7
+Stable tag: 1.5.0
 License: GPLv2 or later
 
 Minimaler, schneller Audio-Player mit Download, Shuffle, Visualizer und Streaming-Links.
@@ -22,6 +22,7 @@ Ein schlanker, moderner Audio-Player für WordPress - perfekt für Musiker, Podc
 * ⬇️ Track-Download (pro Track aktivierbar)
 * � Audio Visualizer mit Frequenz-Balken
 * ⏱️ Progress-Bar mit Seek-Funktion
+* 🌊 Waveform-Anzeige mit Fortschrittsfarbe
 * 🔊 Lautstärke-Steuerung per Tastatur
 
 = Cover & Design =
@@ -32,6 +33,8 @@ Ein schlanker, moderner Audio-Player für WordPress - perfekt für Musiker, Podc
 * 💫 Pulse-Effekt bei Track-Wechsel
 * � Hover-Zoom auf Cover
 * 📱 Responsive Design (Wide & Standard Layout)
+* 🎨 Theme Manager mit Live-Preview
+* 🔒 URL-Schutz für Audio-Dateien (optional)
 
 = Streaming & Integration =
 
@@ -94,6 +97,16 @@ Wide Layout (horizontal):
 Unter "Playlists" > "Einstellungen":
 - BunnyCDN URL konfigurieren
 - Umami Analytics aktivieren/deaktivieren
+- URL-Schutz aktivieren (verschleiert Audio-URLs mit Tokens)
+
+= Theme Manager =
+
+Unter "Playlists" > "Themes":
+- Eigene Farbschemas erstellen
+- Live-Preview beim Bearbeiten
+- Visualizer-Farbe anpassen
+- Waveform-Farben (aktiv/inaktiv) konfigurieren
+- Themes aktivieren/deaktivieren
 
 = Embed Codes =
 
@@ -125,6 +138,14 @@ Ja, der Player ist vollständig kompatibel mit Caching-Plugins.
 
 == Changelog ==
 
+= 1.5.0 =
+* 🎨 Theme Manager mit Live-Preview
+* 🌊 Waveform-Anzeige statt einfacher Progress-Bar
+* 🔒 URL-Schutz mit zeitlich begrenzten Tokens
+* 🛡️ Verbesserter XSS-Schutz im Admin
+* 🔧 Range-Header Validierung für Streaming
+* ✨ Separate Farben für Visualizer und Waveform
+
 = 1.4.0 =
 * Keyboard Shortcuts (Space, Pfeiltasten, N, P, M, S)
 * Security Audit bestanden
@@ -153,6 +174,9 @@ Ja, der Player ist vollständig kompatibel mit Caching-Plugins.
 * Responsive Design
 
 == Upgrade Notice ==
+
+= 1.5.0 =
+Neuer Theme Manager! Erstelle eigene Farbschemas mit Live-Preview. Waveform-Anzeige ersetzt die Progress-Bar. Optional: URL-Schutz für Audio-Dateien.
 
 = 1.4.0 =
 Keyboard Shortcuts hinzugefügt! Space für Play/Pause, Pfeiltasten für Seek und Lautstärke.

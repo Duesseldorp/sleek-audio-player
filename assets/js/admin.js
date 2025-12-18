@@ -130,6 +130,14 @@
             });
         });
 
+        // ===== Hilfsfunktion: HTML-Escape für XSS-Schutz =====
+        function escapeHtml(str) {
+            if (!str) return '';
+            var div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
         // ===== Hilfsfunktion: Track-Zeile hinzufügen =====
         function addTrackRow(data) {
             data = data || {};
@@ -141,14 +149,14 @@
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][cover_url]" class="sap-track-cover-url" value="" />' +
                 '<button type="button" class="button sap-select-cover" title="Cover auswählen">🖼️</button>' +
                 '<input type="text" name="sap_tracks[' + trackIndex + '][title]" ' +
-                    'class="sap-track-title" placeholder="Titel" value="' + (data.title || '') + '" />' +
+                    'class="sap-track-title" placeholder="Titel" value="" />' +
                 '<input type="text" name="sap_tracks[' + trackIndex + '][artist]" ' +
-                    'class="sap-track-artist" placeholder="Artist" value="' + (data.artist || '') + '" />' +
+                    'class="sap-track-artist" placeholder="Artist" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][url]" ' +
-                    'class="sap-track-url" value="' + (data.url || '') + '" />' +
+                    'class="sap-track-url" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][attachment_id]" ' +
-                    'class="sap-track-id" value="' + (data.attachment_id || '') + '" />' +
-                '<span class="sap-track-filename">' + (data.filename || 'Keine Datei') + '</span>' +
+                    'class="sap-track-id" value="" />' +
+                '<span class="sap-track-filename">Keine Datei</span>' +
                 '<button type="button" class="button sap-select-audio">🎵 Audio</button>' +
                 '<input type="url" name="sap_tracks[' + trackIndex + '][spotify]" ' +
                     'class="sap-track-link sap-link-spotify" placeholder="🎵 Spotify" value="" />' +
@@ -162,7 +170,16 @@
                 '<button type="button" class="button sap-remove-track">✕</button>' +
                 '</div>';
             
-            $('#sap-tracks-container').append(html);
+            var $row = $(html);
+            
+            // Sichere Wertezuweisung nach DOM-Erstellung (XSS-Schutz)
+            if (data.title) $row.find('.sap-track-title').val(data.title);
+            if (data.artist) $row.find('.sap-track-artist').val(data.artist);
+            if (data.url) $row.find('.sap-track-url').val(data.url);
+            if (data.attachment_id) $row.find('.sap-track-id').val(data.attachment_id);
+            if (data.filename) $row.find('.sap-track-filename').text(data.filename);
+            
+            $('#sap-tracks-container').append($row);
             trackIndex++;
             $('#sap-track-index').val(trackIndex);
         }
