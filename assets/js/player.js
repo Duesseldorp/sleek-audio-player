@@ -68,12 +68,17 @@
         let isShuffled = false;
         let shuffledOrder = [];
         
-        // CORS for visualizer - only enable if same origin (cross-origin without headers breaks audio)
+        // CORS for visualizer - enable for same origin or trusted CDN domains
         let corsEnabled = false;
+        const trustedCDNs = ['b-cdn.net', 'bunnycdn.com', 'cloudfront.net', 'jsdelivr.net'];
+        
         if (playlist.length > 0 && playlist[0].url) {
             try {
                 const audioUrl = new URL(playlist[0].url, window.location.href);
-                if (audioUrl.origin === window.location.origin) {
+                const isSameOrigin = audioUrl.origin === window.location.origin;
+                const isTrustedCDN = trustedCDNs.some(cdn => audioUrl.hostname.endsWith(cdn));
+                
+                if (isSameOrigin || isTrustedCDN) {
                     audio.crossOrigin = 'anonymous';
                     corsEnabled = true;
                 }
@@ -321,6 +326,16 @@
             if (artistEl) artistEl.textContent = firstTrack.artist || '';
             if (tracks[0]) tracks[0].classList.add('active');
             updateCarousel();
+            
+            // Download-Button sofort anzeigen wenn Track downloadbar ist
+            if (downloadBtn) {
+                if (firstTrack.downloadable) {
+                    downloadBtn.style.display = 'flex';
+                    downloadBtn.onclick = () => downloadTrack(firstTrack);
+                } else {
+                    downloadBtn.style.display = 'none';
+                }
+            }
             
             // Zweiten Track vorpuffern
             if (playlist.length > 1) {

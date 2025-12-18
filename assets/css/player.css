@@ -580,13 +580,11 @@
 }
 
 .sap-player.sap-wide .sap-cover-carousel {
-    -webkit-flex: 0 0 300px !important;
-    flex: 0 0 300px !important;
-    width: 300px !important;
-    height: 300px !important;
-    min-width: 250px !important;
-    max-width: 350px !important;
-    max-height: 400px !important;
+    -webkit-flex: 0 0 35% !important;
+    flex: 0 0 35% !important;
+    width: 35% !important;
+    min-width: 150px !important;
+    max-width: 300px !important;
     aspect-ratio: 1 / 1;
     border-radius: 0;
     overflow: hidden;
@@ -676,15 +674,36 @@
 
 .sap-player.sap-wide .sap-track {
     padding: 10px 24px;
-    gap: 16px;
+    gap: 12px;
+    display: flex;
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden;
 }
 
 .sap-player.sap-wide .sap-track-num {
     width: 24px;
+    flex-shrink: 0;
+}
+
+.sap-player.sap-wide .sap-track-details {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .sap-player.sap-wide .sap-track-title {
-    font-size: 13px !important;
+    display: block !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    width: 100% !important;
+}
+
+.sap-player.sap-wide .sap-track-duration {
+    flex-shrink: 0;
+    margin-left: auto;
 }
 
 .sap-player.sap-wide .sap-track-duration {
@@ -693,27 +712,13 @@
     text-align: right;
 }
 
-/* Wide Layout - Larger screens */
-@media (min-width: 700px) {
+/* Wide Layout - Extra large screens only */
+@media (min-width: 1000px) {
     .sap-player.sap-wide .sap-cover-carousel {
         -webkit-flex: 0 0 320px !important;
         flex: 0 0 320px !important;
         width: 320px !important;
-        height: 320px !important;
-    }
-    
-    .sap-player.sap-wide .sap-content {
-        min-height: 320px;
-    }
-}
-
-/* Wide Layout - Extra large */
-@media (min-width: 900px) {
-    .sap-player.sap-wide .sap-cover-carousel {
-        -webkit-flex: 0 0 350px !important;
-        flex: 0 0 350px !important;
-        width: 350px !important;
-        height: 350px !important;
+        max-width: 320px !important;
     }
     
     .sap-player.sap-wide .sap-content {
