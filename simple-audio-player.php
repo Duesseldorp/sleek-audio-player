@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Audio Player
  * Description: Minimaler Audio-Player mit Download, Shuffle, Cover und Streaming-Links
- * Version: 1.4.0
+ * Version: 1.5.0
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
@@ -12,9 +12,1289 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '1.4.0');
+define('SAP_VERSION', '1.5.0');
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+/**
+ * Theme Manager Class
+ */
+class SAP_Theme_Manager {
+    
+    private static $instance = null;
+    private $table_name;
+    
+    // Default theme colors (standard theme)
+    public static $default_theme = array(
+        'name' => 'Standard',
+        'colors' => array(
+            // Background colors
+            'sap-bg' => '#0a1118',
+            'sap-card' => '#0f1a24',
+            'sap-card-hover' => '#162230',
+            'sap-border' => 'rgba(79, 128, 156, 0.15)',
+            // Accent colors
+            'sap-accent' => '#e85d3d',
+            'sap-accent-light' => '#f4795d',
+            'sap-accent-glow' => 'rgba(232, 93, 61, 0.35)',
+            // Text colors
+            'sap-white' => '#ffffff',
+            'sap-gray-100' => 'rgba(255, 255, 255, 0.92)',
+            'sap-gray-200' => 'rgba(200, 215, 225, 0.8)',
+            'sap-gray-300' => 'rgba(160, 185, 200, 0.6)',
+            'sap-gray-400' => 'rgba(120, 150, 170, 0.4)',
+            // Effects
+            'sap-blue-tint' => 'rgba(70, 130, 170, 0.1)',
+            'sap-visualizer' => '#e85d3d',
+            'sap-track-active' => '#e85d3d',
+        ),
+        'settings' => array(
+            'sap-radius' => '16px',
+            'sap-radius-sm' => '10px',
+        ),
+    );
+    
+    public static function get_instance() {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+        return self::$instance;
+    }
+    
+    private function __construct() {
+        global $wpdb;
+        $this->table_name = $wpdb->prefix . 'sap_themes';
+        
+        add_action('admin_menu', array($this, 'add_theme_menu'));
+        add_action('admin_init', array($this, 'register_theme_settings'));
+        add_action('wp_ajax_sap_save_theme', array($this, 'ajax_save_theme'));
+        add_action('wp_ajax_sap_delete_theme', array($this, 'ajax_delete_theme'));
+        add_action('wp_ajax_sap_get_theme', array($this, 'ajax_get_theme'));
+        add_action('wp_ajax_sap_set_active_theme', array($this, 'ajax_set_active_theme'));
+    }
+    
+    /**
+     * Create themes table on plugin activation
+     */
+    public static function create_table() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'sap_themes';
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        $sql = "CREATE TABLE IF NOT EXISTS $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            name varchar(100) NOT NULL,
+            colors longtext NOT NULL,
+            settings longtext NOT NULL,
+            is_default tinyint(1) DEFAULT 0,
+            created_at datetime DEFAULT CURRENT_TIMESTAMP,
+            updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
+        
+        // Insert default theme if not exists
+        $existing = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE is_default = 1");
+        if (!$existing) {
+            $wpdb->insert($table_name, array(
+                'name' => 'Standard',
+                'colors' => json_encode(self::$default_theme['colors']),
+                'settings' => json_encode(self::$default_theme['settings']),
+                'is_default' => 1,
+            ));
+        }
+    }
+    
+    /**
+     * Add theme management menu
+     */
+    public function add_theme_menu() {
+        add_submenu_page(
+            'edit.php?post_type=sap_playlist',
+            'Theme Manager',
+            'Themes',
+            'manage_options',
+            'sap-themes',
+            array($this, 'render_theme_page')
+        );
+    }
+    
+    /**
+     * Register settings
+     */
+    public function register_theme_settings() {
+        register_setting('sap_theme_settings', 'sap_active_theme_id', array(
+            'type' => 'integer',
+            'sanitize_callback' => 'absint',
+            'default' => 0,
+        ));
+    }
+    
+    /**
+     * Get all themes
+     */
+    public function get_all_themes() {
+        global $wpdb;
+        $results = $wpdb->get_results("SELECT * FROM {$this->table_name} ORDER BY is_default DESC, name ASC", ARRAY_A);
+        
+        foreach ($results as &$theme) {
+            $theme['colors'] = json_decode($theme['colors'], true);
+            $theme['settings'] = json_decode($theme['settings'], true);
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Get theme by ID
+     */
+    public function get_theme($id) {
+        global $wpdb;
+        $theme = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table_name} WHERE id = %d", $id), ARRAY_A);
+        
+        if ($theme) {
+            $theme['colors'] = json_decode($theme['colors'], true);
+            $theme['settings'] = json_decode($theme['settings'], true);
+        }
+        
+        return $theme;
+    }
+    
+    /**
+     * Get active theme
+     */
+    public function get_active_theme() {
+        $active_id = get_option('sap_active_theme_id', 0);
+        
+        if ($active_id) {
+            $theme = $this->get_theme($active_id);
+            if ($theme) {
+                return $theme;
+            }
+        }
+        
+        // Return default theme
+        global $wpdb;
+        $theme = $wpdb->get_row("SELECT * FROM {$this->table_name} WHERE is_default = 1", ARRAY_A);
+        
+        if ($theme) {
+            $theme['colors'] = json_decode($theme['colors'], true);
+            $theme['settings'] = json_decode($theme['settings'], true);
+            return $theme;
+        }
+        
+        // Fallback to hardcoded default
+        return array(
+            'id' => 0,
+            'name' => 'Standard',
+            'colors' => self::$default_theme['colors'],
+            'settings' => self::$default_theme['settings'],
+            'is_default' => 1,
+        );
+    }
+    
+    /**
+     * Save theme
+     */
+    public function save_theme($data) {
+        global $wpdb;
+        
+        $theme_data = array(
+            'name' => sanitize_text_field($data['name']),
+            'colors' => json_encode($data['colors']),
+            'settings' => json_encode($data['settings']),
+        );
+        
+        if (!empty($data['id'])) {
+            // Update existing
+            $wpdb->update(
+                $this->table_name,
+                $theme_data,
+                array('id' => absint($data['id']))
+            );
+            return absint($data['id']);
+        } else {
+            // Insert new
+            $wpdb->insert($this->table_name, $theme_data);
+            return $wpdb->insert_id;
+        }
+    }
+    
+    /**
+     * Delete theme
+     */
+    public function delete_theme($id) {
+        global $wpdb;
+        
+        // Don't delete default theme
+        $theme = $this->get_theme($id);
+        if ($theme && $theme['is_default']) {
+            return false;
+        }
+        
+        // If this was active, reset to default
+        if (get_option('sap_active_theme_id') == $id) {
+            delete_option('sap_active_theme_id');
+        }
+        
+        return $wpdb->delete($this->table_name, array('id' => $id));
+    }
+    
+    /**
+     * Reset theme to default values
+     */
+    public function reset_to_default($id) {
+        global $wpdb;
+        
+        return $wpdb->update(
+            $this->table_name,
+            array(
+                'colors' => json_encode(self::$default_theme['colors']),
+                'settings' => json_encode(self::$default_theme['settings']),
+            ),
+            array('id' => $id)
+        );
+    }
+    
+    /**
+     * Generate CSS from theme
+     */
+    public function generate_theme_css($theme) {
+        // Merge with defaults to ensure all variables exist
+        $colors = array_merge(self::$default_theme['colors'], $theme['colors'] ?? array());
+        $settings = array_merge(self::$default_theme['settings'], $theme['settings'] ?? array());
+        
+        // Use both :root and .sap-player for higher specificity (fixes admin override issues)
+        $css = ":root, .sap-player {\n";
+        
+        foreach ($colors as $var => $value) {
+            $css .= "    --{$var}: {$value} !important;\n";
+        }
+        
+        foreach ($settings as $var => $value) {
+            $css .= "    --{$var}: {$value} !important;\n";
+        }
+        
+        $css .= "}\n";
+        
+        return $css;
+    }
+    
+    /**
+     * AJAX: Save theme
+     */
+    public function ajax_save_theme() {
+        check_ajax_referer('sap_theme_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $data = array(
+            'id' => isset($_POST['id']) ? absint($_POST['id']) : 0,
+            'name' => sanitize_text_field($_POST['name']),
+            'colors' => array(),
+            'settings' => array(),
+        );
+        
+        // Parse colors
+        if (!empty($_POST['colors']) && is_array($_POST['colors'])) {
+            foreach ($_POST['colors'] as $key => $value) {
+                $data['colors'][sanitize_key($key)] = sanitize_text_field($value);
+            }
+        }
+        
+        // Parse settings
+        if (!empty($_POST['settings']) && is_array($_POST['settings'])) {
+            foreach ($_POST['settings'] as $key => $value) {
+                $data['settings'][sanitize_key($key)] = sanitize_text_field($value);
+            }
+        }
+        
+        $id = $this->save_theme($data);
+        
+        wp_send_json_success(array(
+            'id' => $id,
+            'message' => 'Theme gespeichert!',
+        ));
+    }
+    
+    /**
+     * AJAX: Delete theme
+     */
+    public function ajax_delete_theme() {
+        check_ajax_referer('sap_theme_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $id = absint($_POST['id']);
+        $result = $this->delete_theme($id);
+        
+        if ($result) {
+            wp_send_json_success('Theme gelöscht!');
+        } else {
+            wp_send_json_error('Standard-Theme kann nicht gelöscht werden.');
+        }
+    }
+    
+    /**
+     * AJAX: Get theme
+     */
+    public function ajax_get_theme() {
+        check_ajax_referer('sap_theme_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $id = absint($_POST['id']);
+        $theme = $this->get_theme($id);
+        
+        if ($theme) {
+            wp_send_json_success($theme);
+        } else {
+            wp_send_json_error('Theme nicht gefunden.');
+        }
+    }
+    
+    /**
+     * AJAX: Set active theme
+     */
+    public function ajax_set_active_theme() {
+        check_ajax_referer('sap_theme_nonce', 'nonce');
+        
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $id = absint($_POST['id']);
+        update_option('sap_active_theme_id', $id);
+        
+        wp_send_json_success('Theme aktiviert!');
+    }
+    
+    /**
+     * Render theme management page
+     */
+    public function render_theme_page() {
+        $themes = $this->get_all_themes();
+        $active_id = get_option('sap_active_theme_id', 0);
+        $default_theme = self::$default_theme;
+        
+        // Grouped color labels for better organization
+        $color_groups = array(
+            'background' => array(
+                'title' => '🎨 Hintergrund',
+                'colors' => array(
+                    'sap-bg' => 'Player Hintergrund',
+                    'sap-card' => 'Karten-Hintergrund',
+                    'sap-card-hover' => 'Karte Hover',
+                    'sap-border' => 'Rahmenfarbe',
+                )
+            ),
+            'accent' => array(
+                'title' => '✨ Akzent & Buttons',
+                'colors' => array(
+                    'sap-accent' => 'Hauptakzent (Play-Button)',
+                    'sap-accent-light' => 'Akzent Hell',
+                    'sap-accent-glow' => 'Akzent Glow',
+                    'sap-visualizer' => 'Visualizer Farbe',
+                    'sap-track-active' => 'Aktiver Track',
+                )
+            ),
+            'text' => array(
+                'title' => '📝 Text & Schrift',
+                'colors' => array(
+                    'sap-white' => 'Titel (Weiß)',
+                    'sap-gray-100' => 'Text Hell',
+                    'sap-gray-200' => 'Text Normal',
+                    'sap-gray-300' => 'Text Gedimmt (Artist)',
+                    'sap-gray-400' => 'Text Sehr Gedimmt',
+                )
+            ),
+            'effects' => array(
+                'title' => '💫 Effekte',
+                'colors' => array(
+                    'sap-blue-tint' => 'Blauer Overlay',
+                )
+            ),
+        );
+        
+        $settings_labels = array(
+            'sap-radius' => 'Border Radius',
+            'sap-radius-sm' => 'Border Radius (Klein)',
+        );
+        ?>
+        <style>
+            .sap-theme-manager {
+                max-width: 1400px;
+                margin: 20px auto;
+                padding: 0 20px;
+            }
+            .sap-theme-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+            }
+            .sap-theme-header h1 {
+                margin: 0;
+                font-size: 28px;
+                font-weight: 600;
+            }
+            .sap-theme-grid {
+                display: grid;
+                grid-template-columns: 320px 1fr;
+                gap: 30px;
+            }
+            .sap-themes-list {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .sap-themes-list-header {
+                padding: 16px 20px;
+                background: #f8f9fa;
+                border-bottom: 1px solid #ddd;
+                font-weight: 600;
+            }
+            .sap-theme-item {
+                padding: 16px 20px;
+                border-bottom: 1px solid #eee;
+                cursor: pointer;
+                transition: background 0.2s;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .sap-theme-item:last-child {
+                border-bottom: none;
+            }
+            .sap-theme-item:hover {
+                background: #f8f9fa;
+            }
+            .sap-theme-item.active {
+                background: #e7f3ff;
+                border-left: 3px solid #2271b1;
+            }
+            .sap-theme-item.editing {
+                background: #fff8e5;
+                border-left: 3px solid #dba617;
+            }
+            .sap-theme-swatch {
+                width: 40px;
+                height: 40px;
+                border-radius: 8px;
+                flex-shrink: 0;
+                border: 2px solid #ddd;
+            }
+            .sap-theme-info {
+                flex: 1;
+            }
+            .sap-theme-name {
+                font-weight: 600;
+                margin-bottom: 2px;
+            }
+            .sap-theme-badge {
+                display: inline-block;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 4px;
+                margin-left: 8px;
+                font-weight: 500;
+            }
+            .sap-badge-default {
+                background: #e0e0e0;
+                color: #666;
+            }
+            .sap-badge-active {
+                background: #d4edda;
+                color: #155724;
+            }
+            .sap-theme-editor {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 24px;
+            }
+            .sap-editor-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+                border-bottom: 1px solid #eee;
+            }
+            .sap-editor-title {
+                font-size: 18px;
+                font-weight: 600;
+            }
+            .sap-editor-actions {
+                display: flex;
+                gap: 8px;
+            }
+            .sap-color-section {
+                margin-bottom: 24px;
+            }
+            .sap-color-section h3 {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 16px;
+                color: #333;
+            }
+            .sap-color-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 12px;
+            }
+            .sap-color-field {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: #f8f9fa;
+                padding: 8px 12px;
+                border-radius: 6px;
+                border: 1px solid #eee;
+            }
+            .sap-color-field label {
+                width: 100px;
+                flex-shrink: 0;
+                font-size: 12px;
+                color: #555;
+                line-height: 1.3;
+            }
+            .sap-color-field input[type="color"] {
+                width: 36px;
+                height: 36px;
+                padding: 2px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                cursor: pointer;
+                flex-shrink: 0;
+            }
+            .sap-color-field input[type="text"] {
+                flex: 1;
+                min-width: 0;
+                padding: 8px 10px;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                font-family: monospace;
+                font-size: 12px;
+            }
+            .sap-theme-preview {
+                margin-top: 30px;
+                padding: 24px;
+                border-radius: 12px;
+                background: var(--preview-bg, #0a1118);
+            }
+            .sap-preview-player {
+                max-width: 300px;
+                margin: 0 auto;
+                border-radius: var(--preview-radius, 16px);
+                overflow: hidden;
+                background: var(--preview-card, #0f1a24);
+                border: 1px solid var(--preview-border, rgba(79, 128, 156, 0.15));
+            }
+            .sap-preview-cover {
+                width: 100%;
+                aspect-ratio: 1;
+                background: linear-gradient(135deg, var(--preview-accent, #e85d3d), var(--preview-accent-light, #f4795d));
+                position: relative;
+                overflow: hidden;
+            }
+            .sap-preview-content {
+                padding: 20px;
+            }
+            .sap-preview-title {
+                color: var(--preview-white, #fff);
+                font-size: 16px;
+                font-weight: 600;
+                margin-bottom: 4px;
+            }
+            .sap-preview-artist {
+                color: var(--preview-gray, rgba(160, 185, 200, 0.6));
+                font-size: 13px;
+                margin-bottom: 16px;
+            }
+            .sap-preview-progress {
+                height: 4px;
+                background: var(--preview-gray-400, rgba(120, 150, 170, 0.4));
+                border-radius: 2px;
+                margin-bottom: 16px;
+            }
+            .sap-preview-progress-bar {
+                width: 40%;
+                height: 100%;
+                background: var(--preview-accent, #e85d3d);
+                border-radius: 2px;
+            }
+            .sap-preview-controls {
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+            }
+            .sap-preview-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: var(--preview-gray-200, rgba(200, 215, 225, 0.8));
+                background: transparent;
+            }
+            .sap-preview-btn.play {
+                width: 48px;
+                height: 48px;
+                background: var(--preview-accent, #e85d3d);
+                color: #fff;
+            }
+            .sap-preview-btn.small {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            .sap-preview-info {
+                text-align: center;
+                margin-bottom: 12px;
+            }
+            .sap-preview-meta {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                margin-top: 4px;
+            }
+            .sap-preview-meta-text {
+                font-size: 11px;
+                color: var(--preview-gray-300, rgba(160, 185, 200, 0.6));
+            }
+            .sap-preview-meta-dot {
+                width: 3px;
+                height: 3px;
+                border-radius: 50%;
+                background: var(--preview-gray-400, rgba(120, 150, 170, 0.4));
+            }
+            .sap-preview-progress-section {
+                margin-bottom: 12px;
+            }
+            .sap-preview-times {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 4px;
+            }
+            .sap-preview-time {
+                font-size: 10px;
+                color: var(--preview-gray-300, rgba(160, 185, 200, 0.6));
+            }
+            .sap-preview-visualizer {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                gap: 4px;
+                padding: 0 20px;
+            }
+            .sap-viz-bar {
+                width: 8px;
+                background: var(--preview-visualizer, #e85d3d);
+                border-radius: 2px 2px 0 0;
+                opacity: 0.8;
+            }
+            .sap-preview-playlist {
+                margin-top: 12px;
+                background: rgba(0,0,0,0.2);
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            .sap-preview-track {
+                display: flex;
+                align-items: center;
+                padding: 8px 12px;
+                gap: 10px;
+                font-size: 11px;
+                transition: background 0.15s;
+            }
+            .sap-preview-track.hover {
+                background: var(--preview-card-hover, #162230);
+            }
+            .sap-preview-track.active {
+                background: rgba(232, 93, 61, 0.15);
+                border-left: 2px solid var(--preview-accent, #e85d3d);
+            }
+            .sap-preview-track-num {
+                width: 16px;
+                text-align: center;
+                color: var(--preview-gray-400, rgba(120, 150, 170, 0.4));
+                font-size: 10px;
+            }
+            .sap-preview-track.active .sap-preview-track-num {
+                color: var(--preview-accent, #e85d3d);
+            }
+            .sap-preview-track-title {
+                flex: 1;
+                color: var(--preview-gray-100, rgba(255, 255, 255, 0.92));
+                text-transform: uppercase;
+                letter-spacing: 0.02em;
+                font-weight: 500;
+            }
+            .sap-preview-track.active .sap-preview-track-title {
+                color: var(--preview-white, #fff);
+            }
+            .sap-preview-track-duration {
+                color: var(--preview-gray-400, rgba(120, 150, 170, 0.4));
+            }
+            .sap-name-field {
+                margin-bottom: 24px;
+            }
+            .sap-name-field label {
+                display: block;
+                font-weight: 600;
+                margin-bottom: 8px;
+            }
+            .sap-name-field input {
+                width: 100%;
+                max-width: 300px;
+                padding: 10px 14px;
+                border: 1px solid #ddd;
+                border-radius: 6px;
+                font-size: 14px;
+            }
+            .sap-btn {
+                padding: 10px 20px;
+                border-radius: 6px;
+                font-size: 13px;
+                font-weight: 500;
+                cursor: pointer;
+                border: none;
+                transition: all 0.2s;
+            }
+            .sap-btn-primary {
+                background: #2271b1;
+                color: #fff;
+            }
+            .sap-btn-primary:hover {
+                background: #135e96;
+            }
+            .sap-btn-secondary {
+                background: #f0f0f0;
+                color: #333;
+                border: 1px solid #ddd;
+            }
+            .sap-btn-secondary:hover {
+                background: #e5e5e5;
+            }
+            .sap-btn-danger {
+                background: #dc3545;
+                color: #fff;
+            }
+            .sap-btn-danger:hover {
+                background: #c82333;
+            }
+            .sap-btn-success {
+                background: #28a745;
+                color: #fff;
+            }
+            .sap-btn-success:hover {
+                background: #218838;
+            }
+            .sap-new-theme-btn {
+                width: 100%;
+                padding: 14px;
+                text-align: center;
+                background: #f8f9fa;
+                border: 2px dashed #ddd;
+                border-radius: 8px;
+                color: #666;
+                cursor: pointer;
+                margin-top: 12px;
+                transition: all 0.2s;
+            }
+            .sap-new-theme-btn:hover {
+                border-color: #2271b1;
+                color: #2271b1;
+                background: #f0f7fc;
+            }
+            @media (max-width: 900px) {
+                .sap-theme-grid {
+                    grid-template-columns: 1fr;
+                }
+            }
+        </style>
+        
+        <div class="sap-theme-manager">
+            <div class="sap-theme-header">
+                <h1>🎨 Theme Manager</h1>
+            </div>
+            
+            <div class="sap-theme-grid">
+                <!-- Themes List -->
+                <div>
+                    <div class="sap-themes-list">
+                        <div class="sap-themes-list-header">Gespeicherte Themes</div>
+                        <?php foreach ($themes as $theme) : 
+                            $is_active = ($active_id == $theme['id']) || ($active_id == 0 && $theme['is_default']);
+                            $accent = $theme['colors']['sap-accent'] ?? '#e85d3d';
+                            $bg = $theme['colors']['sap-bg'] ?? '#0a1118';
+                        ?>
+                            <div class="sap-theme-item <?php echo $is_active ? 'active' : ''; ?>" 
+                                 data-id="<?php echo esc_attr($theme['id']); ?>">
+                                <div class="sap-theme-swatch" style="background: linear-gradient(135deg, <?php echo esc_attr($accent); ?>, <?php echo esc_attr($bg); ?>);"></div>
+                                <div class="sap-theme-info">
+                                    <div class="sap-theme-name">
+                                        <?php echo esc_html($theme['name']); ?>
+                                        <?php if ($theme['is_default']) : ?>
+                                            <span class="sap-theme-badge sap-badge-default">Standard</span>
+                                        <?php endif; ?>
+                                        <?php if ($is_active) : ?>
+                                            <span class="sap-theme-badge sap-badge-active">Aktiv</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="sap-new-theme-btn" id="sap-new-theme">+ Neues Theme erstellen</button>
+                </div>
+                
+                <!-- Theme Editor -->
+                <div class="sap-theme-editor" id="sap-theme-editor">
+                    <div class="sap-editor-header">
+                        <div class="sap-editor-title" id="sap-editor-title">Theme bearbeiten</div>
+                        <div class="sap-editor-actions">
+                            <button type="button" class="sap-btn sap-btn-secondary" id="sap-reset-theme">↺ Zurücksetzen</button>
+                            <button type="button" class="sap-btn sap-btn-danger" id="sap-delete-theme" style="display:none;">🗑 Löschen</button>
+                            <button type="button" class="sap-btn sap-btn-success" id="sap-activate-theme">✓ Aktivieren</button>
+                            <button type="button" class="sap-btn sap-btn-primary" id="sap-save-theme">💾 Speichern</button>
+                        </div>
+                    </div>
+                    
+                    <form id="sap-theme-form">
+                        <input type="hidden" name="id" id="sap-theme-id" value="">
+                        <input type="hidden" name="is_default" id="sap-theme-is-default" value="0">
+                        
+                        <div class="sap-name-field">
+                            <label for="sap-theme-name">Theme Name</label>
+                            <input type="text" name="name" id="sap-theme-name" value="" placeholder="Mein Theme" required>
+                        </div>
+                        
+                        <?php foreach ($color_groups as $group_key => $group) : ?>
+                        <div class="sap-color-section">
+                            <h3><?php echo esc_html($group['title']); ?></h3>
+                            <div class="sap-color-grid">
+                                <?php foreach ($group['colors'] as $var => $label) : 
+                                    $default_value = $default_theme['colors'][$var] ?? '#000000';
+                                    // Extract hex color for picker (convert rgba to hex if needed)
+                                    $picker_value = '#000000';
+                                    if (preg_match('/^#[0-9a-fA-F]{6}$/', $default_value)) {
+                                        $picker_value = $default_value;
+                                    } elseif (preg_match('/rgba?\((\d+),\s*(\d+),\s*(\d+)/', $default_value, $matches)) {
+                                        $picker_value = sprintf('#%02x%02x%02x', $matches[1], $matches[2], $matches[3]);
+                                    }
+                                ?>
+                                    <div class="sap-color-field">
+                                        <label><?php echo esc_html($label); ?></label>
+                                        <input type="color" 
+                                               class="sap-color-picker" 
+                                               data-target="<?php echo esc_attr($var); ?>"
+                                               value="<?php echo esc_attr($picker_value); ?>">
+                                        <input type="text" 
+                                               name="colors[<?php echo esc_attr($var); ?>]" 
+                                               class="sap-color-input" 
+                                               data-var="<?php echo esc_attr($var); ?>"
+                                               value="<?php echo esc_attr($default_value); ?>" 
+                                               placeholder="<?php echo esc_attr($default_value); ?>">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                        
+                        <div class="sap-color-section">
+                            <h3>⚙️ Einstellungen</h3>
+                            <div class="sap-color-grid">
+                                <?php foreach ($settings_labels as $var => $label) : 
+                                    $default_value = $default_theme['settings'][$var] ?? '16px';
+                                ?>
+                                    <div class="sap-color-field">
+                                        <label><?php echo esc_html($label); ?></label>
+                                        <input type="text" 
+                                               name="settings[<?php echo esc_attr($var); ?>]" 
+                                               class="sap-setting-input" 
+                                               data-var="<?php echo esc_attr($var); ?>"
+                                               value="<?php echo esc_attr($default_value); ?>" 
+                                               placeholder="<?php echo esc_attr($default_value); ?>">
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </form>
+                    
+                    <!-- Complete Live Preview -->
+                    <div class="sap-theme-preview" id="sap-theme-preview">
+                        <div class="sap-preview-player">
+                            <div class="sap-preview-cover">
+                                <!-- Visualizer bars -->
+                                <div class="sap-preview-visualizer">
+                                    <div class="sap-viz-bar" style="height:30%"></div>
+                                    <div class="sap-viz-bar" style="height:60%"></div>
+                                    <div class="sap-viz-bar" style="height:80%"></div>
+                                    <div class="sap-viz-bar" style="height:45%"></div>
+                                    <div class="sap-viz-bar" style="height:70%"></div>
+                                    <div class="sap-viz-bar" style="height:55%"></div>
+                                    <div class="sap-viz-bar" style="height:40%"></div>
+                                    <div class="sap-viz-bar" style="height:65%"></div>
+                                </div>
+                            </div>
+                            <div class="sap-preview-content">
+                                <div class="sap-preview-info">
+                                    <div class="sap-preview-title">Track Titel</div>
+                                    <div class="sap-preview-artist">Artist Name</div>
+                                    <div class="sap-preview-meta">
+                                        <span class="sap-preview-meta-text">5 Tracks</span>
+                                        <span class="sap-preview-meta-dot"></span>
+                                        <span class="sap-preview-meta-text">12:34</span>
+                                    </div>
+                                </div>
+                                <div class="sap-preview-progress-section">
+                                    <div class="sap-preview-progress">
+                                        <div class="sap-preview-progress-bar"></div>
+                                    </div>
+                                    <div class="sap-preview-times">
+                                        <span class="sap-preview-time">1:23</span>
+                                        <span class="sap-preview-time">3:45</span>
+                                    </div>
+                                </div>
+                                <div class="sap-preview-controls">
+                                    <div class="sap-preview-btn small"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg></div>
+                                    <div class="sap-preview-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg></div>
+                                    <div class="sap-preview-btn play"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div>
+                                    <div class="sap-preview-btn"><svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg></div>
+                                    <div class="sap-preview-btn small"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg></div>
+                                </div>
+                                <!-- Playlist Preview -->
+                                <div class="sap-preview-playlist">
+                                    <div class="sap-preview-track active">
+                                        <span class="sap-preview-track-num">●</span>
+                                        <span class="sap-preview-track-title">Aktiver Track</span>
+                                        <span class="sap-preview-track-duration">3:45</span>
+                                    </div>
+                                    <div class="sap-preview-track">
+                                        <span class="sap-preview-track-num">2</span>
+                                        <span class="sap-preview-track-title">Nächster Song</span>
+                                        <span class="sap-preview-track-duration">4:12</span>
+                                    </div>
+                                    <div class="sap-preview-track hover">
+                                        <span class="sap-preview-track-num">3</span>
+                                        <span class="sap-preview-track-title">Hover Zustand</span>
+                                        <span class="sap-preview-track-duration">2:58</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+        jQuery(document).ready(function($) {
+            var defaultTheme = <?php echo json_encode($default_theme); ?>;
+            var currentThemeId = null;
+            var nonce = '<?php echo wp_create_nonce('sap_theme_nonce'); ?>';
+            
+            // Update preview
+            function updatePreview() {
+                var preview = $('#sap-theme-preview');
+                var player = preview.find('.sap-preview-player');
+                
+                // Get color values
+                var colors = {};
+                $('.sap-color-input').each(function() {
+                    colors[$(this).data('var')] = $(this).val();
+                });
+                
+                // Background colors
+                preview.css('background', colors['sap-bg']);
+                player.css('background', colors['sap-card']);
+                player.css('border-color', colors['sap-border']);
+                preview.find('.sap-preview-track.hover').css('background', colors['sap-card-hover']);
+                
+                // Accent colors
+                preview.find('.sap-preview-cover').css('background', 'linear-gradient(135deg, ' + colors['sap-accent'] + ', ' + colors['sap-accent-light'] + ')');
+                preview.find('.sap-preview-progress-bar').css('background', colors['sap-accent']);
+                preview.find('.sap-preview-btn.play').css('background', colors['sap-accent']);
+                var trackActiveColor = colors['sap-track-active'] || colors['sap-accent'];
+                preview.find('.sap-preview-track.active').css('border-left-color', trackActiveColor);
+                preview.find('.sap-preview-track.active .sap-preview-track-num').css('color', trackActiveColor);
+                
+                // Visualizer
+                preview.find('.sap-viz-bar').css('background', colors['sap-visualizer']);
+                
+                // Text colors
+                preview.find('.sap-preview-title').css('color', colors['sap-white']);
+                preview.find('.sap-preview-track.active .sap-preview-track-title').css('color', colors['sap-white']);
+                preview.find('.sap-preview-track-title').not('.active .sap-preview-track-title').css('color', colors['sap-gray-100']);
+                preview.find('.sap-preview-artist').css('color', colors['sap-gray-300']);
+                preview.find('.sap-preview-meta-text').css('color', colors['sap-gray-300']);
+                preview.find('.sap-preview-time').css('color', colors['sap-gray-300']);
+                preview.find('.sap-preview-progress').css('background', colors['sap-gray-400']);
+                preview.find('.sap-preview-meta-dot').css('background', colors['sap-gray-400']);
+                preview.find('.sap-preview-track-num').not('.active .sap-preview-track-num').css('color', colors['sap-gray-400']);
+                preview.find('.sap-preview-track-duration').css('color', colors['sap-gray-400']);
+                preview.find('.sap-preview-btn').not('.play').css('color', colors['sap-gray-200']);
+                
+                // Border radius
+                var radius = $('.sap-setting-input[data-var="sap-radius"]').val();
+                var radiusSm = $('.sap-setting-input[data-var="sap-radius-sm"]').val();
+                player.css('border-radius', radius);
+                preview.find('.sap-preview-playlist').css('border-radius', radiusSm);
+            }
+            
+            // Helper: hex to rgb
+            function hexToRgb(hex) {
+                var r = parseInt(hex.slice(1, 3), 16);
+                var g = parseInt(hex.slice(3, 5), 16);
+                var b = parseInt(hex.slice(5, 7), 16);
+                return {r: r, g: g, b: b};
+            }
+            
+            // Helper: extract hex from rgba
+            function rgbaToHex(rgba) {
+                var match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+                if (match) {
+                    var r = parseInt(match[1]).toString(16).padStart(2, '0');
+                    var g = parseInt(match[2]).toString(16).padStart(2, '0');
+                    var b = parseInt(match[3]).toString(16).padStart(2, '0');
+                    return '#' + r + g + b;
+                }
+                return '#000000';
+            }
+            
+            // Color picker sync - handles both hex and rgba
+            $(document).on('input', '.sap-color-picker', function() {
+                var target = $(this).data('target');
+                var hexValue = $(this).val();
+                var input = $('.sap-color-input[data-var="' + target + '"]');
+                var currentValue = input.val();
+                
+                // Check if current value is rgba format
+                if (currentValue.indexOf('rgba') === 0) {
+                    // Extract alpha from current value
+                    var alphaMatch = currentValue.match(/,\s*([\d.]+)\)$/);
+                    var alpha = alphaMatch ? alphaMatch[1] : '1';
+                    var rgb = hexToRgb(hexValue);
+                    input.val('rgba(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ', ' + alpha + ')');
+                } else if (currentValue.indexOf('rgb(') === 0) {
+                    var rgb = hexToRgb(hexValue);
+                    input.val('rgb(' + rgb.r + ', ' + rgb.g + ', ' + rgb.b + ')');
+                } else {
+                    input.val(hexValue);
+                }
+                updatePreview();
+            });
+            
+            $(document).on('input change', '.sap-color-input, .sap-setting-input', function() {
+                var varName = $(this).data('var');
+                var value = $(this).val();
+                var picker = $('.sap-color-picker[data-target="' + varName + '"]');
+                
+                if (picker.length) {
+                    // Sync picker - convert rgba to hex if needed
+                    if (/^#[0-9a-fA-F]{6}$/.test(value)) {
+                        picker.val(value);
+                    } else if (value.indexOf('rgb') === 0) {
+                        picker.val(rgbaToHex(value));
+                    }
+                }
+                updatePreview();
+            });
+            
+            // Load theme into editor
+            function loadTheme(theme) {
+                currentThemeId = theme.id;
+                $('#sap-theme-id').val(theme.id || '');
+                $('#sap-theme-is-default').val(theme.is_default || 0);
+                $('#sap-theme-name').val(theme.name || '');
+                $('#sap-editor-title').text(theme.name ? 'Theme: ' + theme.name : 'Neues Theme');
+                
+                // Load colors
+                if (theme.colors) {
+                    $.each(theme.colors, function(key, value) {
+                        var input = $('.sap-color-input[data-var="' + key + '"]');
+                        input.val(value);
+                        var picker = $('.sap-color-picker[data-target="' + key + '"]');
+                        if (picker.length) {
+                            // Convert to hex for picker
+                            if (/^#[0-9a-fA-F]{6}$/.test(value)) {
+                                picker.val(value);
+                            } else if (value.indexOf('rgb') === 0) {
+                                picker.val(rgbaToHex(value));
+                            }
+                        }
+                    });
+                }
+                
+                // Load settings
+                if (theme.settings) {
+                    $.each(theme.settings, function(key, value) {
+                        $('.sap-setting-input[data-var="' + key + '"]').val(value);
+                    });
+                }
+                
+                // Show/hide delete button (is_default can be "1" string or 1 number)
+                var isDefault = theme.is_default == 1 || theme.is_default === '1' || theme.is_default === true;
+                if (isDefault) {
+                    $('#sap-delete-theme').hide();
+                } else if (theme.id) {
+                    $('#sap-delete-theme').show();
+                } else {
+                    $('#sap-delete-theme').hide();
+                }
+                
+                updatePreview();
+            }
+            
+            // Click on theme item
+            $(document).on('click', '.sap-theme-item', function() {
+                var id = $(this).data('id');
+                
+                $('.sap-theme-item').removeClass('editing');
+                $(this).addClass('editing');
+                
+                $.post(ajaxurl, {
+                    action: 'sap_get_theme',
+                    id: id,
+                    nonce: nonce
+                }, function(response) {
+                    if (response.success) {
+                        loadTheme(response.data);
+                    }
+                });
+            });
+            
+            // New theme
+            $('#sap-new-theme').on('click', function() {
+                $('.sap-theme-item').removeClass('editing');
+                loadTheme({
+                    id: '',
+                    name: '',
+                    colors: defaultTheme.colors,
+                    settings: defaultTheme.settings,
+                    is_default: 0
+                });
+            });
+            
+            // Reset to default
+            $('#sap-reset-theme').on('click', function() {
+                if (confirm('Alle Farben auf Standard zurücksetzen?')) {
+                    loadTheme({
+                        id: currentThemeId,
+                        name: $('#sap-theme-name').val(),
+                        colors: defaultTheme.colors,
+                        settings: defaultTheme.settings,
+                        is_default: $('#sap-theme-is-default').val()
+                    });
+                }
+            });
+            
+            // Save theme
+            $('#sap-save-theme').on('click', function() {
+                var name = $('#sap-theme-name').val();
+                if (!name) {
+                    alert('Bitte gib einen Namen ein.');
+                    return;
+                }
+                
+                var data = {
+                    action: 'sap_save_theme',
+                    nonce: nonce,
+                    id: $('#sap-theme-id').val(),
+                    name: name,
+                    colors: {},
+                    settings: {}
+                };
+                
+                $('.sap-color-input').each(function() {
+                    data.colors[$(this).data('var')] = $(this).val();
+                });
+                
+                $('.sap-setting-input').each(function() {
+                    data.settings[$(this).data('var')] = $(this).val();
+                });
+                
+                $.post(ajaxurl, data, function(response) {
+                    if (response.success) {
+                        alert(response.data.message);
+                        location.reload();
+                    } else {
+                        alert('Fehler: ' + response.data);
+                    }
+                });
+            });
+            
+            // Delete theme
+            $('#sap-delete-theme').on('click', function() {
+                if (!confirm('Theme wirklich löschen?')) return;
+                
+                $.post(ajaxurl, {
+                    action: 'sap_delete_theme',
+                    nonce: nonce,
+                    id: currentThemeId
+                }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    } else {
+                        alert('Fehler: ' + response.data);
+                    }
+                });
+            });
+            
+            // Activate theme
+            $('#sap-activate-theme').on('click', function() {
+                if (!currentThemeId) {
+                    alert('Bitte speichere das Theme zuerst.');
+                    return;
+                }
+                
+                $.post(ajaxurl, {
+                    action: 'sap_set_active_theme',
+                    nonce: nonce,
+                    id: currentThemeId
+                }, function(response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                });
+            });
+            
+            // Load first theme on init
+            if ($('.sap-theme-item').length) {
+                $('.sap-theme-item.active').first().click();
+                if (!$('.sap-theme-item.editing').length) {
+                    $('.sap-theme-item').first().click();
+                }
+            }
+        });
+        </script>
+        <?php
+    }
+}
+
+// Initialize theme manager
+SAP_Theme_Manager::get_instance();
+
+// Activation hook for creating table
+register_activation_hook(__FILE__, array('SAP_Theme_Manager', 'create_table'));
 
 class Simple_Audio_Player {
 
@@ -69,6 +1349,125 @@ class Simple_Audio_Player {
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('template_redirect', array($this, 'handle_embed'));
+        add_action('init', array($this, 'handle_audio_stream'));
+    }
+    
+    /**
+     * Generate secure token for audio streaming
+     */
+    public static function generate_stream_token($attachment_id, $expiry = 3600) {
+        $secret = wp_salt('auth');
+        $expires = time() + $expiry;
+        $data = $attachment_id . '|' . $expires;
+        $signature = hash_hmac('sha256', $data, $secret);
+        return base64_encode($data . '|' . $signature);
+    }
+    
+    /**
+     * Verify stream token
+     */
+    public static function verify_stream_token($token) {
+        $secret = wp_salt('auth');
+        $decoded = base64_decode($token);
+        
+        if (!$decoded) return false;
+        
+        $parts = explode('|', $decoded);
+        if (count($parts) !== 3) return false;
+        
+        list($attachment_id, $expires, $signature) = $parts;
+        
+        // Check expiry
+        if (time() > intval($expires)) return false;
+        
+        // Verify signature
+        $expected = hash_hmac('sha256', $attachment_id . '|' . $expires, $secret);
+        if (!hash_equals($expected, $signature)) return false;
+        
+        return intval($attachment_id);
+    }
+    
+    /**
+     * Generate obfuscated stream URL
+     */
+    public static function get_stream_url($attachment_id) {
+        if (!get_option('sap_url_protection', false)) {
+            return wp_get_attachment_url($attachment_id);
+        }
+        
+        $token = self::generate_stream_token($attachment_id);
+        return add_query_arg('sap_stream', $token, home_url('/'));
+    }
+    
+    /**
+     * Handle audio streaming requests
+     */
+    public function handle_audio_stream() {
+        if (!isset($_GET['sap_stream'])) return;
+        
+        $token = sanitize_text_field($_GET['sap_stream']);
+        $attachment_id = self::verify_stream_token($token);
+        
+        if (!$attachment_id) {
+            status_header(403);
+            die('Invalid or expired token');
+        }
+        
+        $file_path = get_attached_file($attachment_id);
+        
+        if (!$file_path || !file_exists($file_path)) {
+            status_header(404);
+            die('File not found');
+        }
+        
+        $mime_type = get_post_mime_type($attachment_id);
+        $file_size = filesize($file_path);
+        $file_name = basename($file_path);
+        
+        // Handle range requests for seeking
+        $start = 0;
+        $end = $file_size - 1;
+        
+        if (isset($_SERVER['HTTP_RANGE'])) {
+            $range = $_SERVER['HTTP_RANGE'];
+            if (preg_match('/bytes=(\d+)-(\d*)/', $range, $matches)) {
+                $start = intval($matches[1]);
+                if (!empty($matches[2])) {
+                    $end = intval($matches[2]);
+                }
+            }
+            
+            status_header(206);
+            header("Content-Range: bytes $start-$end/$file_size");
+        } else {
+            status_header(200);
+        }
+        
+        $length = $end - $start + 1;
+        
+        header('Content-Type: ' . $mime_type);
+        header('Content-Length: ' . $length);
+        header('Accept-Ranges: bytes');
+        header('Cache-Control: no-cache, no-store, must-revalidate');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Stream the file
+        $fp = fopen($file_path, 'rb');
+        fseek($fp, $start);
+        
+        $buffer_size = 8192;
+        $bytes_remaining = $length;
+        
+        while ($bytes_remaining > 0 && !feof($fp)) {
+            $read_size = min($buffer_size, $bytes_remaining);
+            echo fread($fp, $read_size);
+            $bytes_remaining -= $read_size;
+            flush();
+        }
+        
+        fclose($fp);
+        exit;
     }
     
     /**
@@ -147,6 +1546,12 @@ class Simple_Audio_Player {
             'sanitize_callback' => 'rest_sanitize_boolean',
             'default' => false,
         ));
+        
+        register_setting('sap_settings', 'sap_url_protection', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false,
+        ));
     }
     
     /**
@@ -197,6 +1602,25 @@ class Simple_Audio_Player {
                             </p>
                         </td>
                     </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="sap_url_protection">🔒 URL-Schutz</label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       id="sap_url_protection" 
+                                       name="sap_url_protection" 
+                                       value="1"
+                                       <?php checked(get_option('sap_url_protection', false)); ?> />
+                                Audio-URLs verschleiern
+                            </label>
+                            <p class="description">
+                                Versteckt die echten Datei-URLs und verwendet zeitlich begrenzte Tokens.<br>
+                                <strong>Hinweis:</strong> Funktioniert nicht mit CDN! Bei aktiviertem Schutz wird das CDN umgangen.
+                            </p>
+                        </td>
+                    </tr>
                 </table>
                 
                 <?php submit_button('Einstellungen speichern'); ?>
@@ -210,6 +1634,20 @@ class Simple_Audio_Player {
                 <li>Als <strong>Origin URL</strong> gibst du deine Website-URL ein: <code><?php echo home_url(); ?></code></li>
                 <li>Kopiere die Pull Zone URL (z.B. <code>https://deinname.b-cdn.net</code>) und trage sie oben ein</li>
             </ol>
+            
+            <h3>⚠️ Wichtig: CORS-Header für Audio-Dateien</h3>
+            <p>Damit Audio-Dateien vom CDN abgespielt werden können, müssen CORS-Header konfiguriert sein:</p>
+            <ol>
+                <li>Gehe zu deiner Pull Zone → <strong>Headers</strong></li>
+                <li>Füge einen neuen Header hinzu:
+                    <ul>
+                        <li><strong>Header Name:</strong> <code>Access-Control-Allow-Origin</code></li>
+                        <li><strong>Header Value:</strong> <code>*</code> (oder <code><?php echo home_url(); ?></code>)</li>
+                    </ul>
+                </li>
+                <li>Speichern und Cache leeren</li>
+            </ol>
+            <p><em>Ohne CORS-Header werden Audio-Dateien vom Browser blockiert!</em></p>
         </div>
         <?php
     }
@@ -224,6 +1662,12 @@ class Simple_Audio_Player {
             array(),
             SAP_VERSION
         );
+        
+        // Inject active theme CSS
+        $theme_manager = SAP_Theme_Manager::get_instance();
+        $active_theme = $theme_manager->get_active_theme();
+        $theme_css = $theme_manager->generate_theme_css($active_theme);
+        wp_add_inline_style('simple-audio-player', $theme_css);
 
         wp_enqueue_script(
             'simple-audio-player',
@@ -513,10 +1957,18 @@ class Simple_Audio_Player {
             return '<p>Keine Tracks gefunden.</p>';
         }
         
-        // Apply CDN URLs to all media
+        // Apply URL protection or CDN URLs to audio
+        $url_protection = get_option('sap_url_protection', false);
+        
         foreach ($tracks as &$track) {
             if (!empty($track['url'])) {
-                $track['url'] = self::cdn_url($track['url']);
+                if ($url_protection && !empty($track['attachment_id'])) {
+                    // Use obfuscated streaming URL (bypasses CDN)
+                    $track['url'] = self::get_stream_url($track['attachment_id']);
+                } else {
+                    // Use CDN URL if configured
+                    $track['url'] = self::cdn_url($track['url']);
+                }
             }
             if (!empty($track['cover_url'])) {
                 $track['cover_url'] = self::cdn_url($track['cover_url']);
@@ -567,7 +2019,7 @@ class Simple_Audio_Player {
                         if ($track_cover) :
                     ?>
                         <div class="sap-cover-slide <?php echo $i === 0 ? 'active' : ''; ?>" data-index="<?php echo $i; ?>">
-                            <img src="<?php echo esc_url($track_cover); ?>" alt="<?php echo esc_attr($t['title']); ?>" />
+                            <img src="<?php echo esc_url($track_cover); ?>" alt="<?php echo esc_attr($t['title']); ?>" loading="eager" decoding="async" />
                         </div>
                     <?php endif; endforeach; ?>
                 </div>

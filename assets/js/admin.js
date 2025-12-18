@@ -10,7 +10,6 @@
         
         // Prüfen ob wp.media verfügbar ist
         if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
-            console.error('SAP Admin: wp.media nicht verfügbar');
             return;
         }
         
@@ -68,8 +67,6 @@
             var $btn = $(this);
             var $row = $btn.closest('.sap-track-row');
             
-            console.log('Cover-Button geklickt', $row.length);
-            
             // Neuen Frame für jeden Klick erstellen
             var frame = wp.media({
                 title: 'Cover-Bild für Track auswählen',
@@ -80,7 +77,6 @@
 
             frame.on('select', function() {
                 var attachment = frame.state().get('selection').first().toJSON();
-                console.log('Bild ausgewählt:', attachment);
                 
                 var thumbUrl = attachment.sizes && attachment.sizes.thumbnail 
                     ? attachment.sizes.thumbnail.url 
@@ -89,8 +85,6 @@
                 $row.find('.sap-track-cover-id').val(attachment.id);
                 $row.find('.sap-track-cover-url').val(attachment.url);
                 $row.find('.sap-track-cover-preview').html('<img src="' + thumbUrl + '" />');
-                
-                console.log('Cover gesetzt für Row:', $row.data('index'));
             });
 
             frame.open();

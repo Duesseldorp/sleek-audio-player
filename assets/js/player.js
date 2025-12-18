@@ -67,6 +67,20 @@
         let currentIndex = 0;
         let isShuffled = false;
         let shuffledOrder = [];
+        
+        // CORS for visualizer - only enable if same origin (cross-origin without headers breaks audio)
+        let corsEnabled = false;
+        if (playlist.length > 0 && playlist[0].url) {
+            try {
+                const audioUrl = new URL(playlist[0].url, window.location.href);
+                if (audioUrl.origin === window.location.origin) {
+                    audio.crossOrigin = 'anonymous';
+                    corsEnabled = true;
+                }
+            } catch (e) {
+                // Invalid URL, skip CORS
+            }
+        }
 
         // === Audio Visualizer (Winamp-Style) ===
         let audioContext = null;
@@ -89,15 +103,21 @@
 
         function initAudioContext() {
             if (audioContext) return;
+            if (!corsEnabled) return; // Visualizer requires CORS
             
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            analyser.fftSize = 256;
-            analyser.smoothingTimeConstant = 0.8;
-            
-            source = audioContext.createMediaElementSource(audio);
-            source.connect(analyser);
-            analyser.connect(audioContext.destination);
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.8;
+                
+                source = audioContext.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioContext.destination);
+            } catch (e) {
+                audioContext = null;
+                analyser = null;
+            }
         }
 
         function drawVisualizer() {
@@ -118,6 +138,18 @@
             const barWidth = width / barCount;
             const gap = 2;
             
+            // Get visualizer color from CSS variable (from :root)
+            const computedStyle = getComputedStyle(document.documentElement);
+            const vizColor = computedStyle.getPropertyValue('--sap-visualizer').trim() || '#e85d3d';
+            
+            // Convert hex to rgba for gradient
+            const hexToRgba = (hex, alpha) => {
+                const r = parseInt(hex.slice(1, 3), 16);
+                const g = parseInt(hex.slice(3, 5), 16);
+                const b = parseInt(hex.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+            };
+            
             for (let i = 0; i < barCount; i++) {
                 const dataIndex = Math.floor(i * bufferLength / barCount);
                 const value = dataArray[dataIndex];
@@ -126,11 +158,11 @@
                 const x = i * barWidth;
                 const y = height - barHeight;
                 
-                // Semi-transparent gradient bars - Orange accent
+                // Semi-transparent gradient bars using theme color
                 const gradient = visualizerCtx.createLinearGradient(0, height, 0, 0);
-                gradient.addColorStop(0, 'rgba(232, 93, 61, 0.6)');
-                gradient.addColorStop(0.5, 'rgba(244, 121, 93, 0.7)');
-                gradient.addColorStop(1, 'rgba(255, 200, 180, 0.9)');
+                gradient.addColorStop(0, hexToRgba(vizColor, 0.6));
+                gradient.addColorStop(0.5, hexToRgba(vizColor, 0.75));
+                gradient.addColorStop(1, hexToRgba(vizColor, 0.95));
                 
                 visualizerCtx.fillStyle = gradient;
                 visualizerCtx.fillRect(x + gap/2, y, barWidth - gap, barHeight);
@@ -222,12 +254,13 @@
 
         // === Audio-Qualitätsoptimierung ===
         audio.preload = 'auto';           // Vollständiges Preloading
-        audio.crossOrigin = 'anonymous';  // Für Visualizer + CORS
         
         // Preload-Audio für nächsten Track (Gapless Playback)
         let preloadAudio = new Audio();
         preloadAudio.preload = 'auto';
-        preloadAudio.crossOrigin = 'anonymous';
+        if (corsEnabled) {
+            preloadAudio.crossOrigin = 'anonymous';
+        }
         
         // Preload Cache für mehrere Tracks
         const audioCache = new Map();
@@ -246,7 +279,9 @@
             
             const preloadEl = new Audio();
             preloadEl.preload = 'auto';
-            preloadEl.crossOrigin = 'anonymous';
+            if (corsEnabled) {
+                preloadEl.crossOrigin = 'anonymous';
+            }
             preloadEl.src = track.url;
             preloadEl.load();
             audioCache.set(track.url, preloadEl);
@@ -517,17 +552,23 @@
                 return;
             }
             
-            // Debug: Log if Umami not found
-            console.log('SAP Analytics:', eventName, data);
         }
         
         // --- Functions ---
 
         let isLoading = false;
+        let loadingTimeout = null;
         
         function playTrack(index) {
-            // Prevent rapid multiple calls
-            if (isLoading) return;
+            
+            // Clear any pending timeout
+            if (loadingTimeout) {
+                clearTimeout(loadingTimeout);
+                loadingTimeout = null;
+            }
+            
+            // Reset loading state for new track request
+            isLoading = false;
             
             currentIndex = index;
             const track = playlist[index];
@@ -549,37 +590,34 @@
             // Carousel aktualisieren
             updateCarousel();
             
-            // Set new source and play when ready
+            // Set new source and play directly
             audio.src = track.url;
-            audio.load();
             
-            const playWhenReady = function() {
-                audio.removeEventListener('canplay', playWhenReady);
-                audio.play().then(() => {
-                    isLoading = false;
-                    preloadNextTrack();
-                    
-                    // Track play event in Umami
-                    trackEvent('audio-play', {
-                        title: track.title,
-                        artist: track.artist || '',
-                        index: index + 1,
-                        total: playlist.length
-                    });
-                }).catch(err => {
-                    console.warn('Playback failed:', err);
-                    isLoading = false;
+            // Try to play immediately - browser will buffer as needed
+            audio.play().then(() => {
+                isLoading = false;
+                preloadNextTrack();
+                
+                // Track play event in Umami
+                trackEvent('audio-play', {
+                    title: track.title,
+                    artist: track.artist || '',
+                    index: index + 1,
+                    total: playlist.length
                 });
-            };
-            
-            audio.addEventListener('canplay', playWhenReady, { once: true });
-            
-            // Fallback timeout in case canplay doesn't fire
-            setTimeout(() => {
-                if (isLoading) {
-                    isLoading = false;
+            }).catch(err => {
+                isLoading = false;
+                
+                // If autoplay blocked, wait for user interaction
+                if (err.name === 'NotAllowedError') {
+                    // Autoplay blocked - waiting for user interaction
                 }
-            }, 5000);
+            });
+            
+            // Handle load errors
+            audio.onerror = function(e) {
+                isLoading = false;
+            };
             
             // Download button
             if (downloadBtn) {
@@ -599,9 +637,7 @@
                 if (!audio.src && playlist.length > 0) {
                     playTrack(0);
                 } else {
-                    audio.play().catch(err => {
-                        console.warn('Play failed:', err);
-                    });
+                    audio.play().catch(() => {});
                 }
             } else {
                 audio.pause();
@@ -705,56 +741,109 @@
         }
 
         // === Keyboard Shortcuts ===
-        document.addEventListener('keydown', function(e) {
-            // Ignore if typing in input/textarea
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
-            }
+        // Only add listener once globally, track active player
+        if (!window.sapKeyboardInitialized) {
+            window.sapKeyboardInitialized = true;
             
-            // Only respond if this player is visible/in viewport
-            const rect = playerEl.getBoundingClientRect();
-            const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
-            if (!inViewport) return;
-            
-            switch(e.code) {
-                case 'Space':
-                    e.preventDefault();
-                    togglePlay();
-                    break;
-                case 'ArrowLeft':
-                    e.preventDefault();
-                    if (audio.duration) {
-                        audio.currentTime = Math.max(0, audio.currentTime - 10);
+            document.addEventListener('keydown', function(e) {
+                // Ignore if typing in input/textarea/contentEditable
+                const tag = e.target.tagName;
+                if (tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable) {
+                    return;
+                }
+                
+                // Find the active/playing player, or the first visible one
+                let targetPlayer = null;
+                let targetAudio = null;
+                
+                // First priority: currently playing player
+                const allPlayers = document.querySelectorAll('.sap-player');
+                for (const p of allPlayers) {
+                    const a = p.querySelector('.sap-audio');
+                    if (a && !a.paused) {
+                        targetPlayer = p;
+                        targetAudio = a;
+                        break;
                     }
-                    break;
-                case 'ArrowRight':
-                    e.preventDefault();
-                    if (audio.duration) {
-                        audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+                }
+                
+                // Second priority: first visible player
+                if (!targetPlayer) {
+                    for (const p of allPlayers) {
+                        const rect = p.getBoundingClientRect();
+                        const inViewport = rect.top < window.innerHeight && rect.bottom > 0;
+                        if (inViewport) {
+                            targetPlayer = p;
+                            targetAudio = p.querySelector('.sap-audio');
+                            break;
+                        }
                     }
-                    break;
-                case 'ArrowUp':
-                    e.preventDefault();
-                    audio.volume = Math.min(1, audio.volume + 0.1);
-                    break;
-                case 'ArrowDown':
-                    e.preventDefault();
-                    audio.volume = Math.max(0, audio.volume - 0.1);
-                    break;
-                case 'KeyN':
-                    playNext();
-                    break;
-                case 'KeyP':
-                    playPrev();
-                    break;
-                case 'KeyM':
-                    audio.muted = !audio.muted;
-                    break;
-                case 'KeyS':
-                    toggleShuffle();
-                    break;
-            }
-        });
+                }
+                
+                if (!targetPlayer || !targetAudio) return;
+                
+                // Get the player's control functions via custom event
+                let handled = false;
+                
+                switch(e.code) {
+                    case 'Space':
+                        e.preventDefault();
+                        if (targetAudio.paused) {
+                            targetAudio.play().catch(() => {});
+                        } else {
+                            targetAudio.pause();
+                        }
+                        handled = true;
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        if (targetAudio.duration) {
+                            targetAudio.currentTime = Math.max(0, targetAudio.currentTime - 10);
+                        }
+                        handled = true;
+                        break;
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (targetAudio.duration) {
+                            targetAudio.currentTime = Math.min(targetAudio.duration, targetAudio.currentTime + 10);
+                        }
+                        handled = true;
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        targetAudio.volume = Math.min(1, targetAudio.volume + 0.1);
+                        handled = true;
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        targetAudio.volume = Math.max(0, targetAudio.volume - 0.1);
+                        handled = true;
+                        break;
+                    case 'KeyM':
+                        targetAudio.muted = !targetAudio.muted;
+                        handled = true;
+                        break;
+                    case 'KeyN':
+                        // Trigger next button click
+                        const nextBtn = targetPlayer.querySelector('.sap-next');
+                        if (nextBtn) nextBtn.click();
+                        handled = true;
+                        break;
+                    case 'KeyP':
+                        // Trigger prev button click
+                        const prevBtn = targetPlayer.querySelector('.sap-prev');
+                        if (prevBtn) prevBtn.click();
+                        handled = true;
+                        break;
+                    case 'KeyS':
+                        // Trigger shuffle button click
+                        const shuffleBtn = targetPlayer.querySelector('.sap-shuffle');
+                        if (shuffleBtn) shuffleBtn.click();
+                        handled = true;
+                        break;
+                }
+            });
+        }
     }
 
 })();

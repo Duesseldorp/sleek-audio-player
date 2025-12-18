@@ -437,7 +437,7 @@
 }
 
 .sap-track.active .sap-track-num {
-    color: var(--sap-accent);
+    color: var(--sap-track-active, var(--sap-accent));
 }
 
 /* Playing indicator */
@@ -446,7 +446,7 @@
     display: inline-block;
     width: 8px;
     height: 8px;
-    background: var(--sap-accent);
+    background: var(--sap-track-active, var(--sap-accent));
     border-radius: 50%;
     animation: sap-pulse 1.5s ease-in-out infinite;
 }
