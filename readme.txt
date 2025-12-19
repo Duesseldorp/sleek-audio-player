@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.9.0
+Stable tag: 2.0.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -21,6 +21,8 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 * ▶️ Play/Pause/Prev/Next Controls
 * 🔀 Shuffle mode
+* 📤 Share button with social media preview
+* ⋮ More menu (Download, Repeat, Speed)
 * 🔁 Repeat mode (Off / All / One)
 * ⏩ Playback speed (1x, 1.25x, 1.5x, 2x)
 * ⬇️ Track download (configurable per track)
@@ -50,11 +52,14 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🌐 iFrame embed for external websites
 * 🚀 BunnyCDN support for fast delivery
 
-= SEO Features =
+= SEO & Social Sharing =
 
 * 🔍 JSON-LD Schema.org markup (MusicPlaylist, MusicRecording)
 * 📱 Open Graph meta tags for social sharing
 * 🐦 Twitter Card support
+* 📤 Share tracks with cover art preview on WhatsApp, Facebook, etc.
+* 🎵 Track-specific OG tags (title, artist, cover)
+* 🔗 Shareable URLs with autoplay (?playlist=X&track=Y&play=1)
 * 🌐 Public playlist pages with own URL
 * 📋 Playlist archive at /playlist/
 
@@ -159,6 +164,15 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.0.0 =
+* 📤 Share button for social media sharing
+* ⋮ More menu with Download, Repeat and Speed options
+* 🎵 Track-specific Open Graph tags (title, artist, cover image)
+* 🔗 Shareable URLs with playlist ID for embedded playlists
+* 👆 "Tap to Play" overlay when autoplay is blocked
+* 🎨 Cleaner UI with fewer visible buttons
+* 📱 Improved social sharing preview (no emoji in share text)
+
 = 1.9.0 =
 * 🎵 8 Visualizer types: Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Butterfly
 * 👆 Double-click on cover cycles through visualizers
@@ -228,6 +242,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.0.0 =
+New Share button! Share tracks directly to social media with cover art preview. Cleaner UI with More menu.
 
 = 1.9.0 =
 8 new visualizer types! Double-click cover or press V to cycle. New volume slider control.

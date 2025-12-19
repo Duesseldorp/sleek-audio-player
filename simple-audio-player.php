@@ -1950,28 +1950,43 @@ class Simple_Audio_Player {
             return;
         }
         
-        if (!is_singular('sap_playlist')) {
-            return;
-        }
+        // Check if sharing a specific track via URL parameters
+        $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;
+        $shared_playlist = isset($_GET['playlist']) ? absint($_GET['playlist']) : 0;
         
+        // If no playlist ID in URL, try to get from current post (if it's a playlist page)
         global $post;
+        $playlist_id = 0;
         
-        // Validate post object
-        if (!$post || !isset($post->ID) || $post->post_type !== 'sap_playlist') {
-            return;
+        if ($shared_playlist > 0) {
+            // Playlist ID from URL parameter
+            $playlist_id = $shared_playlist;
+        } elseif ($post && isset($post->ID) && $post->post_type === 'sap_playlist') {
+            // Current page is a playlist
+            $playlist_id = $post->ID;
         }
         
-        // Security: Only for published posts
-        if ($post->post_status !== 'publish') {
+        // If no playlist found and no track being shared, exit
+        if (!$playlist_id || $shared_track <= 0) {
+            // Fall back to original behavior for playlist pages without track parameter
+            if (!is_singular('sap_playlist')) {
+                return;
+            }
+            $playlist_id = $post->ID;
+        }
+        
+        // Get playlist data
+        $playlist_post = get_post($playlist_id);
+        if (!$playlist_post || $playlist_post->post_type !== 'sap_playlist' || $playlist_post->post_status !== 'publish') {
             return;
         }
         
         // Sanitize all output data
-        $playlist_title = wp_strip_all_tags(get_the_title($post->ID));
-        $url = esc_url(get_permalink($post->ID));
-        $cover = get_the_post_thumbnail_url($post->ID, 'large');
-        $excerpt = wp_strip_all_tags(get_the_excerpt($post->ID));
-        $tracks = get_post_meta($post->ID, '_sap_tracks', true);
+        $playlist_title = wp_strip_all_tags(get_the_title($playlist_id));
+        $url = esc_url(get_permalink($playlist_id));
+        $cover = get_the_post_thumbnail_url($playlist_id, 'large');
+        $excerpt = wp_strip_all_tags(get_the_excerpt($playlist_id));
+        $tracks = get_post_meta($playlist_id, '_sap_tracks', true);
         $track_count = is_array($tracks) ? count($tracks) : 0;
         
         // Check if a specific track is being shared
@@ -1985,14 +2000,27 @@ class Simple_Audio_Player {
             
             if ($track_title) {
                 $title = $track_title . ($track_artist ? ' - ' . $track_artist : '');
-                $excerpt = '🎵 Listen to "' . $track_title . '"' . ($track_artist ? ' by ' . $track_artist : '') . ' on ' . $playlist_title;
+                $excerpt = '"' . $track_title . '"' . ($track_artist ? ' by ' . $track_artist : '') . ' - ' . $playlist_title;
                 
                 // Use track cover if available
-                if (!empty($track['cover'])) {
-                    $track_cover = esc_url($track['cover']);
-                    if ($track_cover && filter_var($track_cover, FILTER_VALIDATE_URL)) {
-                        $cover = $track_cover;
-                    }
+                // Priority: cover_url > cover_id (attachment) > playlist cover
+                $track_cover = '';
+                
+                // First try direct cover_url
+                if (!empty($track['cover_url'])) {
+                    $track_cover = $track['cover_url'];
+                    // Apply CDN if configured
+                    $track_cover = self::cdn_url($track_cover);
+                }
+                
+                // Fallback to cover_id attachment
+                if (empty($track_cover) && !empty($track['cover_id'])) {
+                    $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'large');
+                }
+                
+                // Set cover if valid URL found
+                if ($track_cover && filter_var($track_cover, FILTER_VALIDATE_URL)) {
+                    $cover = $track_cover;
                 }
             }
             
@@ -3041,7 +3069,7 @@ class Simple_Audio_Player {
         // Note: No !important here so CSS media queries can override on mobile
         $wide_style = $is_wide ? 'display:grid;grid-template-columns:auto 1fr;max-width:100%;width:100%;' : '';
         ?>
-        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="'.$wide_style.'"'; ?> data-playlist='<?php echo esc_attr(json_encode($tracks)); ?>' data-default-cover='<?php echo esc_url($cover); ?>' role="region" aria-label="Audio Player">
+        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="'.$wide_style.'"'; ?> data-playlist='<?php echo esc_attr(json_encode($tracks)); ?>' data-playlist-id='<?php echo esc_attr($post_id); ?>' data-default-cover='<?php echo esc_url($cover); ?>' role="region" aria-label="Audio Player">
             
             <!-- Cover Carousel -->
             <div class="sap-cover-carousel" <?php if($is_wide) echo 'style="height:100%;flex-shrink:0;"'; ?>>

@@ -920,12 +920,20 @@
             const track = playlist[currentIndex];
             if (!track) return;
             
-            // Build share URL with track and autoplay (always starts from beginning)
-            const baseUrl = window.location.href.split('?')[0].split('#')[0];
-            const shareUrl = `${baseUrl}?track=${currentIndex + 1}&play=1`;
+            // Get playlist ID for sharing (needed for OG tags on embedded playlists)
+            const playlistId = playerEl.dataset.playlistId || '';
             
+            // Build share URL with track, playlist ID and autoplay
+            const baseUrl = window.location.href.split('?')[0].split('#')[0];
+            const shareUrl = playlistId 
+                ? `${baseUrl}?playlist=${playlistId}&track=${currentIndex + 1}&play=1`
+                : `${baseUrl}?track=${currentIndex + 1}&play=1`;
+            
+            // Format: "Title" by Artist (no emoji)
             const shareTitle = track.title + (track.artist ? ' - ' + track.artist : '');
-            const shareText = `🎵 Listen to "${shareTitle}"`;
+            const shareText = track.artist 
+                ? `"${track.title}" by ${track.artist}` 
+                : track.title;
             
             // Try Native Share API (Mobile)
             if (navigator.share) {
