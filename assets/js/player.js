@@ -49,6 +49,10 @@
         const downloadBtn = moreMenu ? moreMenu.querySelector('.sap-download') : null;
         const repeatBtn = moreMenu ? moreMenu.querySelector('.sap-repeat') : null;
         const speedBtn = moreMenu ? moreMenu.querySelector('.sap-speed') : null;
+        const streamDivider = moreMenu ? moreMenu.querySelector('.sap-stream-divider') : null;
+        const streamSpotify = moreMenu ? moreMenu.querySelector('.sap-stream-spotify') : null;
+        const streamApple = moreMenu ? moreMenu.querySelector('.sap-stream-apple') : null;
+        const streamAmazon = moreMenu ? moreMenu.querySelector('.sap-stream-amazon') : null;
         const volumeWrapper = playerEl.querySelector('.sap-volume-wrapper');
         const volumeBtn = playerEl.querySelector('.sap-volume-btn');
         const volumeSlider = playerEl.querySelector('.sap-volume-slider');
@@ -87,6 +91,29 @@
         const playbackSpeeds = [1, 1.25, 1.5, 2];
         let currentSpeedIndex = 0;
         let showRemainingTime = localStorage.getItem('sap_show_remaining') === 'true';
+        
+        // Update streaming links in More menu based on current track
+        function updateStreamingLinks(track) {
+            if (!moreMenu) return;
+            
+            const hasAnyLink = track.spotify || track.apple || track.amazon;
+            
+            if (streamDivider) {
+                streamDivider.style.display = hasAnyLink ? '' : 'none';
+            }
+            if (streamSpotify) {
+                streamSpotify.style.display = track.spotify ? '' : 'none';
+                if (track.spotify) streamSpotify.href = track.spotify;
+            }
+            if (streamApple) {
+                streamApple.style.display = track.apple ? '' : 'none';
+                if (track.apple) streamApple.href = track.apple;
+            }
+            if (streamAmazon) {
+                streamAmazon.style.display = track.amazon ? '' : 'none';
+                if (track.amazon) streamAmazon.href = track.amazon;
+            }
+        }
         
         // CORS for visualizer - enable for same origin or trusted CDN domains
         let corsEnabled = false;
@@ -749,6 +776,7 @@
             if (artistEl) artistEl.textContent = firstTrack.artist || '';
             if (tracks[0]) tracks[0].classList.add('active');
             updateCarousel();
+            updateStreamingLinks(firstTrack);
             
             // Check for share parameters in URL (?track=X&play=1)
             const urlParams = new URLSearchParams(window.location.search);
@@ -772,6 +800,7 @@
                 if (downloadBtn) {
                     downloadBtn.classList.toggle('visible', !!track.downloadable);
                 }
+                updateStreamingLinks(track);
                 
                 // Scroll to player
                 playerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -865,13 +894,6 @@
                 e.stopPropagation();
                 const isActive = moreWrapper.classList.toggle('active');
                 this.setAttribute('aria-expanded', isActive);
-                
-                // Position fixed menu relative to button
-                if (isActive) {
-                    const rect = moreBtn.getBoundingClientRect();
-                    moreMenu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
-                    moreMenu.style.right = (window.innerWidth - rect.right) + 'px';
-                }
                 this.blur();
             });
             
@@ -1566,6 +1588,9 @@
             if (downloadBtn) {
                 downloadBtn.classList.toggle('visible', !!track.downloadable);
             }
+            
+            // Update streaming links for current track
+            updateStreamingLinks(track);
         }
 
         function togglePlay() {

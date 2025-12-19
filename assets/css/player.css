@@ -527,8 +527,7 @@
 .sap-volume-slider {
     position: absolute;
     bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 0;
     padding: 12px 8px;
     background: var(--sap-card);
     border: 1px solid var(--sap-border);
@@ -537,7 +536,7 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-    transform: translateX(-50%) translateY(8px);
+    transform: translateY(8px);
     z-index: 100;
 }
 
@@ -545,7 +544,7 @@
 .sap-volume-wrapper:hover .sap-volume-slider {
     opacity: 1;
     visibility: visible;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
 }
 
 .sap-volume-track {
@@ -594,9 +593,7 @@
     .sap-volume-slider {
         bottom: auto;
         top: 100%;
-        left: 50%;
-        right: auto;
-        transform: translateX(-50%);
+        right: 0;
         padding: 16px 20px;
         margin-top: 12px;
         border-radius: 12px;
@@ -605,7 +602,7 @@
     
     .sap-volume-wrapper.active .sap-volume-slider,
     .sap-volume-wrapper:hover .sap-volume-slider {
-        transform: translateX(-50%);
+        transform: translateY(0);
     }
     
     .sap-volume-track {
@@ -676,8 +673,12 @@
 }
 
 .sap-more-menu {
-    position: fixed;
+    position: absolute;
+    bottom: 100%;
+    right: 0;
     min-width: 160px;
+    max-height: 280px;
+    overflow-y: auto;
     padding: 8px 0;
     background: var(--sap-card);
     border: 1px solid var(--sap-border);
@@ -732,6 +733,33 @@
 
 .sap-more-item.sap-download.visible {
     display: flex;
+}
+
+/* More Menu Divider */
+.sap-more-divider {
+    height: 1px;
+    background: var(--sap-border);
+    margin: 8px 0;
+}
+
+/* Streaming Links in More Menu */
+.sap-stream-link {
+    text-decoration: none;
+}
+
+.sap-stream-spotify:hover {
+    background: rgba(29, 185, 84, 0.15);
+    color: #1DB954;
+}
+
+.sap-stream-apple:hover {
+    background: rgba(252, 60, 68, 0.15);
+    color: #FC3C44;
+}
+
+.sap-stream-amazon:hover {
+    background: rgba(0, 168, 225, 0.15);
+    color: #00A8E1;
 }
 
 /* Skip Buttons (Prev/Next) - simple behavior, no persistent focus */

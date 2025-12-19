@@ -3155,6 +3155,16 @@ class Simple_Audio_Player {
                                 <svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44z"/><path d="M10.59 15.41a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg>
                                 <span class="sap-speed-label">Speed: 1x</span>
                             </button>
+                            <div class="sap-more-divider sap-stream-divider" style="display:none;"></div>
+                            <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-spotify" style="display:none;">
+                                <span>Spotify</span>
+                            </a>
+                            <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-apple" style="display:none;">
+                                <span>Apple Music</span>
+                            </a>
+                            <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-amazon" style="display:none;">
+                                <span>Amazon Music</span>
+                            </a>
                         </div>
                     </div>
                     <div class="sap-volume-wrapper">
@@ -3171,27 +3181,6 @@ class Simple_Audio_Player {
                         </div>
                     </div>
                 </div>
-
-                <!-- Streaming Links -->
-                <?php if ($spotify || $apple || $amazon) : ?>
-                <div class="sap-streaming">
-                    <?php if ($spotify) : ?>
-                        <a href="<?php echo esc_url($spotify); ?>" target="_blank" rel="noopener" class="sap-link sap-spotify" title="Spotify">
-                            <svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/></svg>
-                        </a>
-                    <?php endif; ?>
-                    <?php if ($apple) : ?>
-                        <a href="<?php echo esc_url($apple); ?>" target="_blank" rel="noopener" class="sap-link sap-apple" title="Apple Music">
-                            <svg viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-                        </a>
-                    <?php endif; ?>
-                    <?php if ($amazon) : ?>
-                        <a href="<?php echo esc_url($amazon); ?>" target="_blank" rel="noopener" class="sap-link sap-amazon" title="Amazon Music">
-                            <svg viewBox="0 0 24 24"><path d="M13.958 10.09c0 1.232.029 2.256-.591 3.351-.502.891-1.301 1.438-2.186 1.438-1.214 0-1.922-.924-1.922-2.292 0-2.692 2.415-3.182 4.7-3.182v.685zm3.186 7.705c-.209.189-.512.201-.746.074-1.052-.872-1.238-1.276-1.814-2.106-1.734 1.767-2.962 2.297-5.209 2.297-2.66 0-4.731-1.641-4.731-4.925 0-2.565 1.391-4.309 3.37-5.164 1.715-.754 4.11-.891 5.942-1.095v-.41c0-.753.06-1.642-.383-2.294-.385-.578-1.124-.82-1.775-.82-1.205 0-2.277.618-2.54 1.897-.054.285-.261.567-.549.582l-3.061-.333c-.259-.056-.548-.266-.472-.66C6.021 1.145 9.202 0 12.059 0c1.447 0 3.336.385 4.477 1.478 1.447 1.379 1.309 3.219 1.309 5.221v4.727c0 1.421.589 2.044 1.145 2.812.2.277.243.611-.01.818-.631.533-1.752 1.518-2.373 2.071l-.463-.332z"/></svg>
-                        </a>
-                    <?php endif; ?>
-                </div>
-                <?php endif; ?>
 
                 <!-- Playlist -->
                 <ul class="sap-playlist" role="listbox" aria-label="Playlist">
