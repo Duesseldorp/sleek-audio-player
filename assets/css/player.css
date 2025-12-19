@@ -57,6 +57,7 @@
 /* ===== Cover Carousel ===== */
 .sap-cover-carousel {
     position: relative;
+    z-index: 1;
     width: 100%;
     aspect-ratio: 1;
     overflow: hidden;
@@ -220,6 +221,8 @@
 /* ===== Content Section ===== */
 .sap-content {
     padding: 24px;
+    position: relative;
+    z-index: 10;
 }
 
 /* ===== Track Info ===== */
@@ -635,9 +638,7 @@
 }
 
 .sap-more-menu {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
+    position: fixed;
     min-width: 160px;
     padding: 8px 0;
     background: var(--sap-card);
@@ -648,7 +649,7 @@
     visibility: hidden;
     transform: translateY(8px);
     transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-    z-index: 100;
+    z-index: 99999;
 }
 
 .sap-more-wrapper.active .sap-more-menu {
@@ -1011,7 +1012,7 @@
     flex: 1 1 auto;
     padding: 20px 24px;
     min-width: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .sap-player.sap-wide .sap-playlist {

@@ -860,11 +860,18 @@
         });
         
         // === More Menu ===
-        if (moreBtn && moreWrapper) {
+        if (moreBtn && moreWrapper && moreMenu) {
             moreBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                moreWrapper.classList.toggle('active');
-                this.setAttribute('aria-expanded', moreWrapper.classList.contains('active'));
+                const isActive = moreWrapper.classList.toggle('active');
+                this.setAttribute('aria-expanded', isActive);
+                
+                // Position fixed menu relative to button
+                if (isActive) {
+                    const rect = moreBtn.getBoundingClientRect();
+                    moreMenu.style.bottom = (window.innerHeight - rect.top + 8) + 'px';
+                    moreMenu.style.right = (window.innerWidth - rect.right) + 'px';
+                }
                 this.blur();
             });
             
