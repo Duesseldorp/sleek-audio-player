@@ -1,0 +1,236 @@
+# German translation for Simple Audio Player
+# Copyright (C) 2024 Martin Graebing
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Audio Player 2.0.0\n"
+"Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
+"POT-Creation-Date: 2024-12-19 16:00+0000\n"
+"PO-Revision-Date: 2024-12-19 16:30+0100\n"
+"Last-Translator: Martin Graebing <info@duesseldorp.de>\n"
+"Language-Team: German <info@duesseldorp.de>\n"
+"Language: de_DE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: simple-audio-player.php
+msgid "Playlist not found"
+msgstr "Playlist nicht gefunden"
+
+#: simple-audio-player.php
+msgid "No playlist ID specified."
+msgstr "Keine Playlist-ID angegeben."
+
+#: simple-audio-player.php
+msgid "No tracks found."
+msgstr "Keine Tracks gefunden."
+
+#: simple-audio-player.php
+msgid "Playlists"
+msgstr "Playlists"
+
+#: simple-audio-player.php
+msgid "Playlist"
+msgstr "Playlist"
+
+#: simple-audio-player.php
+msgid "Add New Playlist"
+msgstr "Neue Playlist erstellen"
+
+#: simple-audio-player.php
+msgid "Edit Playlist"
+msgstr "Playlist bearbeiten"
+
+#: simple-audio-player.php
+msgid "View Playlist"
+msgstr "Playlist ansehen"
+
+#: simple-audio-player.php
+msgid "Search Playlists"
+msgstr "Playlists durchsuchen"
+
+#: simple-audio-player.php
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: simple-audio-player.php
+msgid "Themes"
+msgstr "Themes"
+
+#: simple-audio-player.php
+msgid "Waveforms"
+msgstr "Wellenformen"
+
+#: simple-audio-player.php
+msgid "BunnyCDN URL"
+msgstr "BunnyCDN URL"
+
+#: simple-audio-player.php
+msgid "Enable Umami Analytics"
+msgstr "Umami Analytics aktivieren"
+
+#: simple-audio-player.php
+msgid "Enable URL Protection"
+msgstr "URL-Schutz aktivieren"
+
+#: simple-audio-player.php
+msgid "Title"
+msgstr "Titel"
+
+#: simple-audio-player.php
+msgid "Artist"
+msgstr "Künstler"
+
+#: simple-audio-player.php
+msgid "Select Audio"
+msgstr "Audio auswählen"
+
+#: simple-audio-player.php
+msgid "Allow Download"
+msgstr "Download erlauben"
+
+#: simple-audio-player.php
+msgid "Add Track"
+msgstr "Track hinzufügen"
+
+#: simple-audio-player.php
+msgid "Remove"
+msgstr "Entfernen"
+
+#: simple-audio-player.php
+msgid "Tracks"
+msgstr "Tracks"
+
+#: simple-audio-player.php
+msgid "Track"
+msgstr "Track"
+
+#: simple-audio-player.php
+msgid "Streaming Links"
+msgstr "Streaming-Links"
+
+#: simple-audio-player.php
+msgid "Spotify URL"
+msgstr "Spotify URL"
+
+#: simple-audio-player.php
+msgid "Apple Music URL"
+msgstr "Apple Music URL"
+
+#: simple-audio-player.php
+msgid "Amazon Music URL"
+msgstr "Amazon Music URL"
+
+#: simple-audio-player.php
+msgid "Embed Shortcode"
+msgstr "Einbettungscode"
+
+#: simple-audio-player.php
+msgid "Standard"
+msgstr "Standard"
+
+#: simple-audio-player.php
+msgid "Wide Layout"
+msgstr "Breites Layout"
+
+#: simple-audio-player.php
+msgid "iFrame Embed"
+msgstr "iFrame-Einbettung"
+
+#: simple-audio-player.php
+msgid "Save Settings"
+msgstr "Einstellungen speichern"
+
+#: simple-audio-player.php
+msgid "Create Theme"
+msgstr "Theme erstellen"
+
+#: simple-audio-player.php
+msgid "Delete Theme"
+msgstr "Theme löschen"
+
+#: simple-audio-player.php
+msgid "Activate"
+msgstr "Aktivieren"
+
+#: simple-audio-player.php
+msgid "Active"
+msgstr "Aktiv"
+
+#: simple-audio-player.php
+msgid "Background Colors"
+msgstr "Hintergrundfarben"
+
+#: simple-audio-player.php
+msgid "Accent Colors"
+msgstr "Akzentfarben"
+
+#: simple-audio-player.php
+msgid "Text Colors"
+msgstr "Textfarben"
+
+#: simple-audio-player.php
+msgid "Effects"
+msgstr "Effekte"
+
+#: simple-audio-player.php
+msgid "Analyze All"
+msgstr "Alle analysieren"
+
+#: simple-audio-player.php
+msgid "Analyzed"
+msgstr "Analysiert"
+
+#: simple-audio-player.php
+msgid "Pending"
+msgstr "Ausstehend"
+
+#: simple-audio-player.php
+msgid "Share"
+msgstr "Teilen"
+
+#: simple-audio-player.php
+msgid "Download"
+msgstr "Herunterladen"
+
+#: simple-audio-player.php
+msgid "Repeat"
+msgstr "Wiederholen"
+
+#: simple-audio-player.php
+msgid "Speed"
+msgstr "Geschwindigkeit"
+
+#: simple-audio-player.php
+msgid "Shuffle"
+msgstr "Zufällig"
+
+#: simple-audio-player.php
+msgid "Previous"
+msgstr "Zurück"
+
+#: simple-audio-player.php
+msgid "Next"
+msgstr "Weiter"
+
+#: simple-audio-player.php
+msgid "Play"
+msgstr "Abspielen"
+
+#: simple-audio-player.php
+msgid "Pause"
+msgstr "Pause"
+
+#: simple-audio-player.php
+msgid "Volume"
+msgstr "Lautstärke"
+
+#: simple-audio-player.php
+msgid "Mute"
+msgstr "Stumm"
+
+#: simple-audio-player.php
+msgid "Tap to Play"
+msgstr "Tippen zum Abspielen"

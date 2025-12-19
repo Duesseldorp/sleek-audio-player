@@ -589,26 +589,29 @@
     transform: translate(-50%, 50%) scale(1.2);
 }
 
-/* Mobile: Horizontal slider */
+/* Mobile: Larger touch-friendly horizontal slider */
 @media (max-width: 480px) {
     .sap-volume-slider {
         bottom: auto;
         top: 100%;
-        left: auto;
-        right: 0;
-        transform: none;
-        padding: 8px 12px;
-        margin-top: 8px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        padding: 16px 20px;
+        margin-top: 12px;
+        border-radius: 12px;
+        min-width: 180px;
     }
     
     .sap-volume-wrapper.active .sap-volume-slider,
     .sap-volume-wrapper:hover .sap-volume-slider {
-        transform: none;
+        transform: translateX(-50%);
     }
     
     .sap-volume-track {
-        width: 100px;
-        height: 6px;
+        width: 140px;
+        height: 12px;
+        border-radius: 6px;
     }
     
     .sap-volume-fill {
@@ -616,17 +619,52 @@
         height: 100%;
         bottom: auto;
         left: 0;
+        border-radius: 6px;
     }
     
     .sap-volume-handle {
         left: 70%;
         bottom: 50%;
         transform: translate(-50%, 50%);
+        width: 24px;
+        height: 24px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
     }
     
     .sap-volume-handle:hover,
     .sap-volume-track:active .sap-volume-handle {
-        transform: translate(-50%, 50%) scale(1.15);
+        transform: translate(-50%, 50%) scale(1.1);
+    }
+}
+
+/* Extra touch target area for mobile */
+@media (pointer: coarse) {
+    .sap-volume-track {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        background: transparent;
+        position: relative;
+    }
+    
+    .sap-volume-track::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 12px;
+        background: var(--sap-gray-400);
+        border-radius: 6px;
+    }
+    
+    .sap-volume-fill {
+        position: absolute;
+        height: 12px;
+        z-index: 1;
+    }
+    
+    .sap-volume-handle {
+        z-index: 2;
     }
 }
 

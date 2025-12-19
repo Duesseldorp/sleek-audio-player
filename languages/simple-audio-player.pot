@@ -1,0 +1,235 @@
+# Copyright (C) 2024 Martin Graebing
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Simple Audio Player 2.0.0\n"
+"Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
+"POT-Creation-Date: 2024-12-19 16:00+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: simple-audio-player.php
+msgid "Playlist not found"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "No playlist ID specified."
+msgstr ""
+
+#: simple-audio-player.php
+msgid "No tracks found."
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Playlists"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Playlist"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Add New Playlist"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Edit Playlist"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "View Playlist"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Search Playlists"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Settings"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Themes"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Waveforms"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "BunnyCDN URL"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Enable Umami Analytics"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Enable URL Protection"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Title"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Artist"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Select Audio"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Allow Download"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Add Track"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Remove"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Tracks"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Track"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Streaming Links"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Spotify URL"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Apple Music URL"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Amazon Music URL"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Embed Shortcode"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Standard"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Wide Layout"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "iFrame Embed"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Save Settings"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Create Theme"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Delete Theme"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Activate"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Active"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Background Colors"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Accent Colors"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Text Colors"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Effects"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Analyze All"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Analyzed"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Pending"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Share"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Download"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Repeat"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Speed"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Shuffle"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Previous"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Next"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Play"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Pause"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Volume"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Mute"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Tap to Play"
+msgstr ""

@@ -927,6 +927,15 @@
             const track = playlist[currentIndex];
             if (!track) return;
             
+            // Umami tracking
+            if (typeof umami !== 'undefined') {
+                umami.track('share-button', {
+                    track: track.title || '',
+                    artist: track.artist || '',
+                    playlist: playerEl.dataset.playlistId || ''
+                });
+            }
+            
             // Get playlist ID for sharing (needed for OG tags on embedded playlists)
             const playlistId = playerEl.dataset.playlistId || '';
             
@@ -1376,6 +1385,53 @@
                 e.stopPropagation();
                 playTrack(index);
             });
+            
+            // Keyboard support for accessibility
+            track.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    playTrack(index);
+                } else if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    const nextTrack = tracks[index + 1];
+                    if (nextTrack) nextTrack.focus();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const prevTrack = tracks[index - 1];
+                    if (prevTrack) prevTrack.focus();
+                }
+            });
+        });
+        
+        // Global keyboard shortcuts for player
+        playerEl.addEventListener('keydown', function(e) {
+            // Only handle if not in an input field
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            switch(e.key) {
+                case ' ':
+                    if (e.target.classList.contains('sap-track')) return; // Let track handler deal with it
+                    e.preventDefault();
+                    togglePlay();
+                    break;
+                case 'ArrowLeft':
+                    if (!e.target.classList.contains('sap-track')) {
+                        e.preventDefault();
+                        audio.currentTime = Math.max(0, audio.currentTime - 5);
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (!e.target.classList.contains('sap-track')) {
+                        e.preventDefault();
+                        audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
+                    }
+                    break;
+                case 'm':
+                case 'M':
+                    // Toggle mute
+                    if (volumeBtn) volumeBtn.click();
+                    break;
+            }
         });
 
         // --- Umami Analytics ---

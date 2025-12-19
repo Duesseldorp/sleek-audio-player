@@ -15,9 +15,14 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '1.8.0');
+define('SAP_VERSION', '2.0.0');
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+// Load text domain for translations
+add_action('init', function() {
+    load_plugin_textdomain('simple-audio-player', false, dirname(plugin_basename(__FILE__)) . '/languages');
+});
 
 /**
  * Theme Manager Class
@@ -102,7 +107,7 @@ class SAP_Theme_Manager {
         dbDelta($sql);
         
         // Insert default theme if not exists
-        $existing = $wpdb->get_var("SELECT COUNT(*) FROM $table_name WHERE is_default = 1");
+        $existing = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE is_default = 1", $table_name));
         if (!$existing) {
             $wpdb->insert($table_name, array(
                 'name' => 'Standard',
@@ -143,7 +148,7 @@ class SAP_Theme_Manager {
      */
     public function get_all_themes() {
         global $wpdb;
-        $results = $wpdb->get_results("SELECT * FROM {$this->table_name} ORDER BY is_default DESC, name ASC", ARRAY_A);
+        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY is_default DESC, name ASC", $this->table_name), ARRAY_A);
         
         foreach ($results as &$theme) {
             $theme['colors'] = json_decode($theme['colors'], true);
@@ -183,7 +188,7 @@ class SAP_Theme_Manager {
         
         // Return default theme
         global $wpdb;
-        $theme = $wpdb->get_row("SELECT * FROM {$this->table_name} WHERE is_default = 1", ARRAY_A);
+        $theme = $wpdb->get_row($wpdb->prepare("SELECT * FROM %i WHERE is_default = 1", $this->table_name), ARRAY_A);
         
         if ($theme) {
             $theme['colors'] = json_decode($theme['colors'], true);
@@ -2172,7 +2177,7 @@ class Simple_Audio_Player {
         $playlist = get_post($id);
         
         if (!$playlist || $playlist->post_type !== 'sap_playlist') {
-            return new WP_Error('not_found', 'Playlist nicht gefunden', array('status' => 404));
+            return new WP_Error('not_found', __('Playlist not found', 'simple-audio-player'), array('status' => 404));
         }
         
         $tracks = get_post_meta($id, '_sap_tracks', true);
@@ -2998,12 +3003,12 @@ class Simple_Audio_Player {
 
         $post_id = intval($atts['id']);
         if (!$post_id) {
-            return '<p>No playlist ID specified.</p>';
+            return '<p>' . __('No playlist ID specified.', 'simple-audio-player') . '</p>';
         }
 
         $tracks = get_post_meta($post_id, '_sap_tracks', true);
         if (empty($tracks)) {
-            return '<p>No tracks found.</p>';
+            return '<p>' . __('No tracks found.', 'simple-audio-player') . '</p>';
         }
         
         // Apply URL protection or CDN URLs to audio
