@@ -199,6 +199,24 @@
     opacity: 1;
 }
 
+/* ===== Loading Spinner ===== */
+.sap-loading-spinner {
+    pointer-events: none;
+}
+
+.sap-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--sap-gray-400);
+    border-top-color: var(--sap-accent);
+    border-radius: 50%;
+    animation: sap-spin 0.8s linear infinite;
+}
+
+@keyframes sap-spin {
+    to { transform: rotate(360deg); }
+}
+
 /* ===== Content Section ===== */
 .sap-content {
     padding: 24px;
@@ -473,6 +491,208 @@
 
 .sap-repeat {
     position: relative;
+}
+
+/* ===== Volume Control ===== */
+.sap-volume-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.sap-volume-btn svg {
+    display: none;
+}
+
+.sap-volume-btn .sap-icon-volume-high {
+    display: block;
+}
+
+.sap-volume-btn.low .sap-icon-volume-high,
+.sap-volume-btn.muted .sap-icon-volume-high {
+    display: none;
+}
+
+.sap-volume-btn.low .sap-icon-volume-low {
+    display: block;
+}
+
+.sap-volume-btn.muted .sap-icon-volume-mute {
+    display: block;
+}
+
+.sap-volume-slider {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 8px;
+    background: var(--sap-card);
+    border: 1px solid var(--sap-border);
+    border-radius: var(--sap-radius-sm);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    transform: translateX(-50%) translateY(8px);
+    z-index: 100;
+}
+
+.sap-volume-wrapper.active .sap-volume-slider,
+.sap-volume-wrapper:hover .sap-volume-slider {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.sap-volume-track {
+    width: 6px;
+    height: 100px;
+    background: var(--sap-gray-400);
+    border-radius: 3px;
+    position: relative;
+    cursor: pointer;
+}
+
+.sap-volume-fill {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70%;
+    background: var(--sap-accent);
+    border-radius: 3px;
+    transition: height 0.05s ease-out;
+}
+
+.sap-volume-handle {
+    position: absolute;
+    left: 50%;
+    bottom: 70%;
+    transform: translate(-50%, 50%);
+    width: 16px;
+    height: 16px;
+    background: var(--sap-white);
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    transition: transform 0.1s ease, bottom 0.05s ease-out;
+}
+
+.sap-volume-handle:hover {
+    transform: translate(-50%, 50%) scale(1.15);
+}
+
+.sap-volume-track:active .sap-volume-handle {
+    transform: translate(-50%, 50%) scale(1.2);
+}
+
+/* Mobile: Horizontal slider */
+@media (max-width: 480px) {
+    .sap-volume-slider {
+        bottom: auto;
+        top: 100%;
+        left: auto;
+        right: 0;
+        transform: none;
+        padding: 8px 12px;
+        margin-top: 8px;
+    }
+    
+    .sap-volume-wrapper.active .sap-volume-slider,
+    .sap-volume-wrapper:hover .sap-volume-slider {
+        transform: none;
+    }
+    
+    .sap-volume-track {
+        width: 100px;
+        height: 6px;
+    }
+    
+    .sap-volume-fill {
+        width: 70%;
+        height: 100%;
+        bottom: auto;
+        left: 0;
+    }
+    
+    .sap-volume-handle {
+        left: 70%;
+        bottom: 50%;
+        transform: translate(-50%, 50%);
+    }
+    
+    .sap-volume-handle:hover,
+    .sap-volume-track:active .sap-volume-handle {
+        transform: translate(-50%, 50%) scale(1.15);
+    }
+}
+
+/* ===== More Menu ===== */
+.sap-more-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.sap-more-menu {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    min-width: 160px;
+    padding: 8px 0;
+    background: var(--sap-card);
+    border: 1px solid var(--sap-border);
+    border-radius: var(--sap-radius-sm);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    z-index: 100;
+}
+
+.sap-more-wrapper.active .sap-more-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.sap-more-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 16px;
+    background: none;
+    border: none;
+    color: var(--sap-gray-200);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sap-more-item:hover {
+    background: var(--sap-blue-tint);
+    color: var(--sap-white);
+}
+
+.sap-more-item.active {
+    color: var(--sap-accent);
+}
+
+.sap-more-item svg {
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+.sap-more-item.sap-download {
+    display: none;
+}
+
+.sap-more-item.sap-download.visible {
+    display: flex;
 }
 
 /* Skip Buttons (Prev/Next) - simple behavior, no persistent focus */

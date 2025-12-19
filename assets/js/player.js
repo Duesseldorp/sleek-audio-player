@@ -42,9 +42,19 @@
         const prevBtn = playerEl.querySelector('.sap-prev');
         const nextBtn = playerEl.querySelector('.sap-next');
         const shuffleBtn = playerEl.querySelector('.sap-shuffle');
-        const downloadBtn = playerEl.querySelector('.sap-download');
-        const repeatBtn = playerEl.querySelector('.sap-repeat');
-        const speedBtn = playerEl.querySelector('.sap-speed');
+        const shareBtn = playerEl.querySelector('.sap-share');
+        const moreWrapper = playerEl.querySelector('.sap-more-wrapper');
+        const moreBtn = playerEl.querySelector('.sap-more-btn');
+        const moreMenu = playerEl.querySelector('.sap-more-menu');
+        const downloadBtn = moreMenu ? moreMenu.querySelector('.sap-download') : null;
+        const repeatBtn = moreMenu ? moreMenu.querySelector('.sap-repeat') : null;
+        const speedBtn = moreMenu ? moreMenu.querySelector('.sap-speed') : null;
+        const volumeWrapper = playerEl.querySelector('.sap-volume-wrapper');
+        const volumeBtn = playerEl.querySelector('.sap-volume-btn');
+        const volumeSlider = playerEl.querySelector('.sap-volume-slider');
+        const volumeTrack = playerEl.querySelector('.sap-volume-track');
+        const volumeFill = playerEl.querySelector('.sap-volume-fill');
+        const volumeHandle = playerEl.querySelector('.sap-volume-handle');
         const carousel = playerEl.querySelector('.sap-cover-carousel');
         const coverTrack = playerEl.querySelector('.sap-cover-track');
         const coverSlides = playerEl.querySelectorAll('.sap-cover-slide');
@@ -740,14 +750,48 @@
             if (tracks[0]) tracks[0].classList.add('active');
             updateCarousel();
             
-            // Show download button immediately if track is downloadable
-            if (downloadBtn) {
-                if (firstTrack.downloadable) {
-                    downloadBtn.style.display = 'flex';
-                    downloadBtn.onclick = () => downloadTrack(firstTrack);
-                } else {
-                    downloadBtn.style.display = 'none';
+            // Check for share parameters in URL (?track=X&play=1)
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedTrack = parseInt(urlParams.get('track'));
+            const shouldAutoplay = urlParams.get('play') === '1';
+            
+            // If a specific track was shared, load and play it
+            if (sharedTrack && sharedTrack > 0 && sharedTrack <= playlist.length) {
+                const trackIndex = sharedTrack - 1; // Convert to 0-indexed
+                currentIndex = trackIndex;
+                const track = playlist[trackIndex];
+                audio.src = track.url;
+                if (nowPlayingEl) nowPlayingEl.textContent = track.title;
+                if (artistEl) artistEl.textContent = track.artist || '';
+                tracks.forEach(t => t.classList.remove('active'));
+                if (tracks[trackIndex]) tracks[trackIndex].classList.add('active');
+                updateCarousel();
+                updateWaveformForTrack(track);
+                
+                // Update download button in menu
+                if (downloadBtn) {
+                    downloadBtn.classList.toggle('visible', !!track.downloadable);
                 }
+                
+                // Scroll to player
+                playerEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Try autoplay from beginning
+                if (shouldAutoplay) {
+                    audio.currentTime = 0;
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            // Autoplay blocked - show big play overlay
+                            showPlayOverlay();
+                        });
+                    }
+                }
+            }
+            
+            // Show download button in menu if track is downloadable
+            if (downloadBtn) {
+                downloadBtn.classList.toggle('visible', !!firstTrack.downloadable);
             }
             
             // Initialize waveform for first track
@@ -757,6 +801,37 @@
             if (playlist.length > 1) {
                 preloadAudio.src = playlist[1].url;
                 preloadAudio.load();
+            }
+        }
+        
+        // Big play overlay for shared links when autoplay is blocked
+        function showPlayOverlay() {
+            const existing = playerEl.querySelector('.sap-play-overlay');
+            if (existing) return;
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'sap-play-overlay';
+            overlay.innerHTML = '<div class="sap-play-overlay-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="sap-play-overlay-text">Tap to Play</div>';
+            overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,17,24,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;cursor:pointer;overflow:hidden;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
+            
+            const btn = overlay.querySelector('.sap-play-overlay-btn');
+            btn.style.cssText = 'width:80px;height:80px;background:var(--sap-accent,#e85d3d);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 0 30px var(--sap-accent-glow,rgba(232,93,61,0.35));transition:transform 0.2s ease,box-shadow 0.2s ease;';
+            
+            const svg = btn.querySelector('svg');
+            svg.style.cssText = 'width:36px;height:36px;fill:#fff;margin-left:4px;';
+            
+            const text = overlay.querySelector('.sap-play-overlay-text');
+            text.style.cssText = 'font-size:14px;color:var(--sap-gray-200,rgba(200,215,225,0.8));font-weight:500;letter-spacing:0.5px;';
+            
+            const coverCarousel = playerEl.querySelector('.sap-cover-carousel');
+            if (coverCarousel) {
+                coverCarousel.style.position = 'relative';
+                coverCarousel.appendChild(overlay);
+                
+                overlay.addEventListener('click', function() {
+                    overlay.remove();
+                    audio.play().catch(() => {});
+                });
             }
         }
 
@@ -778,13 +853,250 @@
             toggleShuffle();
             this.blur();
         });
-        if (repeatBtn) repeatBtn.addEventListener('click', function() {
-            toggleRepeat();
+        // === Share Function ===
+        if (shareBtn) shareBtn.addEventListener('click', function() {
+            shareTrack();
             this.blur();
         });
-        if (speedBtn) speedBtn.addEventListener('click', function() {
-            cycleSpeed();
-            this.blur();
+        
+        // === More Menu ===
+        if (moreBtn && moreWrapper) {
+            moreBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                moreWrapper.classList.toggle('active');
+                this.setAttribute('aria-expanded', moreWrapper.classList.contains('active'));
+                this.blur();
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!moreWrapper.contains(e.target)) {
+                    moreWrapper.classList.remove('active');
+                    moreBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+            
+            // Handle menu item clicks
+            if (downloadBtn) {
+                downloadBtn.addEventListener('click', function() {
+                    const track = playlist[currentIndex];
+                    if (track && track.downloadable) {
+                        downloadTrack(track);
+                    }
+                    moreWrapper.classList.remove('active');
+                });
+            }
+            
+            if (repeatBtn) {
+                repeatBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleRepeat();
+                    // Update menu label
+                    const label = this.querySelector('span');
+                    if (label) {
+                        const modes = { off: 'Off', playlist: 'All', track: 'One' };
+                        label.textContent = 'Repeat: ' + (modes[repeatMode] || 'Off');
+                    }
+                    this.classList.toggle('active', repeatMode !== 'off');
+                });
+            }
+            
+            if (speedBtn) {
+                speedBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    cycleSpeed();
+                    // Update menu label
+                    const label = this.querySelector('.sap-speed-label');
+                    if (label) {
+                        label.textContent = 'Speed: ' + audio.playbackRate + 'x';
+                    }
+                });
+            }
+        }
+        
+        function shareTrack() {
+            const track = playlist[currentIndex];
+            if (!track) return;
+            
+            // Build share URL with track and autoplay (always starts from beginning)
+            const baseUrl = window.location.href.split('?')[0].split('#')[0];
+            const shareUrl = `${baseUrl}?track=${currentIndex + 1}&play=1`;
+            
+            const shareTitle = track.title + (track.artist ? ' - ' + track.artist : '');
+            const shareText = `🎵 Listen to "${shareTitle}"`;
+            
+            // Try Native Share API (Mobile)
+            if (navigator.share) {
+                navigator.share({
+                    title: shareTitle,
+                    text: shareText,
+                    url: shareUrl
+                }).catch(() => {
+                    // User cancelled or error - fallback to clipboard
+                    copyToClipboard(shareUrl, shareTitle);
+                });
+            } else {
+                // Desktop fallback - copy to clipboard
+                copyToClipboard(shareUrl, shareTitle);
+            }
+        }
+        
+        function copyToClipboard(text, title) {
+            navigator.clipboard.writeText(text).then(() => {
+                showShareFeedback('Link copied! 🔗');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                textarea.style.position = 'fixed';
+                textarea.style.opacity = '0';
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                showShareFeedback('Link copied! 🔗');
+            });
+        }
+        
+        function showShareFeedback(message) {
+            const feedback = document.createElement('div');
+            feedback.className = 'sap-share-feedback';
+            feedback.textContent = message;
+            feedback.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(40,167,69,0.95);color:#fff;padding:12px 20px;border-radius:25px;font-size:14px;font-weight:600;z-index:100;pointer-events:none;';
+            
+            const coverSection = playerEl.querySelector('.sap-cover-section');
+            if (coverSection) {
+                coverSection.appendChild(feedback);
+                setTimeout(() => feedback.remove(), 2000);
+            }
+        }
+        
+        // === Volume Control ===
+        let currentVolume = parseFloat(localStorage.getItem('sap_volume')) || 0.7;
+        let isMuted = false;
+        let volumeDragging = false;
+        
+        // Initialize volume
+        audio.volume = currentVolume;
+        updateVolumeUI(currentVolume);
+        
+        function updateVolumeUI(vol) {
+            if (!volumeFill || !volumeHandle || !volumeBtn) return;
+            
+            const percent = vol * 100;
+            const isMobile = window.innerWidth <= 480;
+            
+            if (isMobile) {
+                volumeFill.style.width = percent + '%';
+                volumeFill.style.height = '100%';
+                volumeHandle.style.left = percent + '%';
+                volumeHandle.style.bottom = '50%';
+            } else {
+                volumeFill.style.height = percent + '%';
+                volumeFill.style.width = '100%';
+                volumeHandle.style.bottom = percent + '%';
+                volumeHandle.style.left = '50%';
+            }
+            
+            // Update icon
+            volumeBtn.classList.remove('low', 'muted');
+            if (vol === 0 || isMuted) {
+                volumeBtn.classList.add('muted');
+            } else if (vol < 0.5) {
+                volumeBtn.classList.add('low');
+            }
+        }
+        
+        function setVolume(vol) {
+            vol = Math.max(0, Math.min(1, vol));
+            currentVolume = vol;
+            audio.volume = vol;
+            isMuted = vol === 0;
+            localStorage.setItem('sap_volume', vol.toString());
+            updateVolumeUI(vol);
+        }
+        
+        function getVolumeFromEvent(e, rect) {
+            const isMobile = window.innerWidth <= 480;
+            if (isMobile) {
+                const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                return Math.max(0, Math.min(1, x / rect.width));
+            } else {
+                const y = rect.bottom - (e.touches ? e.touches[0].clientY : e.clientY);
+                return Math.max(0, Math.min(1, y / rect.height));
+            }
+        }
+        
+        // Volume button click: toggle mute
+        if (volumeBtn) {
+            volumeBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (isMuted) {
+                    isMuted = false;
+                    audio.volume = currentVolume || 0.7;
+                    updateVolumeUI(currentVolume || 0.7);
+                } else {
+                    isMuted = true;
+                    audio.volume = 0;
+                    updateVolumeUI(0);
+                }
+                this.blur();
+            });
+        }
+        
+        // Volume slider interaction
+        if (volumeTrack) {
+            // Mouse events
+            volumeTrack.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                volumeDragging = true;
+                volumeWrapper.classList.add('active');
+                const rect = volumeTrack.getBoundingClientRect();
+                setVolume(getVolumeFromEvent(e, rect));
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!volumeDragging) return;
+                const rect = volumeTrack.getBoundingClientRect();
+                setVolume(getVolumeFromEvent(e, rect));
+            });
+            
+            document.addEventListener('mouseup', function() {
+                if (volumeDragging) {
+                    volumeDragging = false;
+                    setTimeout(() => volumeWrapper.classList.remove('active'), 100);
+                }
+            });
+            
+            // Touch events
+            volumeTrack.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                volumeDragging = true;
+                volumeWrapper.classList.add('active');
+                const rect = volumeTrack.getBoundingClientRect();
+                setVolume(getVolumeFromEvent(e, rect));
+            }, { passive: false });
+            
+            volumeTrack.addEventListener('touchmove', function(e) {
+                if (!volumeDragging) return;
+                e.preventDefault();
+                const rect = volumeTrack.getBoundingClientRect();
+                setVolume(getVolumeFromEvent(e, rect));
+            }, { passive: false });
+            
+            volumeTrack.addEventListener('touchend', function() {
+                volumeDragging = false;
+                setTimeout(() => volumeWrapper.classList.remove('active'), 300);
+            });
+        }
+        
+        // Close slider when clicking outside
+        document.addEventListener('click', function(e) {
+            if (volumeWrapper && !volumeWrapper.contains(e.target)) {
+                volumeWrapper.classList.remove('active');
+            }
         });
         
         // === Swipe Gesture Support & Cover Click ===
@@ -1078,6 +1390,39 @@
         let isLoading = false;
         let loadingTimeout = null;
         
+        // Loading spinner functions
+        function showLoadingSpinner() {
+            const existing = playerEl.querySelector('.sap-loading-spinner');
+            if (existing) return;
+            
+            const spinner = document.createElement('div');
+            spinner.className = 'sap-loading-spinner';
+            spinner.innerHTML = '<div class="sap-spinner"></div>';
+            spinner.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:50;';
+            
+            const coverSection = playerEl.querySelector('.sap-cover-section');
+            if (coverSection) coverSection.appendChild(spinner);
+        }
+        
+        function hideLoadingSpinner() {
+            const spinner = playerEl.querySelector('.sap-loading-spinner');
+            if (spinner) spinner.remove();
+        }
+        
+        // Error feedback function
+        function showErrorFeedback(message) {
+            const feedback = document.createElement('div');
+            feedback.className = 'sap-error-feedback';
+            feedback.textContent = '⚠️ ' + message;
+            feedback.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(220,53,69,0.9);color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;z-index:100;pointer-events:none;text-align:center;max-width:80%;';
+            
+            const coverSection = playerEl.querySelector('.sap-cover-section');
+            if (coverSection) {
+                coverSection.appendChild(feedback);
+                setTimeout(() => feedback.remove(), 3000);
+            }
+        }
+        
         function playTrack(index) {
             
             // Clear any pending timeout
@@ -1095,6 +1440,7 @@
             if (!track) return;
             
             isLoading = true;
+            showLoadingSpinner();
             
             // Stop current playback first
             audio.pause();
@@ -1118,6 +1464,7 @@
             // Try to play immediately - browser will buffer as needed
             audio.play().then(() => {
                 isLoading = false;
+                hideLoadingSpinner();
                 preloadNextTrack();
                 
                 // Track play event in Umami
@@ -1129,6 +1476,7 @@
                 });
             }).catch(err => {
                 isLoading = false;
+                hideLoadingSpinner();
                 
                 // If autoplay blocked, wait for user interaction
                 if (err.name === 'NotAllowedError') {
@@ -1139,16 +1487,13 @@
             // Handle load errors
             audio.onerror = function(e) {
                 isLoading = false;
+                hideLoadingSpinner();
+                showErrorFeedback('Track could not be loaded');
             };
             
-            // Download button
+            // Download button in menu
             if (downloadBtn) {
-                if (track.downloadable) {
-                    downloadBtn.style.display = 'flex';
-                    downloadBtn.onclick = () => downloadTrack(track);
-                } else {
-                    downloadBtn.style.display = 'none';
-                }
+                downloadBtn.classList.toggle('visible', !!track.downloadable);
             }
         }
 

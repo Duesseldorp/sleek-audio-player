@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.8.0
+Stable tag: 1.9.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -24,11 +24,13 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🔁 Repeat mode (Off / All / One)
 * ⏩ Playback speed (1x, 1.25x, 1.5x, 2x)
 * ⬇️ Track download (configurable per track)
-* 🎵 Audio visualizer with frequency bars
+* 🎵 8 Visualizer types (Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Butterfly)
+* 👆 Double-click cover to cycle visualizers
 * ⏱️ Progress bar with seek functionality
 * 🌊 Waveform display with progress color
 * 👆 Click on waveform jumps to position & starts playback
-* 🔊 Volume control via keyboard
+* 🔊 Volume control with popup slider
+* ⏱️ Click duration to toggle remaining time
 
 = Cover & Design =
 
@@ -67,6 +69,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * S = Shuffle on/off
 * R = Repeat mode cycle
 * L = Playback speed cycle
+* V = Cycle visualizer
 
 = Technical =
 
@@ -156,6 +159,15 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 1.9.0 =
+* 🎵 8 Visualizer types: Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Butterfly
+* 👆 Double-click on cover cycles through visualizers
+* ⌨️ Keyboard shortcut V for visualizer cycling
+* 🔊 Volume control with expandable slider (vertical on desktop, horizontal on mobile)
+* ⏱️ Click on duration toggles remaining time display
+* 💾 User preferences saved in localStorage (visualizer type, volume, time display)
+* 📱 Improved mobile support for volume control
+
 = 1.8.0 =
 * � Repeat mode (Off / All / One track)
 * ⏩ Playback speed control (1x, 1.25x, 1.5x, 2x)
@@ -216,6 +228,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 1.9.0 =
+8 new visualizer types! Double-click cover or press V to cycle. New volume slider control.
 
 = 1.8.0 =
 SEO update! Playlists get their own URLs and Schema.org markup. After updating: save Settings > Permalinks!
