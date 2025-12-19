@@ -186,10 +186,10 @@
 /* Audio Visualizer */
 .sap-visualizer {
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     width: 100%;
-    height: 80px;
+    height: 100%;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.5s ease;
@@ -310,6 +310,15 @@
     font-variant-numeric: tabular-nums;
 }
 
+.sap-duration {
+    cursor: pointer;
+    transition: color 0.15s ease;
+}
+
+.sap-duration:hover {
+    color: var(--sap-white);
+}
+
 /* ===== Controls ===== */
 .sap-controls {
     display: flex;
@@ -340,7 +349,7 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: var(--sap-card-hover);
+    background: var(--sap-accent);
     opacity: 0;
     transition: opacity 0.12s ease-out;
 }
@@ -350,7 +359,7 @@
 }
 
 .sap-btn:hover::before {
-    opacity: 1;
+    opacity: 0.85;
 }
 
 .sap-btn:active {
@@ -410,23 +419,60 @@
     height: 26px;
 }
 
-/* Active Toggle States (Shuffle, Repeat) */
+/* Active Toggle States (Shuffle, Repeat, Speed) */
 .sap-shuffle.active,
-.sap-repeat.active {
+.sap-repeat.active,
+.sap-speed.active {
     color: var(--sap-accent);
 }
 
 .sap-shuffle.active::before,
-.sap-repeat.active::before {
+.sap-repeat.active::before,
+.sap-speed.active::before {
     opacity: 0.18;
     transform: scale(1);
     background: var(--sap-accent);
 }
 
 .sap-shuffle.active:hover::before,
-.sap-repeat.active:hover::before {
+.sap-repeat.active:hover::before,
+.sap-speed.active:hover::before {
     background: var(--sap-accent);
     opacity: 0.25;
+}
+
+/* Speed Button */
+.sap-speed {
+    min-width: 36px;
+}
+
+.sap-speed-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+}
+
+/* Repeat Badge (shows "1" for single track repeat) */
+.sap-repeat-badge {
+    display: none;
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    font-size: 8px;
+    font-weight: 700;
+    background: var(--sap-accent);
+    color: var(--sap-white);
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+}
+
+.sap-repeat {
+    position: relative;
 }
 
 /* Skip Buttons (Prev/Next) - simple behavior, no persistent focus */

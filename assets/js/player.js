@@ -1,6 +1,6 @@
 /**
  * Simple Audio Player - JavaScript
- * Vanilla JS - kein jQuery nötig
+ * Vanilla JS - no jQuery required
  */
 
 (function() {
@@ -43,6 +43,8 @@
         const nextBtn = playerEl.querySelector('.sap-next');
         const shuffleBtn = playerEl.querySelector('.sap-shuffle');
         const downloadBtn = playerEl.querySelector('.sap-download');
+        const repeatBtn = playerEl.querySelector('.sap-repeat');
+        const speedBtn = playerEl.querySelector('.sap-speed');
         const carousel = playerEl.querySelector('.sap-cover-carousel');
         const coverTrack = playerEl.querySelector('.sap-cover-track');
         const coverSlides = playerEl.querySelectorAll('.sap-cover-slide');
@@ -71,6 +73,10 @@
         let currentIndex = 0;
         let isShuffled = false;
         let shuffledOrder = [];
+        let repeatMode = 'off'; // off, track, playlist
+        const playbackSpeeds = [1, 1.25, 1.5, 2];
+        let currentSpeedIndex = 0;
+        let showRemainingTime = localStorage.getItem('sap_show_remaining') === 'true';
         
         // CORS for visualizer - enable for same origin or trusted CDN domains
         let corsEnabled = false;
@@ -129,8 +135,55 @@
             }
         }
 
+        // Get visualizer type from settings or localStorage (user preference)
+        const visualizerTypes = ['bars', 'mirror', 'circular', 'oscilloscope', 'dots', 'wave', 'pulse', 'butterfly'];
+        let visualizerType = localStorage.getItem('sap_visualizer_type') 
+            || (typeof sapSettings !== 'undefined' && sapSettings.visualizerType) 
+            || 'bars';
+        
+        // Cycle to next visualizer type
+        function cycleVisualizer() {
+            const currentIndex = visualizerTypes.indexOf(visualizerType);
+            visualizerType = visualizerTypes[(currentIndex + 1) % visualizerTypes.length];
+            localStorage.setItem('sap_visualizer_type', visualizerType);
+            
+            // Show brief feedback
+            showVisualizerFeedback(visualizerType);
+        }
+        
+        // Show feedback when visualizer changes
+        function showVisualizerFeedback(type) {
+            const names = { bars: 'Bars', mirror: 'Mirror', circular: 'Circular', oscilloscope: 'Oscilloscope', dots: 'Dots', wave: 'Wave', pulse: 'Pulse', butterfly: 'Butterfly' };
+            const feedback = document.createElement('div');
+            feedback.className = 'sap-viz-feedback';
+            feedback.textContent = '🎵 ' + names[type];
+            feedback.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:#fff;padding:8px 16px;border-radius:20px;font-size:14px;z-index:100;pointer-events:none;';
+            
+            const coverSection = playerEl.querySelector('.sap-cover-section');
+            if (coverSection) {
+                coverSection.appendChild(feedback);
+                setTimeout(() => feedback.remove(), 1000);
+            }
+        }
+        
+        // Helper: Convert hex to rgba
+        function hexToRgba(hex, alpha) {
+            if (!hex || hex.charAt(0) !== '#') return `rgba(232, 93, 61, ${alpha})`;
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+        
+        // Get visualizer color from CSS variable
+        function getVizColor() {
+            const computedStyle = getComputedStyle(document.documentElement);
+            return computedStyle.getPropertyValue('--sap-visualizer').trim() || '#e85d3d';
+        }
+
         function drawVisualizer() {
             if (!visualizerCtx || !analyser) return;
+            if (visualizerType === 'off') return;
             
             const bufferLength = analyser.frequencyBinCount;
             const dataArray = new Uint8Array(bufferLength);
@@ -138,36 +191,58 @@
             
             const width = visualizerCanvas.width;
             const height = visualizerCanvas.height;
+            const vizColor = getVizColor();
             
-            // Clear with transparency (shows cover underneath)
+            // Clear canvas
             visualizerCtx.clearRect(0, 0, width, height);
             
-            // Draw bars
+            // Draw based on type
+            switch(visualizerType) {
+                case 'mirror':
+                    drawMirrorBars(dataArray, width, height, vizColor);
+                    break;
+                case 'circular':
+                    drawCircular(dataArray, width, height, vizColor);
+                    break;
+                case 'oscilloscope':
+                    drawOscilloscope(width, height, vizColor);
+                    break;
+                case 'dots':
+                    drawDots(dataArray, width, height, vizColor);
+                    break;
+                case 'wave':
+                    drawWave(dataArray, width, height, vizColor);
+                    break;
+                case 'pulse':
+                    drawPulse(dataArray, width, height, vizColor);
+                    break;
+                case 'butterfly':
+                    drawButterfly(dataArray, width, height, vizColor);
+                    break;
+                case 'bars':
+                default:
+                    drawBars(dataArray, width, height, vizColor);
+                    break;
+            }
+            
+            animationId = requestAnimationFrame(drawVisualizer);
+        }
+        
+        // Classic frequency bars - drawn at bottom of cover
+        function drawBars(dataArray, width, height, vizColor) {
             const barCount = 64;
             const barWidth = width / barCount;
             const gap = 2;
-            
-            // Get visualizer color from CSS variable (from :root)
-            const computedStyle = getComputedStyle(document.documentElement);
-            const vizColor = computedStyle.getPropertyValue('--sap-visualizer').trim() || '#e85d3d';
-            
-            // Convert hex to rgba for gradient
-            const hexToRgba = (hex, alpha) => {
-                const r = parseInt(hex.slice(1, 3), 16);
-                const g = parseInt(hex.slice(3, 5), 16);
-                const b = parseInt(hex.slice(5, 7), 16);
-                return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-            };
+            const maxBarHeight = height * 0.25; // Limit bar height to 25% of cover
             
             for (let i = 0; i < barCount; i++) {
-                const dataIndex = Math.floor(i * bufferLength / barCount);
+                const dataIndex = Math.floor(i * dataArray.length / barCount);
                 const value = dataArray[dataIndex];
-                const barHeight = (value / 255) * height * 0.9;
+                const barHeight = (value / 255) * maxBarHeight;
                 
                 const x = i * barWidth;
                 const y = height - barHeight;
                 
-                // Semi-transparent gradient bars using theme color
                 const gradient = visualizerCtx.createLinearGradient(0, height, 0, 0);
                 gradient.addColorStop(0, hexToRgba(vizColor, 0.6));
                 gradient.addColorStop(0.5, hexToRgba(vizColor, 0.75));
@@ -176,8 +251,227 @@
                 visualizerCtx.fillStyle = gradient;
                 visualizerCtx.fillRect(x + gap/2, y, barWidth - gap, barHeight);
             }
+        }
+        
+        // Mirror bars (top & bottom) - full width, vertically centered
+        function drawMirrorBars(dataArray, width, height, vizColor) {
+            const barCount = 64;
+            const gap = 2;
+            const barWidth = width / barCount;
+            const startX = 0;
+            const centerY = height / 2;
             
-            animationId = requestAnimationFrame(drawVisualizer);
+            for (let i = 0; i < barCount; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / barCount);
+                const value = dataArray[dataIndex];
+                const barHeight = (value / 255) * centerY * 0.85;
+                
+                const x = startX + (i * barWidth);
+                
+                // Top half (going up from center)
+                const gradientTop = visualizerCtx.createLinearGradient(0, centerY, 0, centerY - barHeight);
+                gradientTop.addColorStop(0, hexToRgba(vizColor, 0.5));
+                gradientTop.addColorStop(1, hexToRgba(vizColor, 0.9));
+                visualizerCtx.fillStyle = gradientTop;
+                visualizerCtx.fillRect(x + gap/2, centerY - barHeight, barWidth - gap, barHeight);
+                
+                // Bottom half (going down from center)
+                const gradientBottom = visualizerCtx.createLinearGradient(0, centerY, 0, centerY + barHeight);
+                gradientBottom.addColorStop(0, hexToRgba(vizColor, 0.5));
+                gradientBottom.addColorStop(1, hexToRgba(vizColor, 0.9));
+                visualizerCtx.fillStyle = gradientBottom;
+                visualizerCtx.fillRect(x + gap/2, centerY, barWidth - gap, barHeight);
+            }
+        }
+        
+        // Circular visualizer - centered over cover, double size
+        function drawCircular(dataArray, width, height, vizColor) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const radius = Math.min(width, height) * 0.15;
+            const barCount = 96;
+            
+            for (let i = 0; i < barCount; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / barCount);
+                const value = dataArray[dataIndex];
+                const barHeight = (value / 255) * radius * 2.0;
+                
+                const angle = (i / barCount) * Math.PI * 2 - Math.PI / 2;
+                const x1 = centerX + Math.cos(angle) * radius;
+                const y1 = centerY + Math.sin(angle) * radius;
+                const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+                const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+                
+                const alpha = 0.5 + (value / 255) * 0.5;
+                visualizerCtx.strokeStyle = hexToRgba(vizColor, alpha);
+                visualizerCtx.lineWidth = (width / barCount) * 0.7;
+                visualizerCtx.lineCap = 'round';
+                
+                visualizerCtx.beginPath();
+                visualizerCtx.moveTo(x1, y1);
+                visualizerCtx.lineTo(x2, y2);
+                visualizerCtx.stroke();
+            }
+        }
+        
+        // Oscilloscope waveform - higher amplitude
+        function drawOscilloscope(width, height, vizColor) {
+            const timeDataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteTimeDomainData(timeDataArray);
+            
+            visualizerCtx.lineWidth = 3;
+            visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.85);
+            visualizerCtx.beginPath();
+            
+            const sliceWidth = width / timeDataArray.length;
+            const amplitudeScale = 2.5; // Higher amplitude
+            let x = 0;
+            
+            for (let i = 0; i < timeDataArray.length; i++) {
+                const v = (timeDataArray[i] - 128) / 128.0; // Center around 0
+                const y = (height / 2) + (v * height * 0.4 * amplitudeScale);
+                
+                if (i === 0) {
+                    visualizerCtx.moveTo(x, y);
+                } else {
+                    visualizerCtx.lineTo(x, y);
+                }
+                x += sliceWidth;
+            }
+            
+            visualizerCtx.stroke();
+        }
+        
+        // Dots visualization - dancing dots
+        function drawDots(dataArray, width, height, vizColor) {
+            const dotCount = 32;
+            const maxDotSize = 20;
+            
+            for (let i = 0; i < dotCount; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / dotCount);
+                const value = dataArray[dataIndex];
+                const dotSize = (value / 255) * maxDotSize + 3;
+                
+                const x = (i / dotCount) * width + (width / dotCount / 2);
+                const y = height - (value / 255) * height * 0.7 - dotSize;
+                
+                const alpha = 0.5 + (value / 255) * 0.5;
+                visualizerCtx.fillStyle = hexToRgba(vizColor, alpha);
+                visualizerCtx.beginPath();
+                visualizerCtx.arc(x, y, dotSize, 0, Math.PI * 2);
+                visualizerCtx.fill();
+            }
+        }
+        
+        // Wave visualization - filled waveform
+        function drawWave(dataArray, width, height, vizColor) {
+            const timeDataArray = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteTimeDomainData(timeDataArray);
+            
+            visualizerCtx.fillStyle = hexToRgba(vizColor, 0.6);
+            visualizerCtx.beginPath();
+            visualizerCtx.moveTo(0, height);
+            
+            const sliceWidth = width / timeDataArray.length;
+            let x = 0;
+            
+            for (let i = 0; i < timeDataArray.length; i++) {
+                const v = (timeDataArray[i] - 128) / 128.0;
+                const y = (height / 2) + (v * height * 0.4 * 2);
+                visualizerCtx.lineTo(x, y);
+                x += sliceWidth;
+            }
+            
+            visualizerCtx.lineTo(width, height);
+            visualizerCtx.closePath();
+            visualizerCtx.fill();
+        }
+        
+        // Pulse visualization - multiple pulsing rings reacting to bass
+        function drawPulse(dataArray, width, height, vizColor) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Get bass frequencies (first few values)
+            let bass = 0;
+            for (let i = 0; i < 10; i++) {
+                bass += dataArray[i];
+            }
+            bass = bass / 10 / 255;
+            
+            // Get mid frequencies
+            let mid = 0;
+            for (let i = 10; i < 40; i++) {
+                mid += dataArray[i];
+            }
+            mid = mid / 30 / 255;
+            
+            const maxRadius = Math.min(width, height) * 0.4;
+            
+            // Draw multiple rings with stronger pulse
+            const rings = 4;
+            for (let r = 0; r < rings; r++) {
+                const baseRadius = maxRadius * (0.2 + r * 0.2);
+                const pulseAmount = (r % 2 === 0 ? bass : mid) * 80; // Much stronger pulse
+                const radius = baseRadius + pulseAmount;
+                const alpha = 0.8 - (r * 0.12);
+                
+                visualizerCtx.strokeStyle = hexToRgba(vizColor, alpha);
+                visualizerCtx.lineWidth = 3 + bass * 5;
+                visualizerCtx.beginPath();
+                visualizerCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                visualizerCtx.stroke();
+            }
+            
+            // Center ring (pulsing)
+            const ringSize = 8 + bass * 20;
+            visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.9);
+            visualizerCtx.lineWidth = 2 + bass * 3;
+            visualizerCtx.beginPath();
+            visualizerCtx.arc(centerX, centerY, ringSize, 0, Math.PI * 2);
+            visualizerCtx.stroke();
+        }
+        
+        // Butterfly visualization - symmetrical waves
+        function drawButterfly(dataArray, width, height, vizColor) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const points = 64;
+            
+            visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.8);
+            visualizerCtx.lineWidth = 2;
+            
+            // Left wing
+            visualizerCtx.beginPath();
+            for (let i = 0; i < points; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / points);
+                const value = dataArray[dataIndex] / 255;
+                const angle = (i / points) * Math.PI - Math.PI / 2;
+                const radius = value * Math.min(width, height) * 0.4;
+                
+                const x = centerX - Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                if (i === 0) visualizerCtx.moveTo(x, y);
+                else visualizerCtx.lineTo(x, y);
+            }
+            visualizerCtx.stroke();
+            
+            // Right wing (mirrored)
+            visualizerCtx.beginPath();
+            for (let i = 0; i < points; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / points);
+                const value = dataArray[dataIndex] / 255;
+                const angle = (i / points) * Math.PI - Math.PI / 2;
+                const radius = value * Math.min(width, height) * 0.4;
+                
+                const x = centerX + Math.cos(angle) * radius;
+                const y = centerY + Math.sin(angle) * radius;
+                
+                if (i === 0) visualizerCtx.moveTo(x, y);
+                else visualizerCtx.lineTo(x, y);
+            }
+            visualizerCtx.stroke();
         }
 
         function startVisualizer() {
@@ -376,17 +670,17 @@
         // Start calculation on load
         calculateTotalDuration();
 
-        // === Audio-Qualitätsoptimierung ===
-        audio.preload = 'auto';           // Vollständiges Preloading
+        // === Audio quality optimization ===
+        audio.preload = 'auto';           // Full preloading
         
-        // Preload-Audio für nächsten Track (Gapless Playback)
+        // Preload audio for next track (Gapless Playback)
         let preloadAudio = new Audio();
         preloadAudio.preload = 'auto';
         if (corsEnabled) {
             preloadAudio.crossOrigin = 'anonymous';
         }
         
-        // Preload Cache für mehrere Tracks
+        // Preload cache for multiple tracks
         const audioCache = new Map();
         const MAX_CACHED_TRACKS = 3;
         
@@ -395,7 +689,7 @@
             const track = playlist[index];
             if (!track || audioCache.has(track.url)) return;
             
-            // Cache-Limit einhalten
+            // Respect cache limit
             if (audioCache.size >= MAX_CACHED_TRACKS) {
                 const firstKey = audioCache.keys().next().value;
                 audioCache.delete(firstKey);
@@ -412,12 +706,12 @@
         }
         
         function preloadNextTrack() {
-            // Nächste 2 Tracks vorpuffern
+            // Preload next 2 tracks
             preloadTrack(currentIndex + 1);
             preloadTrack(currentIndex + 2);
         }
         
-        // Buffering-Status anzeigen
+        // Show buffering status
         let bufferingTimeout = null;
         
         audio.addEventListener('waiting', function() {
@@ -446,7 +740,7 @@
             if (tracks[0]) tracks[0].classList.add('active');
             updateCarousel();
             
-            // Download-Button sofort anzeigen wenn Track downloadbar ist
+            // Show download button immediately if track is downloadable
             if (downloadBtn) {
                 if (firstTrack.downloadable) {
                     downloadBtn.style.display = 'flex';
@@ -484,6 +778,14 @@
             toggleShuffle();
             this.blur();
         });
+        if (repeatBtn) repeatBtn.addEventListener('click', function() {
+            toggleRepeat();
+            this.blur();
+        });
+        if (speedBtn) speedBtn.addEventListener('click', function() {
+            cycleSpeed();
+            this.blur();
+        });
         
         // === Swipe Gesture Support & Cover Click ===
         if (carousel && coverTrack) {
@@ -506,6 +808,12 @@
             carousel.addEventListener('mousedown', handleMouseDown);
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
+            
+            // Double-click/tap to cycle visualizer
+            carousel.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                cycleVisualizer();
+            });
 
             function handleTouchStart(e) {
                 startX = e.touches[0].clientX;
@@ -528,19 +836,28 @@
                 if (isHorizontalSwipe === null) {
                     const diffX = Math.abs(touchX - startX);
                     const diffY = Math.abs(touchY - startY);
-                    if (diffX > 10 || diffY > 10) {
+                    // Use higher threshold when cover click is enabled (default) to allow tap-to-play
+                    let coverClickEnabled = true;
+                    if (typeof sapSettings !== 'undefined' && sapSettings.coverClickPlay !== undefined) {
+                        coverClickEnabled = sapSettings.coverClickPlay === true || 
+                                           sapSettings.coverClickPlay === '1' || 
+                                           sapSettings.coverClickPlay === 1 ||
+                                           sapSettings.coverClickPlay === 'true';
+                    }
+                    const moveThreshold = coverClickEnabled ? 20 : 5;
+                    if (diffX > moveThreshold || diffY > moveThreshold) {
+                        didMove = true;
                         isHorizontalSwipe = diffX > diffY;
                     }
                 }
                 
-                // Only handle horizontal swipes
+                // Only handle horizontal swipes for carousel navigation
                 if (isHorizontalSwipe === false) {
                     return;
                 }
                 
                 if (isHorizontalSwipe) {
                     e.preventDefault();
-                    didMove = true;
                 }
                 
                 currentX = touchX;
@@ -574,8 +891,18 @@
                         updateCarousel();
                     }
                 } else if (!didMove && audio.paused && playlist.length > 0) {
-                    // Simple tap - start playback
-                    playTrack(currentIndex);
+                    // Simple tap - start playback (default: enabled, can be disabled in settings)
+                    // If sapSettings not defined, default to enabled (original behavior)
+                    let canClickPlay = true;
+                    if (typeof sapSettings !== 'undefined' && sapSettings.coverClickPlay !== undefined) {
+                        canClickPlay = sapSettings.coverClickPlay === true || 
+                                       sapSettings.coverClickPlay === '1' || 
+                                       sapSettings.coverClickPlay === 1 ||
+                                       sapSettings.coverClickPlay === 'true';
+                    }
+                    if (canClickPlay) {
+                        playTrack(currentIndex);
+                    }
                 } else {
                     updateCarousel();
                 }
@@ -596,7 +923,16 @@
             function handleMouseMove(e) {
                 if (!isDragging) return;
                 currentX = e.clientX;
-                if (Math.abs(currentX - startX) > 5) {
+                // Use higher threshold when cover click is enabled (default)
+                let coverClickEnabled = true;
+                if (typeof sapSettings !== 'undefined' && sapSettings.coverClickPlay !== undefined) {
+                    coverClickEnabled = sapSettings.coverClickPlay === true || 
+                                       sapSettings.coverClickPlay === '1' || 
+                                       sapSettings.coverClickPlay === 1 ||
+                                       sapSettings.coverClickPlay === 'true';
+                }
+                const moveThreshold = coverClickEnabled ? 5 : 3;
+                if (Math.abs(currentX - startX) > moveThreshold) {
                     didMove = true;
                 }
                 const diff = currentX - startX;
@@ -627,8 +963,17 @@
                         updateCarousel();
                     }
                 } else if (!didMove && audio.paused && playlist.length > 0) {
-                    // Simple click - start playback
-                    playTrack(currentIndex);
+                    // Simple click - start playback (default: enabled, can be disabled in settings)
+                    let canClickPlay = true;
+                    if (typeof sapSettings !== 'undefined' && sapSettings.coverClickPlay !== undefined) {
+                        canClickPlay = sapSettings.coverClickPlay === true || 
+                                       sapSettings.coverClickPlay === '1' || 
+                                       sapSettings.coverClickPlay === 1 ||
+                                       sapSettings.coverClickPlay === 'true';
+                    }
+                    if (canClickPlay) {
+                        playTrack(currentIndex);
+                    }
                 } else {
                     updateCarousel();
                 }
@@ -658,6 +1003,12 @@
         if (waveformContainer) waveformContainer.addEventListener('click', seek);
         else if (progressContainer) progressContainer.addEventListener('click', seek);
         
+        // Click on duration toggles between total and remaining time
+        if (durationEl) {
+            durationEl.addEventListener('click', toggleTimeDisplay);
+            durationEl.title = 'Click to toggle remaining time';
+        }
+        
         audio.addEventListener('timeupdate', updateProgress);
         audio.addEventListener('loadedmetadata', updateDuration);
         audio.addEventListener('ended', function() {
@@ -669,7 +1020,25 @@
                     artist: track.artist || ''
                 });
             }
-            playNext();
+            
+            // Handle repeat modes
+            if (repeatMode === 'track') {
+                // Repeat current track
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            } else if (repeatMode === 'playlist') {
+                // Play next, loop to start if at end
+                if (currentIndex >= playlist.length - 1) {
+                    playTrack(0);
+                } else {
+                    playNext();
+                }
+            } else {
+                // No repeat - play next unless at end
+                if (currentIndex < playlist.length - 1) {
+                    playNext();
+                }
+            }
         });
         audio.addEventListener('play', onPlay);
         audio.addEventListener('pause', onPause);
@@ -853,25 +1222,106 @@
             }
         }
 
+        function toggleRepeat() {
+            const modes = ['off', 'playlist', 'track'];
+            const currentModeIndex = modes.indexOf(repeatMode);
+            repeatMode = modes[(currentModeIndex + 1) % modes.length];
+            
+            if (repeatBtn) {
+                repeatBtn.dataset.mode = repeatMode;
+                repeatBtn.classList.toggle('active', repeatMode !== 'off');
+                
+                // Show/hide the "1" badge for single track repeat
+                const badge = repeatBtn.querySelector('.sap-repeat-badge');
+                if (badge) {
+                    badge.style.display = repeatMode === 'track' ? 'flex' : 'none';
+                }
+                
+                // Update title
+                const titles = { off: 'Repeat: Off', playlist: 'Repeat: All', track: 'Repeat: One' };
+                repeatBtn.title = titles[repeatMode];
+            }
+        }
+
+        function cycleSpeed() {
+            currentSpeedIndex = (currentSpeedIndex + 1) % playbackSpeeds.length;
+            const speed = playbackSpeeds[currentSpeedIndex];
+            audio.playbackRate = speed;
+            
+            if (speedBtn) {
+                const label = speedBtn.querySelector('.sap-speed-label');
+                if (label) {
+                    label.textContent = speed + 'x';
+                }
+                speedBtn.classList.toggle('active', speed !== 1);
+            }
+        }
+
         function updateProgress() {
             const percent = (audio.currentTime / audio.duration) * 100;
             if (progressBar) progressBar.style.width = percent + '%';
             if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+            
+            // Update remaining time if in that mode
+            if (showRemainingTime) {
+                updateDuration();
+            }
             
             // Update waveform progress
             drawWaveform(percent / 100);
         }
 
         function updateDuration() {
-            if (durationEl) durationEl.textContent = formatTime(audio.duration);
+            if (durationEl) {
+                if (showRemainingTime && !isNaN(audio.duration) && !isNaN(audio.currentTime)) {
+                    const remaining = audio.duration - audio.currentTime;
+                    durationEl.textContent = '-' + formatTime(remaining);
+                } else {
+                    durationEl.textContent = formatTime(audio.duration);
+                }
+            }
+        }
+        
+        function toggleTimeDisplay() {
+            showRemainingTime = !showRemainingTime;
+            localStorage.setItem('sap_show_remaining', showRemainingTime);
+            updateDuration();
         }
 
         function seek(e) {
             const container = waveformContainer || progressContainer;
-            if (!container || !audio.duration) return;
+            if (!container) return;
+            
             const rect = container.getBoundingClientRect();
-            const percent = (e.clientX - rect.left) / rect.width;
-            audio.currentTime = percent * audio.duration;
+            const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+            
+            // If no track loaded yet, load the current track first
+            if (!audio.src && playlist.length > 0) {
+                const track = playlist[currentIndex];
+                audio.src = track.url;
+            }
+            
+            // If audio duration is available, seek immediately
+            if (audio.duration && !isNaN(audio.duration)) {
+                audio.currentTime = percent * audio.duration;
+                
+                // Auto-play if paused
+                if (audio.paused) {
+                    audio.play().catch(() => {});
+                }
+            } else {
+                // Duration not yet available - wait for metadata then seek and play
+                const seekPercent = percent;
+                
+                const onMetadataLoaded = function() {
+                    audio.currentTime = seekPercent * audio.duration;
+                    audio.play().catch(() => {});
+                    audio.removeEventListener('loadedmetadata', onMetadataLoaded);
+                };
+                
+                audio.addEventListener('loadedmetadata', onMetadataLoaded);
+                audio.load();
+            }
         }
 
         function formatTime(seconds) {
@@ -996,6 +1446,25 @@
                         // Trigger shuffle button click
                         const shuffleBtn = targetPlayer.querySelector('.sap-shuffle');
                         if (shuffleBtn) shuffleBtn.click();
+                        handled = true;
+                        break;
+                    case 'KeyR':
+                        // Trigger repeat button click
+                        const repeatBtn = targetPlayer.querySelector('.sap-repeat');
+                        if (repeatBtn) repeatBtn.click();
+                        handled = true;
+                        break;
+                    case 'KeyL':
+                        // Trigger speed button click
+                        const speedBtn = targetPlayer.querySelector('.sap-speed');
+                        if (speedBtn) speedBtn.click();
+                        handled = true;
+                        break;
+                    case 'KeyV':
+                        // Cycle visualizer type
+                        if (typeof cycleVisualizer === 'function') {
+                            cycleVisualizer();
+                        }
                         handled = true;
                         break;
                 }

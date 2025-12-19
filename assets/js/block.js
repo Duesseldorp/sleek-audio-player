@@ -7,7 +7,7 @@
 
     registerBlockType('simple-audio-player/player', {
         title: __('Simple Audio Player', 'simple-audio-player'),
-        description: __('Fügt einen Audio-Player mit Playlist hinzu.', 'simple-audio-player'),
+        description: __('Adds an audio player with playlist.', 'simple-audio-player'),
         category: 'media',
         icon: 'playlist-audio',
         keywords: [__('audio'), __('music'), __('player'), __('playlist'), __('mp3')],
@@ -27,7 +27,7 @@
             const [loading, setLoading] = useState(true);
             const [preview, setPreview] = useState('');
 
-            // Playlists laden
+            // Load playlists
             useEffect(function() {
                 wp.apiFetch({ path: '/sap/v1/playlists' })
                     .then(function(data) {
@@ -39,7 +39,7 @@
                     });
             }, []);
 
-            // Vorschau laden wenn Playlist gewählt
+            // Load preview when playlist selected
             useEffect(function() {
                 if (playlistId) {
                     setPreview('');
@@ -50,8 +50,8 @@
                 }
             }, [playlistId]);
 
-            // Playlist-Optionen für Dropdown
-            var options = [{ label: __('-- Playlist wählen --', 'simple-audio-player'), value: '' }];
+            // Playlist options for dropdown
+            var options = [{ label: __('-- Select Playlist --', 'simple-audio-player'), value: '' }];
             playlists.forEach(function(pl) {
                 options.push({ label: pl.name + ' (' + pl.count + ' Tracks)', value: pl.id.toString() });
             });
@@ -65,7 +65,7 @@
                     null,
                     wp.element.createElement(
                         PanelBody,
-                        { title: __('Player Einstellungen', 'simple-audio-player'), initialOpen: true },
+                        { title: __('Player Settings', 'simple-audio-player'), initialOpen: true },
                         wp.element.createElement(SelectControl, {
                             label: __('Playlist', 'simple-audio-player'),
                             value: playlistId,
@@ -89,7 +89,7 @@
                             { 
                                 icon: 'playlist-audio', 
                                 label: __('Simple Audio Player', 'simple-audio-player'),
-                                instructions: __('Wähle eine Playlist aus der Sidebar.', 'simple-audio-player')
+                                instructions: __('Select a playlist from the sidebar.', 'simple-audio-player')
                             },
                             wp.element.createElement(SelectControl, {
                                 value: playlistId,
@@ -132,14 +132,14 @@
                             }, 
                                 preview 
                                     ? wp.element.createElement('div', { dangerouslySetInnerHTML: { __html: preview } })
-                                    : __('Player-Vorschau wird im Frontend angezeigt.', 'simple-audio-player')
+                                    : __('Player preview is shown in the frontend.', 'simple-audio-player')
                             )
                         )
             );
         },
 
         save: function() {
-            // Dynamischer Block - Rendering via PHP
+            // Dynamic block - Rendering via PHP
             return null;
         }
     });

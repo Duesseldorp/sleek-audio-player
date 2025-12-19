@@ -21,6 +21,9 @@ $wpdb->query("DROP TABLE IF EXISTS $table_name");
 delete_option('sap_active_theme_id');
 delete_option('sap_cdn_url');
 delete_option('sap_umami_tracking');
+delete_option('sap_url_protection');
+delete_option('sap_cover_click_play');
+delete_option('sap_visualizer_type');
 
 // Optional: Delete all playlist post meta (uncomment if desired)
 // $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_sap_%'");

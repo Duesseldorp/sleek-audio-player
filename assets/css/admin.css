@@ -362,7 +362,7 @@ input.sap-track-link {
 
 /* ===== Empty State ===== */
 #sap-tracks-container:empty::after {
-    content: 'Keine Tracks vorhanden. Klicke auf "+ Track hinzufügen" um zu starten.';
+    content: 'No tracks yet. Click "+ Add Track" to get started.';
     display: block;
     text-align: center;
     padding: 48px 24px;

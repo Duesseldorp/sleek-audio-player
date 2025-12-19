@@ -8,21 +8,21 @@
 
     $(document).ready(function() {
         
-        // Prüfen ob wp.media verfügbar ist
+        // Check if wp.media is available
         if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
             return;
         }
         
         var trackIndex = parseInt($('#sap-track-index').val()) || 0;
 
-        // ===== Einzelnen Track auswählen =====
+        // ===== Select single track =====
         $(document).on('click', '.sap-select-audio', function(e) {
             e.preventDefault();
             var $row = $(this).closest('.sap-track-row');
             
             var mediaFrame = wp.media({
-                title: 'Audio-Datei auswählen',
-                button: { text: 'Auswählen' },
+                title: 'Select audio file',
+                button: { text: 'Select' },
                 library: { type: 'audio' },
                 multiple: false
             });
@@ -34,23 +34,23 @@
                 $row.find('.sap-track-id').val(attachment.id);
                 $row.find('.sap-track-filename').text(attachment.filename);
                 
-                // Titel automatisch setzen, wenn leer
+                // Auto-set title if empty
                 if (!$row.find('.sap-track-title').val()) {
                     var title = attachment.title || attachment.filename.replace(/\.[^/.]+$/, '');
                     $row.find('.sap-track-title').val(title);
                 }
                 
-                // Artist aus ID3-Tags auslesen
+                // Read artist from ID3 tags
                 if (attachment.meta && attachment.meta.artist && !$row.find('.sap-track-artist').val()) {
                     $row.find('.sap-track-artist').val(attachment.meta.artist);
                 }
                 
-                // Album aus ID3-Tags auslesen
+                // Read album from ID3 tags
                 if (attachment.meta && attachment.meta.album && !$row.find('.sap-track-album').val()) {
                     $row.find('.sap-track-album').val(attachment.meta.album);
                 }
                 
-                // Dauer automatisch setzen wenn verfügbar
+                // Auto-set duration if available
                 if (attachment.fileLength) {
                     $row.find('.sap-track-duration').val(attachment.fileLength);
                 }
@@ -59,7 +59,7 @@
             mediaFrame.open();
         });
 
-        // ===== Cover pro Track auswählen =====
+        // ===== Select cover per track =====
         $(document).on('click', '.sap-select-cover', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -67,10 +67,10 @@
             var $btn = $(this);
             var $row = $btn.closest('.sap-track-row');
             
-            // Neuen Frame für jeden Klick erstellen
+            // Create new frame for each click
             var frame = wp.media({
-                title: 'Cover-Bild für Track auswählen',
-                button: { text: 'Als Cover verwenden' },
+                title: 'Select cover image for track',
+                button: { text: 'Use as cover' },
                 library: { type: 'image' },
                 multiple: false
             });
@@ -90,18 +90,18 @@
             frame.open();
         });
 
-        // ===== Neuen Track hinzufügen =====
+        // ===== Add new track =====
         $('#sap-add-track').on('click', function() {
             addTrackRow();
         });
 
-        // ===== Mehrere Tracks aus Mediathek =====
+        // ===== Multiple tracks from Media Library =====
         $('#sap-bulk-add').on('click', function(e) {
             e.preventDefault();
             
             var mediaFrame = wp.media({
-                title: 'Audio-Dateien auswählen',
-                button: { text: 'Hinzufügen' },
+                title: 'Select audio files',
+                button: { text: 'Add' },
                 library: { type: 'audio' },
                 multiple: true
             });
@@ -123,14 +123,14 @@
             mediaFrame.open();
         });
 
-        // ===== Track entfernen =====
+        // ===== Remove track =====
         $(document).on('click', '.sap-remove-track', function() {
             $(this).closest('.sap-track-row').fadeOut(200, function() {
                 $(this).remove();
             });
         });
 
-        // ===== Hilfsfunktion: HTML-Escape für XSS-Schutz =====
+        // ===== Helper function: HTML-Escape for XSS protection =====
         function escapeHtml(str) {
             if (!str) return '';
             var div = document.createElement('div');
@@ -138,7 +138,7 @@
             return div.innerHTML;
         }
 
-        // ===== Hilfsfunktion: Track-Zeile hinzufügen =====
+        // ===== Helper function: Add track row =====
         function addTrackRow(data) {
             data = data || {};
             
@@ -147,16 +147,16 @@
                 '<div class="sap-track-cover-preview"><span class="sap-no-cover">🎵</span></div>' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][cover_id]" class="sap-track-cover-id" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][cover_url]" class="sap-track-cover-url" value="" />' +
-                '<button type="button" class="button sap-select-cover" title="Cover auswählen">🖼️</button>' +
+                '<button type="button" class="button sap-select-cover" title="Select cover">🖼️</button>' +
                 '<input type="text" name="sap_tracks[' + trackIndex + '][title]" ' +
-                    'class="sap-track-title" placeholder="Titel" value="" />' +
+                    'class="sap-track-title" placeholder="Title" value="" />' +
                 '<input type="text" name="sap_tracks[' + trackIndex + '][artist]" ' +
                     'class="sap-track-artist" placeholder="Artist" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][url]" ' +
                     'class="sap-track-url" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][attachment_id]" ' +
                     'class="sap-track-id" value="" />' +
-                '<span class="sap-track-filename">Keine Datei</span>' +
+                '<span class="sap-track-filename">No file</span>' +
                 '<button type="button" class="button sap-select-audio">🎵 Audio</button>' +
                 '<input type="url" name="sap_tracks[' + trackIndex + '][spotify]" ' +
                     'class="sap-track-link sap-link-spotify" placeholder="🎵 Spotify" value="" />' +
@@ -172,7 +172,7 @@
             
             var $row = $(html);
             
-            // Sichere Wertezuweisung nach DOM-Erstellung (XSS-Schutz)
+            // Safe value assignment after DOM creation (XSS protection)
             if (data.title) $row.find('.sap-track-title').val(data.title);
             if (data.artist) $row.find('.sap-track-artist').val(data.artist);
             if (data.url) $row.find('.sap-track-url').val(data.url);
@@ -184,7 +184,7 @@
             $('#sap-track-index').val(trackIndex);
         }
 
-        // ===== Drag & Drop Sortierung (optional, mit jQuery UI) =====
+        // ===== Drag & Drop sorting (optional, with jQuery UI) =====
         if ($.fn.sortable) {
             $('#sap-tracks-container').sortable({
                 handle: '.sap-track-handle',

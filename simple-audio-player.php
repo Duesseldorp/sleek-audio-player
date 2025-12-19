@@ -1,18 +1,21 @@
 <?php
 /**
  * Plugin Name: Simple Audio Player
- * Description: Minimaler Audio-Player mit Download, Shuffle, Cover und Streaming-Links
- * Version: 1.7.0
- * Author: Martin Gräbing
+ * Description: Minimal audio player with download, shuffle, cover art, and visualization
+ * Version: 1.8.0
+ * Author: Martin Graebing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
  * Text Domain: simple-audio-player
+ * Requires at least: 5.0
+ * Requires PHP: 7.4
  * License: GPL v2 or later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '1.7.0');
+define('SAP_VERSION', '1.8.0');
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -320,7 +323,7 @@ class SAP_Theme_Manager {
         
         wp_send_json_success(array(
             'id' => $id,
-            'message' => 'Theme gespeichert!',
+            'message' => 'Theme saved!',
         ));
     }
     
@@ -338,9 +341,9 @@ class SAP_Theme_Manager {
         $result = $this->delete_theme($id);
         
         if ($result) {
-            wp_send_json_success('Theme gelöscht!');
+            wp_send_json_success('Theme deleted!');
         } else {
-            wp_send_json_error('Standard-Theme kann nicht gelöscht werden.');
+            wp_send_json_error('Default theme cannot be deleted.');
         }
     }
     
@@ -360,7 +363,7 @@ class SAP_Theme_Manager {
         if ($theme) {
             wp_send_json_success($theme);
         } else {
-            wp_send_json_error('Theme nicht gefunden.');
+            wp_send_json_error('Theme not found.');
         }
     }
     
@@ -377,7 +380,7 @@ class SAP_Theme_Manager {
         $id = absint($_POST['id']);
         update_option('sap_active_theme_id', $id);
         
-        wp_send_json_success('Theme aktiviert!');
+        wp_send_json_success('Theme activated!');
     }
     
     /**
@@ -391,48 +394,48 @@ class SAP_Theme_Manager {
         // Grouped color labels for better organization
         $color_groups = array(
             'background' => array(
-                'title' => '🎨 Hintergrund',
+                'title' => '🎨 Background',
                 'colors' => array(
-                    'sap-bg' => 'Player Hintergrund',
-                    'sap-card' => 'Karten-Hintergrund',
-                    'sap-card-hover' => 'Karte Hover',
-                    'sap-border' => 'Rahmenfarbe',
+                    'sap-bg' => 'Player Background',
+                    'sap-card' => 'Card Background',
+                    'sap-card-hover' => 'Card Hover',
+                    'sap-border' => 'Border Color',
                 )
             ),
             'accent' => array(
-                'title' => '✨ Akzent & Buttons',
+                'title' => '✨ Accent & Buttons',
                 'colors' => array(
-                    'sap-accent' => 'Hauptakzent (Play-Button)',
-                    'sap-accent-light' => 'Akzent Hell (Hover)',
-                    'sap-accent-glow' => 'Akzent Glow (Schatten)',
-                    'sap-accent-glow-strong' => 'Akzent Glow Stark',
-                    'sap-accent-glow-soft' => 'Akzent Glow Soft',
-                    'sap-visualizer' => 'Visualizer Farbe',
-                    'sap-waveform-inactive' => 'Waveform Inaktiv',
-                    'sap-track-active' => 'Aktiver Track Hintergrund',
+                    'sap-accent' => 'Main Accent (Play Button)',
+                    'sap-accent-light' => 'Accent Light (Hover)',
+                    'sap-accent-glow' => 'Accent Glow (Shadow)',
+                    'sap-accent-glow-strong' => 'Accent Glow Strong',
+                    'sap-accent-glow-soft' => 'Accent Glow Soft',
+                    'sap-visualizer' => 'Visualizer Color',
+                    'sap-waveform-inactive' => 'Waveform Inactive',
+                    'sap-track-active' => 'Active Track Background',
                 )
             ),
             'text' => array(
-                'title' => '📝 Text & Schrift',
+                'title' => '📝 Text & Typography',
                 'colors' => array(
-                    'sap-white' => 'Titel (Weiß)',
-                    'sap-gray-100' => 'Text Hell',
+                    'sap-white' => 'Title (White)',
+                    'sap-gray-100' => 'Text Light',
                     'sap-gray-200' => 'Text Normal',
-                    'sap-gray-300' => 'Text Gedimmt (Artist)',
-                    'sap-gray-400' => 'Text Sehr Gedimmt',
+                    'sap-gray-300' => 'Text Dimmed (Artist)',
+                    'sap-gray-400' => 'Text Very Dimmed',
                 )
             ),
             'effects' => array(
-                'title' => '💫 Effekte',
+                'title' => '💫 Effects',
                 'colors' => array(
-                    'sap-blue-tint' => 'Blauer Overlay',
+                    'sap-blue-tint' => 'Blue Overlay',
                 )
             ),
         );
         
         $settings_labels = array(
             'sap-radius' => 'Border Radius',
-            'sap-radius-sm' => 'Border Radius (Klein)',
+            'sap-radius-sm' => 'Border Radius (Small)',
         );
         ?>
         <style>
@@ -859,7 +862,7 @@ class SAP_Theme_Manager {
                 <!-- Themes List -->
                 <div>
                     <div class="sap-themes-list">
-                        <div class="sap-themes-list-header">Gespeicherte Themes</div>
+                        <div class="sap-themes-list-header">Saved Themes</div>
                         <?php foreach ($themes as $theme) : 
                             $is_active = ($active_id == $theme['id']) || ($active_id == 0 && $theme['is_default']);
                             $accent = $theme['colors']['sap-accent'] ?? '#e85d3d';
@@ -875,25 +878,25 @@ class SAP_Theme_Manager {
                                             <span class="sap-theme-badge sap-badge-default">Standard</span>
                                         <?php endif; ?>
                                         <?php if ($is_active) : ?>
-                                            <span class="sap-theme-badge sap-badge-active">Aktiv</span>
+                                            <span class="sap-theme-badge sap-badge-active">Active</span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <button type="button" class="sap-new-theme-btn" id="sap-new-theme">+ Neues Theme erstellen</button>
+                    <button type="button" class="sap-new-theme-btn" id="sap-new-theme">+ Create New Theme</button>
                 </div>
                 
                 <!-- Theme Editor -->
                 <div class="sap-theme-editor" id="sap-theme-editor">
                     <div class="sap-editor-header">
-                        <div class="sap-editor-title" id="sap-editor-title">Theme bearbeiten</div>
+                        <div class="sap-editor-title" id="sap-editor-title">Edit Theme</div>
                         <div class="sap-editor-actions">
-                            <button type="button" class="sap-btn sap-btn-secondary" id="sap-reset-theme">↺ Zurücksetzen</button>
-                            <button type="button" class="sap-btn sap-btn-danger" id="sap-delete-theme" style="display:none;">🗑 Löschen</button>
-                            <button type="button" class="sap-btn sap-btn-success" id="sap-activate-theme">✓ Aktivieren</button>
-                            <button type="button" class="sap-btn sap-btn-primary" id="sap-save-theme">💾 Speichern</button>
+                            <button type="button" class="sap-btn sap-btn-secondary" id="sap-reset-theme">↺ Reset</button>
+                            <button type="button" class="sap-btn sap-btn-danger" id="sap-delete-theme" style="display:none;">🗑 Delete</button>
+                            <button type="button" class="sap-btn sap-btn-success" id="sap-activate-theme">✓ Activate</button>
+                            <button type="button" class="sap-btn sap-btn-primary" id="sap-save-theme">💾 Save</button>
                         </div>
                     </div>
                     
@@ -903,7 +906,7 @@ class SAP_Theme_Manager {
                         
                         <div class="sap-name-field">
                             <label for="sap-theme-name">Theme Name</label>
-                            <input type="text" name="name" id="sap-theme-name" value="" placeholder="Mein Theme" required>
+                            <input type="text" name="name" id="sap-theme-name" value="" placeholder="My Theme" required>
                         </div>
                         
                         <?php foreach ($color_groups as $group_key => $group) : ?>
@@ -939,7 +942,7 @@ class SAP_Theme_Manager {
                         <?php endforeach; ?>
                         
                         <div class="sap-color-section">
-                            <h3>⚙️ Einstellungen</h3>
+                            <h3>⚙️ Settings</h3>
                             <div class="sap-color-grid">
                                 <?php foreach ($settings_labels as $var => $label) : 
                                     $default_value = $default_theme['settings'][$var] ?? '16px';
@@ -976,7 +979,7 @@ class SAP_Theme_Manager {
                             </div>
                             <div class="sap-preview-content">
                                 <div class="sap-preview-info">
-                                    <div class="sap-preview-title">Track Titel</div>
+                                    <div class="sap-preview-title">Track Title</div>
                                     <div class="sap-preview-artist">Artist Name</div>
                                     <div class="sap-preview-meta">
                                         <span class="sap-preview-meta-text">5 Tracks</span>
@@ -1014,17 +1017,17 @@ class SAP_Theme_Manager {
                                 <div class="sap-preview-playlist">
                                     <div class="sap-preview-track active">
                                         <span class="sap-preview-track-num">●</span>
-                                        <span class="sap-preview-track-title">Aktiver Track</span>
+                                        <span class="sap-preview-track-title">Active Track</span>
                                         <span class="sap-preview-track-duration">3:45</span>
                                     </div>
                                     <div class="sap-preview-track">
                                         <span class="sap-preview-track-num">2</span>
-                                        <span class="sap-preview-track-title">Nächster Song</span>
+                                        <span class="sap-preview-track-title">Next Song</span>
                                         <span class="sap-preview-track-duration">4:12</span>
                                     </div>
                                     <div class="sap-preview-track hover">
                                         <span class="sap-preview-track-num">3</span>
-                                        <span class="sap-preview-track-title">Hover Zustand</span>
+                                        <span class="sap-preview-track-title">Hover State</span>
                                         <span class="sap-preview-track-duration">2:58</span>
                                     </div>
                                 </div>
@@ -1163,7 +1166,7 @@ class SAP_Theme_Manager {
                 $('#sap-theme-id').val(theme.id || '');
                 $('#sap-theme-is-default').val(theme.is_default || 0);
                 $('#sap-theme-name').val(theme.name || '');
-                $('#sap-editor-title').text(theme.name ? 'Theme: ' + theme.name : 'Neues Theme');
+                $('#sap-editor-title').text(theme.name ? 'Theme: ' + theme.name : 'New Theme');
                 
                 // Load colors
                 if (theme.colors) {
@@ -1234,7 +1237,7 @@ class SAP_Theme_Manager {
             
             // Reset to default
             $('#sap-reset-theme').on('click', function() {
-                if (confirm('Alle Farben auf Standard zurücksetzen?')) {
+                if (confirm('Reset all colors to default?')) {
                     loadTheme({
                         id: currentThemeId,
                         name: $('#sap-theme-name').val(),
@@ -1249,7 +1252,7 @@ class SAP_Theme_Manager {
             $('#sap-save-theme').on('click', function() {
                 var name = $('#sap-theme-name').val();
                 if (!name) {
-                    alert('Bitte gib einen Namen ein.');
+                    alert('Please enter a name.');
                     return;
                 }
                 
@@ -1275,14 +1278,14 @@ class SAP_Theme_Manager {
                         alert(response.data.message);
                         location.reload();
                     } else {
-                        alert('Fehler: ' + response.data);
+                        alert('Error: ' + response.data);
                     }
                 });
             });
             
             // Delete theme
             $('#sap-delete-theme').on('click', function() {
-                if (!confirm('Theme wirklich löschen?')) return;
+                if (!confirm('Really delete this theme?')) return;
                 
                 $.post(ajaxurl, {
                     action: 'sap_delete_theme',
@@ -1292,7 +1295,7 @@ class SAP_Theme_Manager {
                     if (response.success) {
                         location.reload();
                     } else {
-                        alert('Fehler: ' + response.data);
+                        alert('Error: ' + response.data);
                     }
                 });
             });
@@ -1300,7 +1303,7 @@ class SAP_Theme_Manager {
             // Activate theme
             $('#sap-activate-theme').on('click', function() {
                 if (!currentThemeId) {
-                    alert('Bitte speichere das Theme zuerst.');
+                    alert('Please save the theme first.');
                     return;
                 }
                 
@@ -1363,7 +1366,7 @@ class SAP_Waveform_Manager {
     public function add_waveform_menu() {
         add_submenu_page(
             'edit.php?post_type=sap_playlist',
-            'Waveform Analyse',
+            'Waveform Analysis',
             'Waveforms',
             'manage_options',
             'sap-waveforms',
@@ -1545,28 +1548,28 @@ class SAP_Waveform_Manager {
         $pending_count = count(array_filter($attachments, function($a) { return !$a['has_waveform']; }));
         ?>
         <div class="wrap">
-            <h1>🎵 Waveform Analyse</h1>
-            <p>Generiert echte Waveform-Daten aus deinen Audio-Dateien für eine authentische Wellenform-Anzeige im Player.</p>
+            <h1>🎵 Waveform Analysis</h1>
+            <p>Generate real waveform data from your audio files for an authentic waveform display in the player.</p>
             
             <div class="sap-waveform-stats" style="background:#fff;padding:20px;border:1px solid #ddd;border-radius:8px;margin:20px 0;">
                 <h2 style="margin-top:0;">Status</h2>
                 <p>
-                    <strong><?php echo count($attachments); ?></strong> Audio-Dateien in Playlists gefunden<br>
-                    <strong style="color:#46b450;"><?php echo count($attachments) - $pending_count; ?></strong> analysiert<br>
-                    <strong style="color:#dc3232;"><?php echo $pending_count; ?></strong> ausstehend
+                    <strong><?php echo count($attachments); ?></strong> audio files found in playlists<br>
+                    <strong style="color:#46b450;"><?php echo count($attachments) - $pending_count; ?></strong> analyzed<br>
+                    <strong style="color:#dc3232;"><?php echo $pending_count; ?></strong> pending
                 </p>
                 
                 <?php if ($pending_count > 0) : ?>
                 <button type="button" id="sap-analyze-all" class="button button-primary button-hero" data-mode="pending">
-                    🔬 <?php echo $pending_count; ?> ausstehende Dateien analysieren
+                    🔬 Analyze <?php echo $pending_count; ?> pending files
                 </button>
                 <?php else : ?>
-                <p style="color:#46b450;font-weight:600;">✓ Alle Dateien wurden analysiert!</p>
+                <p style="color:#46b450;font-weight:600;">✓ All files have been analyzed!</p>
                 <?php endif; ?>
                 
                 <?php if (count($attachments) > 0) : ?>
                 <button type="button" id="sap-reanalyze-all" class="button" style="margin-left:10px;">
-                    🔄 Alle <?php echo count($attachments); ?> Dateien neu analysieren
+                    🔄 Re-analyze all <?php echo count($attachments); ?> files
                 </button>
                 <?php endif; ?>
                 
@@ -1574,16 +1577,16 @@ class SAP_Waveform_Manager {
                     <div style="background:#e0e0e0;border-radius:4px;height:24px;overflow:hidden;">
                         <div id="sap-progress-bar" style="background:#0073aa;height:100%;width:0%;transition:width 0.3s;"></div>
                     </div>
-                    <p id="sap-progress-text" style="margin-top:10px;">Analysiere...</p>
+                    <p id="sap-progress-text" style="margin-top:10px;">Analyzing...</p>
                 </div>
             </div>
             
-            <h2>Audio-Dateien</h2>
+            <h2>Audio Files</h2>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
                         <th style="width:40px;">ID</th>
-                        <th>Titel</th>
+                        <th>Title</th>
                         <th>Playlist</th>
                         <th style="width:120px;">Status</th>
                         <th style="width:200px;">Waveform</th>
@@ -1597,9 +1600,9 @@ class SAP_Waveform_Manager {
                         <td><?php echo esc_html($att['playlist']); ?></td>
                         <td>
                             <?php if ($att['has_waveform']) : ?>
-                                <span style="color:#46b450;">✓ Analysiert</span>
+                                <span style="color:#46b450;">✓ Analyzed</span>
                             <?php else : ?>
-                                <span style="color:#dc3232;">⏳ Ausstehend</span>
+                                <span style="color:#dc3232;">⏳ Pending</span>
                             <?php endif; ?>
                         </td>
                         <td>
@@ -1659,7 +1662,7 @@ class SAP_Waveform_Manager {
                 // Get pending files
                 const pending = [];
                 $('tr[data-id]').each(function() {
-                    if ($(this).find('td:eq(3)').text().includes('Ausstehend')) {
+                    if ($(this).find('td:eq(3)').text().includes('Pending')) {
                         pending.push({
                             id: $(this).data('id'),
                             row: $(this)
@@ -1671,7 +1674,7 @@ class SAP_Waveform_Manager {
                     const item = pending[i];
                     const percent = Math.round((i / pending.length) * 100);
                     $bar.css('width', percent + '%');
-                    $text.text('Analysiere ' + (i + 1) + ' von ' + pending.length + '...');
+                    $text.text('Analyzing ' + (i + 1) + ' of ' + pending.length + '...');
                     
                     try {
                         // First try server-side
@@ -1695,13 +1698,13 @@ class SAP_Waveform_Manager {
                                 // Update UI
                                 const canvas = item.row.find('.sap-mini-waveform')[0];
                                 drawMiniWaveform(canvas, peaks);
-                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
                             }
                         } else if (response.success && response.data.peaks) {
                             // Server-side worked
                             const canvas = item.row.find('.sap-mini-waveform')[0];
                             drawMiniWaveform(canvas, response.data.peaks);
-                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
                         }
                     } catch (e) {
                         console.error('Error analyzing', item.id, e);
@@ -1709,8 +1712,8 @@ class SAP_Waveform_Manager {
                 }
                 
                 $bar.css('width', '100%');
-                $text.text('✓ Analyse abgeschlossen!');
-                $btn.text('✓ Fertig').prop('disabled', true);
+                $text.text('✓ Analysis complete!');
+                $btn.text('✓ Done').prop('disabled', true);
             });
             
             // Re-analyze ALL files button
@@ -1761,13 +1764,13 @@ class SAP_Waveform_Manager {
                                 // Update UI
                                 const canvas = item.row.find('.sap-mini-waveform')[0];
                                 drawMiniWaveform(canvas, peaks);
-                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
                             }
                         } else if (response.success && response.data.peaks) {
                             // Server-side worked
                             const canvas = item.row.find('.sap-mini-waveform')[0];
                             drawMiniWaveform(canvas, response.data.peaks);
-                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analysiert</span>');
+                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
                         }
                     } catch (e) {
                         console.error('Error analyzing', item.id, e);
@@ -1775,8 +1778,8 @@ class SAP_Waveform_Manager {
                 }
                 
                 $bar.css('width', '100%');
-                $text.text('✓ Alle ' + allFiles.length + ' Dateien neu analysiert!');
-                $btn.text('✓ Fertig').prop('disabled', true);
+                $text.text('✓ All ' + allFiles.length + ' files re-analyzed!');
+                $btn.text('✓ Done').prop('disabled', true);
             });
             
             // Client-side audio analysis using Web Audio API
@@ -1898,6 +1901,122 @@ class Simple_Audio_Player {
         add_action('admin_init', array($this, 'register_settings'));
         add_action('template_redirect', array($this, 'handle_embed'));
         add_action('init', array($this, 'handle_audio_stream'));
+        
+        // SEO: Auto-display player on playlist single pages
+        add_filter('the_content', array($this, 'auto_display_player'));
+        
+        // SEO: Add Open Graph meta tags for playlist pages
+        add_action('wp_head', array($this, 'add_open_graph_tags'));
+    }
+    
+    /**
+     * Auto-display player on playlist single pages
+     */
+    public function auto_display_player($content) {
+        // Security: Only run on frontend, single playlist pages, in main query
+        if (is_admin()) {
+            return $content;
+        }
+        
+        if (!is_singular('sap_playlist')) {
+            return $content;
+        }
+        
+        // Prevent duplicate output in excerpts, widgets, etc.
+        if (!in_the_loop() || !is_main_query()) {
+            return $content;
+        }
+        
+        global $post;
+        
+        // Validate post object
+        if (!$post || !isset($post->ID)) {
+            return $content;
+        }
+        
+        // Generate player HTML
+        $player = $this->render_player(array('id' => $post->ID));
+        
+        // Add player before content (or as content if empty)
+        return $player . $content;
+    }
+    
+    /**
+     * Add Open Graph meta tags for playlist pages (SEO & Social Sharing)
+     */
+    public function add_open_graph_tags() {
+        // Security: Only run on frontend playlist pages
+        if (is_admin()) {
+            return;
+        }
+        
+        if (!is_singular('sap_playlist')) {
+            return;
+        }
+        
+        global $post;
+        
+        // Validate post object
+        if (!$post || !isset($post->ID) || $post->post_type !== 'sap_playlist') {
+            return;
+        }
+        
+        // Security: Only for published posts
+        if ($post->post_status !== 'publish') {
+            return;
+        }
+        
+        // Sanitize all output data
+        $title = wp_strip_all_tags(get_the_title($post->ID));
+        $url = esc_url(get_permalink($post->ID));
+        $cover = get_the_post_thumbnail_url($post->ID, 'large');
+        $excerpt = wp_strip_all_tags(get_the_excerpt($post->ID));
+        $tracks = get_post_meta($post->ID, '_sap_tracks', true);
+        $track_count = is_array($tracks) ? count($tracks) : 0;
+        
+        // Validate URL
+        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
+            return;
+        }
+        
+        // Validate cover URL if present
+        if ($cover && !filter_var($cover, FILTER_VALIDATE_URL)) {
+            $cover = '';
+        }
+        
+        // Default description if no excerpt (sanitized)
+        if (empty($excerpt)) {
+            $excerpt = sprintf('%s - %d Tracks', $title, $track_count);
+        }
+        
+        // Limit excerpt length for meta tags
+        if (mb_strlen($excerpt) > 200) {
+            $excerpt = mb_substr($excerpt, 0, 197) . '...';
+        }
+        
+        // Site name (sanitized)
+        $site_name = wp_strip_all_tags(get_bloginfo('name'));
+        
+        ?>
+        <!-- Simple Audio Player - Open Graph Tags -->
+        <meta property="og:type" content="music.playlist">
+        <meta property="og:title" content="<?php echo esc_attr($title); ?>">
+        <meta property="og:description" content="<?php echo esc_attr($excerpt); ?>">
+        <meta property="og:url" content="<?php echo esc_url($url); ?>">
+        <meta property="og:site_name" content="<?php echo esc_attr($site_name); ?>">
+        <?php if ($cover) : ?>
+        <meta property="og:image" content="<?php echo esc_url($cover); ?>">
+        <?php endif; ?>
+        <meta property="music:song_count" content="<?php echo absint($track_count); ?>">
+        
+        <!-- Twitter Card -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" content="<?php echo esc_attr($title); ?>">
+        <meta name="twitter:description" content="<?php echo esc_attr($excerpt); ?>">
+        <?php if ($cover) : ?>
+        <meta name="twitter:image" content="<?php echo esc_url($cover); ?>">
+        <?php endif; ?>
+        <?php
     }
     
     /**
@@ -2192,8 +2311,8 @@ class Simple_Audio_Player {
     public function add_settings_page() {
         add_submenu_page(
             'edit.php?post_type=sap_playlist',
-            'Player Einstellungen',
-            'Einstellungen',
+            'Player Settings',
+            'Settings',
             'manage_options',
             'sap-settings',
             array($this, 'render_settings_page')
@@ -2221,6 +2340,18 @@ class Simple_Audio_Player {
             'sanitize_callback' => 'rest_sanitize_boolean',
             'default' => false,
         ));
+        
+        register_setting('sap_settings', 'sap_cover_click_play', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => true,
+        ));
+        
+        register_setting('sap_settings', 'sap_visualizer_type', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => 'bars',
+        ));
     }
     
     /**
@@ -2229,7 +2360,7 @@ class Simple_Audio_Player {
     public function render_settings_page() {
         ?>
         <div class="wrap">
-            <h1>Simple Audio Player - Einstellungen</h1>
+            <h1>Simple Audio Player - Settings</h1>
             
             <form method="post" action="options.php">
                 <?php settings_fields('sap_settings'); ?>
@@ -2245,10 +2376,10 @@ class Simple_Audio_Player {
                                    name="sap_cdn_url" 
                                    value="<?php echo esc_attr(get_option('sap_cdn_url', '')); ?>" 
                                    class="regular-text"
-                                   placeholder="https://deine-zone.b-cdn.net" />
+                                   placeholder="https://your-zone.b-cdn.net" />
                             <p class="description">
-                                Deine BunnyCDN Pull Zone URL (ohne Slash am Ende).<br>
-                                Leer lassen um CDN zu deaktivieren.
+                                Your BunnyCDN Pull Zone URL (without trailing slash).<br>
+                                Leave empty to disable CDN.
                             </p>
                         </td>
                     </tr>
@@ -2263,17 +2394,17 @@ class Simple_Audio_Player {
                                        name="sap_umami_tracking" 
                                        value="1"
                                        <?php checked(get_option('sap_umami_tracking', false)); ?> />
-                                Tracking aktivieren
+                                Enable tracking
                             </label>
                             <p class="description">
-                                Sendet Events an Umami wenn Songs abgespielt, beendet oder heruntergeladen werden.<br>
-                                Umami muss auf der Seite bereits eingebunden sein.
+                                Sends events to Umami when songs are played, completed, or downloaded.<br>
+                                Umami must already be integrated on your site.
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">
-                            <label for="sap_url_protection">🔒 URL-Schutz</label>
+                            <label for="sap_url_protection">🔒 URL Protection</label>
                         </th>
                         <td>
                             <label>
@@ -2282,41 +2413,109 @@ class Simple_Audio_Player {
                                        name="sap_url_protection" 
                                        value="1"
                                        <?php checked(get_option('sap_url_protection', false)); ?> />
-                                Audio-URLs verschleiern
+                                Obfuscate audio URLs
                             </label>
                             <p class="description">
-                                Versteckt die echten Datei-URLs und verwendet zeitlich begrenzte Tokens.<br>
-                                <strong>Hinweis:</strong> Funktioniert nicht mit CDN! Bei aktiviertem Schutz wird das CDN umgangen.
+                                Hides real file URLs and uses time-limited tokens.<br>
+                                <strong>Note:</strong> Does not work with CDN! When protection is enabled, CDN will be bypassed.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="sap_cover_click_play">🖼️ Cover Click</label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       id="sap_cover_click_play" 
+                                       name="sap_cover_click_play" 
+                                       value="1"
+                                       <?php checked(get_option('sap_cover_click_play', true)); ?> />
+                                Start playback on cover click
+                            </label>
+                            <p class="description">
+                                When enabled, clicking the cover image starts the first track.<br>
+                                Disable this to prevent accidental playback on mobile devices.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label>🎵 Visualizer</label>
+                        </th>
+                        <td>
+                            <?php $viz_type = get_option('sap_visualizer_type', 'bars'); ?>
+                            <fieldset>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="bars" <?php checked($viz_type, 'bars'); ?> />
+                                    Bars (Classic frequency bars)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="mirror" <?php checked($viz_type, 'mirror'); ?> />
+                                    Mirror Bars (Top & bottom reflection)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="circular" <?php checked($viz_type, 'circular'); ?> />
+                                    Circular (Radial around center)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="oscilloscope" <?php checked($viz_type, 'oscilloscope'); ?> />
+                                    Oscilloscope (Waveform line)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="dots" <?php checked($viz_type, 'dots'); ?> />
+                                    Dots (Dancing dots)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="wave" <?php checked($viz_type, 'wave'); ?> />
+                                    Wave (Filled waveform)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="pulse" <?php checked($viz_type, 'pulse'); ?> />
+                                    Pulse (Pulsing circle)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="butterfly" <?php checked($viz_type, 'butterfly'); ?> />
+                                    Butterfly (Symmetrical wings)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="off" <?php checked($viz_type, 'off'); ?> />
+                                    Off (No visualizer)
+                                </label>
+                            </fieldset>
+                            <p class="description">
+                                Choose the default visualization. Users can cycle through all options by double-clicking the cover or pressing V.
                             </p>
                         </td>
                     </tr>
                 </table>
                 
-                <?php submit_button('Einstellungen speichern'); ?>
+                <?php submit_button('Save Settings'); ?>
             </form>
             
             <hr>
-            <h2>Anleitung: BunnyCDN einrichten</h2>
+            <h2>Guide: Setting up BunnyCDN</h2>
             <ol>
-                <li>Gehe zu <a href="https://bunny.net" target="_blank">bunny.net</a> und erstelle einen Account</li>
-                <li>Erstelle eine neue <strong>Pull Zone</strong></li>
-                <li>Als <strong>Origin URL</strong> gibst du deine Website-URL ein: <code><?php echo home_url(); ?></code></li>
-                <li>Kopiere die Pull Zone URL (z.B. <code>https://deinname.b-cdn.net</code>) und trage sie oben ein</li>
+                <li>Go to <a href="https://bunny.net" target="_blank">bunny.net</a> and create an account</li>
+                <li>Create a new <strong>Pull Zone</strong></li>
+                <li>Enter your website URL as <strong>Origin URL</strong>: <code><?php echo home_url(); ?></code></li>
+                <li>Copy the Pull Zone URL (e.g. <code>https://yourname.b-cdn.net</code>) and enter it above</li>
             </ol>
             
-            <h3>⚠️ Wichtig: CORS-Header für Audio-Dateien</h3>
-            <p>Damit Audio-Dateien vom CDN abgespielt werden können, müssen CORS-Header konfiguriert sein:</p>
+            <h3>⚠️ Important: CORS Headers for Audio Files</h3>
+            <p>For audio files to play from CDN, CORS headers must be configured:</p>
             <ol>
-                <li>Gehe zu deiner Pull Zone → <strong>Headers</strong></li>
-                <li>Füge einen neuen Header hinzu:
+                <li>Go to your Pull Zone → <strong>Headers</strong></li>
+                <li>Add a new header:
                     <ul>
                         <li><strong>Header Name:</strong> <code>Access-Control-Allow-Origin</code></li>
-                        <li><strong>Header Value:</strong> <code>*</code> (oder <code><?php echo home_url(); ?></code>)</li>
+                        <li><strong>Header Value:</strong> <code>*</code> (or <code><?php echo home_url(); ?></code>)</li>
                     </ul>
                 </li>
-                <li>Speichern und Cache leeren</li>
+                <li>Save and clear cache</li>
             </ol>
-            <p><em>Ohne CORS-Header werden Audio-Dateien vom Browser blockiert!</em></p>
+            <p><em>Without CORS headers, audio files will be blocked by the browser!</em></p>
         </div>
         <?php
     }
@@ -2349,11 +2548,13 @@ class Simple_Audio_Player {
         // Pass settings to JavaScript
         wp_localize_script('simple-audio-player', 'sapSettings', array(
             'umamiTracking' => (bool) get_option('sap_umami_tracking', false),
+            'coverClickPlay' => (bool) get_option('sap_cover_click_play', true),
+            'visualizerType' => get_option('sap_visualizer_type', 'bars'),
         ));
     }
 
     /**
-     * Admin Scripts für Media Uploader
+     * Admin Scripts for Media Uploader
      */
     public function enqueue_admin_assets($hook) {
         global $post_type;
@@ -2381,27 +2582,35 @@ class Simple_Audio_Player {
     }
 
     /**
-     * Custom Post Type für Playlists
+     * Custom Post Type for Playlists
      */
     public function register_post_type() {
         register_post_type('sap_playlist', array(
             'labels' => array(
                 'name' => __('Playlists', 'simple-audio-player'),
                 'singular_name' => __('Playlist', 'simple-audio-player'),
-                'add_new' => __('Neue Playlist', 'simple-audio-player'),
-                'add_new_item' => __('Neue Playlist erstellen', 'simple-audio-player'),
-                'edit_item' => __('Playlist bearbeiten', 'simple-audio-player'),
+                'add_new' => __('Add New', 'simple-audio-player'),
+                'add_new_item' => __('Add New Playlist', 'simple-audio-player'),
+                'edit_item' => __('Edit Playlist', 'simple-audio-player'),
+                'view_item' => __('View Playlist', 'simple-audio-player'),
+                'all_items' => __('All Playlists', 'simple-audio-player'),
             ),
-            'public' => false,
+            'public' => true,
+            'publicly_queryable' => true,
             'show_ui' => true,
             'show_in_menu' => true,
             'menu_icon' => 'dashicons-playlist-audio',
-            'supports' => array('title'),
+            'supports' => array('title', 'thumbnail', 'excerpt'),
+            'has_archive' => true,
+            'rewrite' => array(
+                'slug' => 'playlist',
+                'with_front' => false,
+            ),
         ));
     }
 
     /**
-     * Meta Boxes für Track-Daten
+     * Meta Boxes for Track Data
      */
     public function add_meta_boxes() {
         add_meta_box(
@@ -2439,9 +2648,9 @@ class Simple_Audio_Player {
                            class="sap-track-cover-id" value="<?php echo esc_attr($track['cover_id'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo $index; ?>][cover_url]" 
                            class="sap-track-cover-url" value="<?php echo esc_url($track['cover_url'] ?? ''); ?>" />
-                    <button type="button" class="button sap-select-cover" title="Cover auswählen">🖼️</button>
+                    <button type="button" class="button sap-select-cover" title="Select cover">🖼️</button>
                     <input type="text" name="sap_tracks[<?php echo $index; ?>][title]" 
-                           class="sap-track-title" placeholder="Titel" 
+                           class="sap-track-title" placeholder="Title" 
                            value="<?php echo esc_attr($track['title'] ?? ''); ?>" />
                     <input type="text" name="sap_tracks[<?php echo $index; ?>][artist]" 
                            class="sap-track-artist" placeholder="Artist" 
@@ -2450,7 +2659,7 @@ class Simple_Audio_Player {
                            class="sap-track-url" value="<?php echo esc_url($track['url'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo $index; ?>][attachment_id]" 
                            class="sap-track-id" value="<?php echo esc_attr($track['attachment_id'] ?? ''); ?>" />
-                    <span class="sap-track-filename"><?php echo esc_html(basename($track['url'] ?? 'Keine Datei')); ?></span>
+                    <span class="sap-track-filename"><?php echo esc_html(basename($track['url'] ?? 'No file')); ?></span>
                     <button type="button" class="button sap-select-audio">🎵 Audio</button>
                     <input type="url" name="sap_tracks[<?php echo $index; ?>][spotify]" 
                            class="sap-track-link sap-link-spotify" placeholder="🎵 Spotify" 
@@ -2471,26 +2680,26 @@ class Simple_Audio_Player {
             <?php endforeach; ?>
         </div>
         <p>
-            <button type="button" class="button button-primary" id="sap-add-track">+ Track hinzufügen</button>
-            <button type="button" class="button" id="sap-bulk-add">📁 Mehrere aus Mediathek</button>
+            <button type="button" class="button button-primary" id="sap-add-track">+ Add Track</button>
+            <button type="button" class="button" id="sap-bulk-add">📁 Bulk add from Media Library</button>
         </p>
         
         <!-- Embed Shortcode Info -->
         <div class="sap-embed-info">
-            <label>Shortcode zum Einbetten:</label>
+            <label>Embed Shortcode:</label>
             <div class="sap-embed-codes">
                 <div class="sap-embed-code">
                     <span class="sap-embed-label">Standard:</span>
-                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Klicken zum Kopieren">[simple_player id="<?php echo $post->ID; ?>"]</code>
+                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[simple_player id="<?php echo $post->ID; ?>"]</code>
                 </div>
                 <div class="sap-embed-code">
                     <span class="sap-embed-label">Wide Layout:</span>
-                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Klicken zum Kopieren">[simple_player id="<?php echo $post->ID; ?>" layout="wide"]</code>
+                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[simple_player id="<?php echo $post->ID; ?>" layout="wide"]</code>
                 </div>
                 <?php if ($post->post_status === 'publish') : ?>
                 <div class="sap-embed-code">
-                    <span class="sap-embed-label">iFrame (extern):</span>
-                    <code class="sap-shortcode sap-iframe-code" onclick="this.select(); document.execCommand('copy');" title="Klicken zum Kopieren">&lt;iframe src="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post->ID))); ?>" width="100%" height="400" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</code>
+                    <span class="sap-embed-label">iFrame (external):</span>
+                    <code class="sap-shortcode sap-iframe-code" onclick="this.select(); document.execCommand('copy');" title="Click to copy">&lt;iframe src="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post->ID))); ?>" width="100%" height="400" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</code>
                 </div>
                 <?php endif; ?>
             </div>
@@ -2530,7 +2739,7 @@ class Simple_Audio_Player {
             <input type="text" 
                    value='[simple_player id="<?php echo $post->ID; ?>"]' 
                    readonly 
-                   onclick="this.select(); document.execCommand('copy'); alert('Shortcode kopiert!');"
+                   onclick="this.select(); document.execCommand('copy'); alert('Shortcode copied!');"
                    style="width:100%; background:#f0f0f0; cursor:pointer;" />
         </p>
         
@@ -2539,26 +2748,26 @@ class Simple_Audio_Player {
             <input type="text" 
                    value='[simple_player id="<?php echo $post->ID; ?>" layout="wide"]' 
                    readonly 
-                   onclick="this.select(); document.execCommand('copy'); alert('Shortcode kopiert!');"
+                   onclick="this.select(); document.execCommand('copy'); alert('Shortcode copied!');"
                    style="width:100%; background:#f0f0f0; cursor:pointer;" />
         </p>
         
         <p>
             <label><strong>iFrame Embed:</strong></label>
             <textarea readonly 
-                      onclick="this.select(); document.execCommand('copy'); alert('Embed Code kopiert!');"
+                      onclick="this.select(); document.execCommand('copy'); alert('Embed code copied!');"
                       style="width:100%; height:60px; background:#f0f0f0; cursor:pointer; font-size:11px;">&lt;iframe src="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post->ID))); ?>" width="100%" height="400" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</textarea>
-            <span class="description">Für externe Websites</span>
+            <span class="description">For external websites</span>
         </p>
         <?php else : ?>
-        <p class="description" style="margin-top:15px;"><em>Embed Codes werden nach Veröffentlichung angezeigt.</em></p>
+        <p class="description" style="margin-top:15px;"><em>Embed codes will be shown after publishing.</em></p>
         <?php endif; ?>
         
         <?php
     }
 
     /**
-     * Meta speichern
+     * Save Meta
      */
     public function save_meta($post_id) {
         if (!isset($_POST['sap_nonce']) || !wp_verify_nonce($_POST['sap_nonce'], 'sap_save_meta')) {
@@ -2573,7 +2782,7 @@ class Simple_Audio_Player {
             return;
         }
 
-        // Tracks speichern
+        // Save tracks
         if (isset($_POST['sap_tracks'])) {
             $tracks = array();
             foreach ($_POST['sap_tracks'] as $track) {
@@ -2595,7 +2804,7 @@ class Simple_Audio_Player {
             update_post_meta($post_id, '_sap_tracks', $tracks);
         }
 
-        // Streaming Links speichern
+        // Save streaming links
         if (isset($_POST['sap_spotify'])) {
             update_post_meta($post_id, '_sap_spotify', esc_url_raw($_POST['sap_spotify']));
         }
@@ -2608,6 +2817,123 @@ class Simple_Audio_Player {
     }
 
     /**
+     * Generate JSON-LD Schema markup for SEO
+     */
+    private function generate_schema_markup($post_id, $tracks, $title, $cover, $total_seconds) {
+        // Validate inputs
+        if (!is_array($tracks) || empty($tracks)) {
+            return '';
+        }
+        
+        $schema_tracks = array();
+        
+        foreach ($tracks as $index => $track) {
+            // Security: Sanitize all track data for JSON output
+            $track_title = isset($track['title']) ? wp_strip_all_tags($track['title']) : '';
+            if (empty($track_title)) {
+                continue;
+            }
+            
+            $track_schema = array(
+                '@type' => 'MusicRecording',
+                'position' => intval($index) + 1,
+                'name' => $track_title,
+            );
+            
+            // Add artist if available (sanitized)
+            if (!empty($track['artist'])) {
+                $track_schema['byArtist'] = array(
+                    '@type' => 'MusicGroup',
+                    'name' => wp_strip_all_tags($track['artist']),
+                );
+            }
+            
+            // Add duration in ISO 8601 format if available
+            if (!empty($track['duration'])) {
+                $parts = explode(':', sanitize_text_field($track['duration']));
+                if (count($parts) == 2) {
+                    $duration_seconds = absint($parts[0]) * 60 + absint($parts[1]);
+                    $track_schema['duration'] = 'PT' . $duration_seconds . 'S';
+                }
+            }
+            
+            // Add track cover or fallback to playlist cover (validated URL)
+            $track_cover = !empty($track['cover_url']) ? esc_url_raw($track['cover_url']) : $cover;
+            if ($track_cover && filter_var($track_cover, FILTER_VALIDATE_URL)) {
+                $track_schema['image'] = $track_cover;
+            }
+            
+            // Add streaming links as sameAs (validated URLs only)
+            $same_as = array();
+            if (!empty($track['spotify']) && filter_var($track['spotify'], FILTER_VALIDATE_URL)) {
+                $same_as[] = esc_url_raw($track['spotify']);
+            }
+            if (!empty($track['apple']) && filter_var($track['apple'], FILTER_VALIDATE_URL)) {
+                $same_as[] = esc_url_raw($track['apple']);
+            }
+            if (!empty($track['amazon']) && filter_var($track['amazon'], FILTER_VALIDATE_URL)) {
+                $same_as[] = esc_url_raw($track['amazon']);
+            }
+            if (!empty($same_as)) {
+                $track_schema['sameAs'] = $same_as;
+            }
+            
+            $schema_tracks[] = $track_schema;
+        }
+        
+        // Don't output schema if no valid tracks
+        if (empty($schema_tracks)) {
+            return '';
+        }
+        
+        $schema = array(
+            '@context' => 'https://schema.org',
+            '@type' => 'MusicPlaylist',
+            'name' => wp_strip_all_tags($title),
+            'numTracks' => count($schema_tracks),
+            'track' => $schema_tracks,
+        );
+        
+        // Add cover image (validated)
+        if ($cover && filter_var($cover, FILTER_VALIDATE_URL)) {
+            $schema['image'] = esc_url_raw($cover);
+        }
+        
+        // Add total duration in ISO 8601 format
+        if ($total_seconds > 0) {
+            $schema['duration'] = 'PT' . absint($total_seconds) . 'S';
+        }
+        
+        // Add playlist URL
+        $permalink = get_permalink($post_id);
+        if ($permalink) {
+            $schema['url'] = esc_url_raw($permalink);
+        }
+        
+        // Add global streaming links if available (validated URLs only)
+        $spotify = get_post_meta($post_id, '_sap_spotify', true);
+        $apple = get_post_meta($post_id, '_sap_apple', true);
+        $amazon = get_post_meta($post_id, '_sap_amazon', true);
+        
+        $same_as = array();
+        if ($spotify && filter_var($spotify, FILTER_VALIDATE_URL)) {
+            $same_as[] = esc_url_raw($spotify);
+        }
+        if ($apple && filter_var($apple, FILTER_VALIDATE_URL)) {
+            $same_as[] = esc_url_raw($apple);
+        }
+        if ($amazon && filter_var($amazon, FILTER_VALIDATE_URL)) {
+            $same_as[] = esc_url_raw($amazon);
+        }
+        if (!empty($same_as)) {
+            $schema['sameAs'] = $same_as;
+        }
+        
+        // wp_json_encode handles escaping for JSON context
+        return '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>' . "\n";
+    }
+    
+    /**
      * Shortcode: [simple_player id="123" layout="wide"]
      */
     public function render_player($atts) {
@@ -2618,12 +2944,12 @@ class Simple_Audio_Player {
 
         $post_id = intval($atts['id']);
         if (!$post_id) {
-            return '<p>Keine Playlist-ID angegeben.</p>';
+            return '<p>No playlist ID specified.</p>';
         }
 
         $tracks = get_post_meta($post_id, '_sap_tracks', true);
         if (empty($tracks)) {
-            return '<p>Keine Tracks gefunden.</p>';
+            return '<p>No tracks found.</p>';
         }
         
         // Apply URL protection or CDN URLs to audio
@@ -2658,7 +2984,7 @@ class Simple_Audio_Player {
         $apple = get_post_meta($post_id, '_sap_apple', true);
         $amazon = get_post_meta($post_id, '_sap_amazon', true);
 
-        // Gesamtdauer berechnen
+        // Calculate total duration
         $total_seconds = 0;
         foreach ($tracks as $track) {
             if (!empty($track['duration'])) {
@@ -2675,7 +3001,11 @@ class Simple_Audio_Player {
         $total_duration = sprintf('%d:%02d', $total_mins, $total_secs);
 
         ob_start();
+        
+        // Generate JSON-LD Schema for SEO
+        $schema = $this->generate_schema_markup($post_id, $tracks, $title, $cover, $total_seconds);
         ?>
+        <?php echo $schema; ?>
         <?php 
         $layout = strtolower(trim($atts['layout']));
         $is_wide = ($layout === 'wide');
@@ -2708,7 +3038,7 @@ class Simple_Audio_Player {
                 
                 <!-- Track Info -->
                 <div class="sap-track-info">
-                    <div class="sap-now-playing">Wähle einen Track</div>
+                    <div class="sap-now-playing">Select a track</div>
                     <div class="sap-artist"></div>
                     <div class="sap-meta">
                         <span><?php echo count($tracks); ?> Tracks</span>
@@ -2718,8 +3048,8 @@ class Simple_Audio_Player {
                 </div>
 
                 <!-- Progress with Waveform -->
-                <div class="sap-progress-section" role="group" aria-label="Wiedergabe-Fortschritt">
-                    <div class="sap-waveform-container" role="slider" aria-label="Zeitposition" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="sap-progress-section" role="group" aria-label="Playback progress">
+                    <div class="sap-waveform-container" role="slider" aria-label="Time position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                         <canvas class="sap-waveform" aria-hidden="true"></canvas>
                         <div class="sap-progress">
                             <div class="sap-progress-bar"></div>
@@ -2732,22 +3062,29 @@ class Simple_Audio_Player {
                 </div>
 
                 <!-- Controls -->
-                <div class="sap-controls" role="group" aria-label="Audio-Steuerung">
-                    <button class="sap-btn sap-btn-small sap-shuffle" title="Shuffle" aria-label="Zufällige Wiedergabe" aria-pressed="false">
+                <div class="sap-controls" role="group" aria-label="Audio controls">
+                    <button class="sap-btn sap-btn-small sap-shuffle" title="Shuffle" aria-label="Shuffle playback" aria-pressed="false">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
                     </button>
-                    <button class="sap-btn sap-prev" title="Zurück" aria-label="Vorheriger Track">
+                    <button class="sap-btn sap-prev" title="Previous" aria-label="Previous track">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                     </button>
-                    <button class="sap-btn sap-play" title="Play/Pause" aria-label="Wiedergabe starten oder pausieren">
+                    <button class="sap-btn sap-play" title="Play/Pause" aria-label="Play or pause">
                         <svg class="sap-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
                         <svg class="sap-icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
-                    <button class="sap-btn sap-next" title="Weiter" aria-label="Nächster Track">
+                    <button class="sap-btn sap-next" title="Next" aria-label="Next track">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                     </button>
-                    <button class="sap-btn sap-btn-small sap-download" title="Download" aria-label="Track herunterladen" style="display:none;">
+                    <button class="sap-btn sap-btn-small sap-download" title="Download" aria-label="Download track" style="display:none;">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                    </button>
+                    <button class="sap-btn sap-btn-small sap-repeat" title="Repeat" aria-label="Repeat mode" data-mode="off">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
+                        <span class="sap-repeat-badge">1</span>
+                    </button>
+                    <button class="sap-btn sap-btn-small sap-speed" title="Playback speed" aria-label="Playback speed">
+                        <span class="sap-speed-label">1x</span>
                     </button>
                 </div>
 
@@ -2797,5 +3134,5 @@ class Simple_Audio_Player {
     }
 }
 
-// Plugin initialisieren
+// Initialize plugin
 Simple_Audio_Player::get_instance();
