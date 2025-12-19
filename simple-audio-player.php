@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Audio Player
  * Description: Minimaler Audio-Player mit Download, Shuffle, Cover und Streaming-Links
- * Version: 1.6.2
+ * Version: 1.7.0
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
@@ -12,7 +12,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '1.6.2');
+define('SAP_VERSION', '1.7.0');
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -1890,12 +1890,130 @@ class Simple_Audio_Player {
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_shortcode('simple_player', array($this, 'render_player'));
         add_action('init', array($this, 'register_post_type'));
+        add_action('init', array($this, 'register_gutenberg_block'));
+        add_action('rest_api_init', array($this, 'register_rest_routes'));
         add_action('add_meta_boxes', array($this, 'add_meta_boxes'));
         add_action('save_post', array($this, 'save_meta'));
         add_action('admin_menu', array($this, 'add_settings_page'));
         add_action('admin_init', array($this, 'register_settings'));
         add_action('template_redirect', array($this, 'handle_embed'));
         add_action('init', array($this, 'handle_audio_stream'));
+    }
+    
+    /**
+     * Register Gutenberg Block
+     */
+    public function register_gutenberg_block() {
+        if (!function_exists('register_block_type')) {
+            return;
+        }
+        
+        // Block-Script registrieren
+        wp_register_script(
+            'sap-block-editor',
+            SAP_PLUGIN_URL . 'assets/js/block.js',
+            array('wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-i18n', 'wp-api-fetch'),
+            SAP_VERSION,
+            true
+        );
+        
+        // Block registrieren
+        register_block_type('simple-audio-player/player', array(
+            'editor_script' => 'sap-block-editor',
+            'render_callback' => array($this, 'render_gutenberg_block'),
+            'attributes' => array(
+                'playlistId' => array(
+                    'type' => 'string',
+                    'default' => ''
+                )
+            )
+        ));
+    }
+    
+    /**
+     * Render Gutenberg Block (Frontend)
+     */
+    public function render_gutenberg_block($attributes) {
+        $playlist_id = isset($attributes['playlistId']) ? intval($attributes['playlistId']) : 0;
+        
+        if (!$playlist_id) {
+            return '';
+        }
+        
+        return $this->render_player(array('id' => $playlist_id));
+    }
+    
+    /**
+     * Register REST API Routes for Gutenberg
+     */
+    public function register_rest_routes() {
+        register_rest_route('sap/v1', '/playlists', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'rest_get_playlists'),
+            'permission_callback' => function() {
+                return current_user_can('edit_posts');
+            }
+        ));
+        
+        register_rest_route('sap/v1', '/preview/(?P<id>\d+)', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'rest_get_preview'),
+            'permission_callback' => function() {
+                return current_user_can('edit_posts');
+            }
+        ));
+    }
+    
+    /**
+     * REST: Get all playlists
+     */
+    public function rest_get_playlists() {
+        $playlists = get_posts(array(
+            'post_type' => 'sap_playlist',
+            'posts_per_page' => -1,
+            'post_status' => 'publish',
+            'orderby' => 'title',
+            'order' => 'ASC'
+        ));
+        
+        $result = array();
+        foreach ($playlists as $playlist) {
+            $tracks = get_post_meta($playlist->ID, '_sap_tracks', true);
+            $track_count = is_array($tracks) ? count($tracks) : 0;
+            
+            $result[] = array(
+                'id' => $playlist->ID,
+                'name' => $playlist->post_title,
+                'count' => $track_count
+            );
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * REST: Get player preview HTML
+     */
+    public function rest_get_preview($request) {
+        $id = intval($request['id']);
+        $playlist = get_post($id);
+        
+        if (!$playlist || $playlist->post_type !== 'sap_playlist') {
+            return new WP_Error('not_found', 'Playlist nicht gefunden', array('status' => 404));
+        }
+        
+        $tracks = get_post_meta($id, '_sap_tracks', true);
+        $track_count = is_array($tracks) ? count($tracks) : 0;
+        
+        return sprintf(
+            '<div style="text-align:left;color:#ccc;font-size:13px;">
+                <strong style="color:#fff;">%s</strong><br>
+                <span style="opacity:0.7;">%d Track%s</span>
+            </div>',
+            esc_html($playlist->post_title),
+            $track_count,
+            $track_count !== 1 ? 's' : ''
+        );
     }
     
     /**

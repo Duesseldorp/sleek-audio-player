@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, mp3, playlist, spotify, apple music, amazon, visualizer, keyboard
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 1.5.0
+Stable tag: 1.7.0
 License: GPLv2 or later
 
 Minimaler, schneller Audio-Player mit Download, Shuffle, Visualizer und Streaming-Links.
@@ -20,18 +20,18 @@ Ein schlanker, moderner Audio-Player für WordPress - perfekt für Musiker, Podc
 * ▶️ Play/Pause/Prev/Next Controls
 * 🔀 Shuffle-Modus
 * ⬇️ Track-Download (pro Track aktivierbar)
-* � Audio Visualizer mit Frequenz-Balken
+* 🎵 Audio Visualizer mit Frequenz-Balken
 * ⏱️ Progress-Bar mit Seek-Funktion
 * 🌊 Waveform-Anzeige mit Fortschrittsfarbe
 * 🔊 Lautstärke-Steuerung per Tastatur
 
 = Cover & Design =
 
-* �🎨 Album-Cover pro Track oder als Fallback
+* 🎨 Album-Cover pro Track oder als Fallback
 * 👆 Swipe-Gesten für Cover-Wechsel (Touch & Mouse)
 * ✨ Ken Burns Animation beim Abspielen
 * 💫 Pulse-Effekt bei Track-Wechsel
-* � Hover-Zoom auf Cover
+* 🔍 Hover-Zoom auf Cover
 * 📱 Responsive Design (Wide & Standard Layout)
 * 🎨 Theme Manager mit Live-Preview
 * 🔒 URL-Schutz für Audio-Dateien (optional)
@@ -138,6 +138,18 @@ Ja, der Player ist vollständig kompatibel mit Caching-Plugins.
 
 == Changelog ==
 
+= 1.7.0 =
+* 🌐 CORS-Support für CDN-Audio (BunnyCDN, CloudFront, jsDelivr)
+* 🎵 Visualizer funktioniert jetzt mit externen Audio-Quellen
+* 🎨 CSS-Optimierungen für bessere Theme-Kompatibilität
+* 🔧 Verbesserte Stabilität
+
+= 1.6.0 =
+* 🎨 Erweiterter Theme Manager mit mehr Farboptionen
+* 🛠️ Backend-Verbesserungen
+* ⚡ Performance-Optimierungen für Waveform-Rendering
+* 🔒 Verbesserte Sicherheits-Validierung
+
 = 1.5.0 =
 * 🎨 Theme Manager mit Live-Preview
 * 🌊 Waveform-Anzeige statt einfacher Progress-Bar
@@ -174,6 +186,12 @@ Ja, der Player ist vollständig kompatibel mit Caching-Plugins.
 * Responsive Design
 
 == Upgrade Notice ==
+
+= 1.7.0 =
+CORS-Support für CDN-Audio! Visualizer funktioniert jetzt auch mit BunnyCDN und anderen CDNs.
+
+= 1.6.0 =
+Erweiterter Theme Manager mit zusätzlichen Farboptionen und Backend-Verbesserungen.
 
 = 1.5.0 =
 Neuer Theme Manager! Erstelle eigene Farbschemas mit Live-Preview. Waveform-Anzeige ersetzt die Progress-Bar. Optional: URL-Schutz für Audio-Dateien.

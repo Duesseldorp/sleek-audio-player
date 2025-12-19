@@ -315,13 +315,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-bottom: 20px;
 }
 
 .sap-btn {
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -371,22 +372,22 @@
 
 /* Small Buttons (Shuffle, Download) */
 .sap-btn-small {
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
 }
 
 .sap-btn-small svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
 }
 
 /* Main Play Button */
 .sap-play {
-    width: 60px;
-    height: 60px;
+    width: 48px;
+    height: 48px;
     background: var(--sap-accent);
     color: var(--sap-white);
-    margin: 0 12px;
+    margin: 0 4px;
     transition: background 0.12s ease-out, transform 0.12s ease-out;
 }
 
