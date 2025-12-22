@@ -158,10 +158,15 @@
             if (!corsEnabled) return; // Visualizer requires CORS
             
             try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                // Optimized AudioContext for better Bluetooth/playback quality
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                audioContext = new AudioCtx({
+                    sampleRate: 48000,        // Standard for Bluetooth audio
+                    latencyHint: 'playback'   // Prioritize quality over latency
+                });
                 analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
-                analyser.smoothingTimeConstant = 0.8;
+                analyser.fftSize = 2048;                  // Larger buffer for stability
+                analyser.smoothingTimeConstant = 0.85;    // Smoother transitions
                 
                 source = audioContext.createMediaElementSource(audio);
                 source.connect(analyser);
@@ -173,7 +178,7 @@
         }
 
         // Get visualizer type from settings or localStorage (user preference)
-        const visualizerTypes = ['bars', 'mirror', 'circular', 'oscilloscope', 'dots', 'wave', 'pulse', 'butterfly'];
+        const visualizerTypes = ['bars', 'mirror', 'circular', 'oscilloscope', 'dots', 'wave', 'pulse', 'circular_bars', 'particles', 'starburst', 'orbits'];
         let visualizerType = localStorage.getItem('sap_visualizer_type') 
             || (typeof sapSettings !== 'undefined' && sapSettings.visualizerType) 
             || 'bars';
@@ -253,8 +258,17 @@
                 case 'pulse':
                     drawPulse(dataArray, width, height, vizColor);
                     break;
-                case 'butterfly':
-                    drawButterfly(dataArray, width, height, vizColor);
+                case 'circular_bars':
+                    drawCircularBars(dataArray, width, height, vizColor);
+                    break;
+                case 'particles':
+                    drawParticles(dataArray, width, height, vizColor);
+                    break;
+                case 'starburst':
+                    drawStarburst(dataArray, width, height, vizColor);
+                    break;
+                case 'orbits':
+                    drawOrbits(dataArray, width, height, vizColor);
                     break;
                 case 'bars':
                 default:
@@ -469,46 +483,213 @@
             visualizerCtx.stroke();
         }
         
-        // Butterfly visualization - symmetrical waves
-        function drawButterfly(dataArray, width, height, vizColor) {
+        // Circular Bars - bars arranged in a circle
+        function drawCircularBars(dataArray, width, height, vizColor) {
             const centerX = width / 2;
             const centerY = height / 2;
-            const points = 64;
+            const barCount = 64;
+            const innerRadius = Math.min(width, height) * 0.15;
+            const maxBarLength = Math.min(width, height) * 0.28;
             
-            visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.8);
-            visualizerCtx.lineWidth = 2;
+            visualizerCtx.shadowBlur = 12;
+            visualizerCtx.shadowColor = vizColor;
             
-            // Left wing
-            visualizerCtx.beginPath();
-            for (let i = 0; i < points; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / points);
+            for (let i = 0; i < barCount; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / barCount);
                 const value = dataArray[dataIndex] / 255;
-                const angle = (i / points) * Math.PI - Math.PI / 2;
-                const radius = value * Math.min(width, height) * 0.4;
+                const barLength = (0.1 + value * 0.9) * maxBarLength;
+                const angle = (i / barCount) * Math.PI * 2 - Math.PI / 2;
                 
-                const x = centerX - Math.cos(angle) * radius;
-                const y = centerY + Math.sin(angle) * radius;
+                const x1 = centerX + Math.cos(angle) * innerRadius;
+                const y1 = centerY + Math.sin(angle) * innerRadius;
+                const x2 = centerX + Math.cos(angle) * (innerRadius + barLength);
+                const y2 = centerY + Math.sin(angle) * (innerRadius + barLength);
                 
-                if (i === 0) visualizerCtx.moveTo(x, y);
-                else visualizerCtx.lineTo(x, y);
+                const gradient = visualizerCtx.createLinearGradient(x1, y1, x2, y2);
+                gradient.addColorStop(0, hexToRgba(vizColor, 0.4));
+                gradient.addColorStop(1, hexToRgba(vizColor, 0.9));
+                
+                visualizerCtx.strokeStyle = gradient;
+                visualizerCtx.lineWidth = 3;
+                visualizerCtx.lineCap = 'round';
+                visualizerCtx.beginPath();
+                visualizerCtx.moveTo(x1, y1);
+                visualizerCtx.lineTo(x2, y2);
+                visualizerCtx.stroke();
             }
-            visualizerCtx.stroke();
             
-            // Right wing (mirrored)
-            visualizerCtx.beginPath();
-            for (let i = 0; i < points; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / points);
-                const value = dataArray[dataIndex] / 255;
-                const angle = (i / points) * Math.PI - Math.PI / 2;
-                const radius = value * Math.min(width, height) * 0.4;
-                
-                const x = centerX + Math.cos(angle) * radius;
-                const y = centerY + Math.sin(angle) * radius;
-                
-                if (i === 0) visualizerCtx.moveTo(x, y);
-                else visualizerCtx.lineTo(x, y);
+            visualizerCtx.shadowBlur = 0;
+        }
+        
+        // Particles - floating particles reacting to music
+        let particles = [];
+        let prevBass = 0;
+        function drawParticles(dataArray, width, height, vizColor) {
+            const bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10 / 255;
+            const mid = dataArray.slice(10, 100).reduce((a, b) => a + b, 0) / 90 / 255;
+            const high = dataArray.slice(100, 200).reduce((a, b) => a + b, 0) / 100 / 255;
+            
+            // Emit rate based on music intensity
+            const bassChange = Math.max(0, bass - prevBass);
+            prevBass = bass * 0.7 + prevBass * 0.3;
+            
+            // More particles when music is loud, burst on bass hits
+            const baseEmit = 1 + Math.floor(bass * 3);
+            const burstEmit = bassChange > 0.05 ? Math.floor(bassChange * 20) : 0;
+            const emitCount = Math.min(baseEmit + burstEmit, 8);
+            
+            for (let i = 0; i < emitCount && particles.length < 60; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                // Speed based on current bass level
+                const speed = 0.5 + bass * 2 + Math.random() * 0.8;
+                particles.push({
+                    x: width / 2,
+                    y: height / 2,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    // Bigger particles on bass hits
+                    baseSize: 3 + Math.random() * 4 + bass * 6,
+                    life: 1,
+                    decay: 0.005 + Math.random() * 0.005
+                });
             }
-            visualizerCtx.stroke();
+            
+            visualizerCtx.shadowBlur = 25;
+            visualizerCtx.shadowColor = vizColor;
+            
+            // Update and draw particles
+            particles = particles.filter(p => {
+                // Slow, gentle movement
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+                
+                if (p.life <= 0) return false;
+                
+                // Size based on frequency: bass = bigger, high = smaller
+                const sizeMultiplier = 1 + bass * 3 - high * 0.5;
+                const size = p.baseSize * Math.max(0.5, sizeMultiplier) * (0.8 + p.life * 0.4);
+                
+                // Transparent fill with visible stroke
+                visualizerCtx.fillStyle = hexToRgba(vizColor, 0.12 + p.life * 0.08);
+                visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.5 + p.life * 0.4);
+                visualizerCtx.lineWidth = 1.5;
+                visualizerCtx.beginPath();
+                visualizerCtx.arc(p.x, p.y, size, 0, Math.PI * 2);
+                visualizerCtx.fill();
+                visualizerCtx.stroke();
+                
+                return p.x > -20 && p.x < width + 20 && p.y > -20 && p.y < height + 20;
+            });
+            
+            visualizerCtx.shadowBlur = 0;
+        }
+        
+        // Starburst - rays emanating from center
+        function drawStarburst(dataArray, width, height, vizColor) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const rayCount = 32;
+            const maxLength = Math.min(width, height) * 0.45;
+            const bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10 / 255;
+            
+            visualizerCtx.shadowBlur = 18;
+            visualizerCtx.shadowColor = vizColor;
+            
+            for (let i = 0; i < rayCount; i++) {
+                const dataIndex = Math.floor(i * dataArray.length / rayCount);
+                const value = dataArray[dataIndex] / 255;
+                const angle = (i / rayCount) * Math.PI * 2;
+                const length = (0.2 + value * 0.8) * maxLength;
+                
+                const innerRadius = 10 + bass * 15;
+                const x1 = centerX + Math.cos(angle) * innerRadius;
+                const y1 = centerY + Math.sin(angle) * innerRadius;
+                const x2 = centerX + Math.cos(angle) * length;
+                const y2 = centerY + Math.sin(angle) * length;
+                
+                const gradient = visualizerCtx.createLinearGradient(x1, y1, x2, y2);
+                gradient.addColorStop(0, hexToRgba(vizColor, 0.8));
+                gradient.addColorStop(0.5, hexToRgba(vizColor, 0.4));
+                gradient.addColorStop(1, hexToRgba(vizColor, 0.05));
+                
+                visualizerCtx.strokeStyle = gradient;
+                visualizerCtx.lineWidth = 2 + value * 3;
+                visualizerCtx.lineCap = 'round';
+                visualizerCtx.beginPath();
+                visualizerCtx.moveTo(x1, y1);
+                visualizerCtx.lineTo(x2, y2);
+                visualizerCtx.stroke();
+            }
+            
+            // Center glow
+            const glowGradient = visualizerCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 25 + bass * 20);
+            glowGradient.addColorStop(0, hexToRgba(vizColor, 0.6));
+            glowGradient.addColorStop(1, hexToRgba(vizColor, 0));
+            visualizerCtx.fillStyle = glowGradient;
+            visualizerCtx.beginPath();
+            visualizerCtx.arc(centerX, centerY, 25 + bass * 20, 0, Math.PI * 2);
+            visualizerCtx.fill();
+            
+            visualizerCtx.shadowBlur = 0;
+        }
+        
+        // Orbits - rotating rings with audio reaction
+        let orbitAngle = 0;
+        function drawOrbits(dataArray, width, height, vizColor) {
+            const centerX = width / 2;
+            const centerY = height / 2;
+            const maxRadius = Math.min(width, height) * 0.48;
+            const bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10 / 255;
+            const mid = dataArray.slice(10, 100).reduce((a, b) => a + b, 0) / 90 / 255;
+            const high = dataArray.slice(100, 200).reduce((a, b) => a + b, 0) / 100 / 255;
+            
+            orbitAngle += 0.006 + bass * 0.018;
+            
+            visualizerCtx.shadowBlur = 18;
+            visualizerCtx.shadowColor = vizColor;
+            
+            const orbits = [
+                { radius: maxRadius * 0.35, rotation: orbitAngle, dots: 10, size: 6, freqBand: bass },
+                { radius: maxRadius * 0.6, rotation: -orbitAngle * 0.7, dots: 14, size: 5, freqBand: mid },
+                { radius: maxRadius * 0.85, rotation: orbitAngle * 0.5, dots: 20, size: 4, freqBand: high }
+            ];
+            
+            orbits.forEach((orbit, idx) => {
+                const pulse = 1 + orbit.freqBand * 0.5;
+                const radius = orbit.radius * pulse;
+                
+                // Draw orbit path - pulsing with music
+                visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.15 + orbit.freqBand * 0.2);
+                visualizerCtx.lineWidth = 1.5 + orbit.freqBand * 2;
+                visualizerCtx.beginPath();
+                visualizerCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                visualizerCtx.stroke();
+                
+                // Draw dots on orbit
+                for (let i = 0; i < orbit.dots; i++) {
+                    const angle = orbit.rotation + (i / orbit.dots) * Math.PI * 2;
+                    const dataIndex = Math.floor((idx * orbit.dots + i) * dataArray.length / 44);
+                    const value = dataArray[dataIndex] / 255;
+                    
+                    const x = centerX + Math.cos(angle) * radius;
+                    const y = centerY + Math.sin(angle) * radius;
+                    const size = orbit.size * (1 + value * 2);
+                    
+                    visualizerCtx.fillStyle = hexToRgba(vizColor, 0.5 + value * 0.5);
+                    visualizerCtx.beginPath();
+                    visualizerCtx.arc(x, y, size, 0, Math.PI * 2);
+                    visualizerCtx.fill();
+                }
+            });
+            
+            // Center dot
+            visualizerCtx.fillStyle = hexToRgba(vizColor, 0.8);
+            visualizerCtx.beginPath();
+            visualizerCtx.arc(centerX, centerY, 5 + bass * 8, 0, Math.PI * 2);
+            visualizerCtx.fill();
+            
+            visualizerCtx.shadowBlur = 0;
         }
 
         function startVisualizer() {
@@ -709,6 +890,44 @@
 
         // === Audio quality optimization ===
         audio.preload = 'auto';           // Full preloading
+        audio.fetchPriority = 'high';     // Prioritize audio loading
+        
+        // MediaSession API for Bluetooth/lock screen metadata
+        function updateMediaSession(track) {
+            if (!('mediaSession' in navigator)) return;
+            
+            const defaultCover = playerEl.dataset.defaultCover || '';
+            const coverUrl = track.cover_url || defaultCover;
+            
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.title || 'Unknown Track',
+                artist: track.artist || '',
+                album: playerEl.dataset.playlistId ? 'Playlist ' + playerEl.dataset.playlistId : '',
+                artwork: coverUrl ? [
+                    { src: coverUrl, sizes: '96x96', type: 'image/jpeg' },
+                    { src: coverUrl, sizes: '128x128', type: 'image/jpeg' },
+                    { src: coverUrl, sizes: '192x192', type: 'image/jpeg' },
+                    { src: coverUrl, sizes: '256x256', type: 'image/jpeg' },
+                    { src: coverUrl, sizes: '384x384', type: 'image/jpeg' },
+                    { src: coverUrl, sizes: '512x512', type: 'image/jpeg' }
+                ] : []
+            });
+            
+            // Media controls for Bluetooth/lock screen
+            navigator.mediaSession.setActionHandler('play', () => audio.play());
+            navigator.mediaSession.setActionHandler('pause', () => audio.pause());
+            navigator.mediaSession.setActionHandler('previoustrack', () => {
+                if (currentIndex > 0) playTrack(currentIndex - 1);
+            });
+            navigator.mediaSession.setActionHandler('nexttrack', () => {
+                if (currentIndex < playlist.length - 1) playTrack(currentIndex + 1);
+            });
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if (details.seekTime !== undefined) {
+                    audio.currentTime = details.seekTime;
+                }
+            });
+        }
         
         // Preload audio for next track (Gapless Playback)
         let preloadAudio = new Audio();
@@ -719,7 +938,7 @@
         
         // Preload cache for multiple tracks
         const audioCache = new Map();
-        const MAX_CACHED_TRACKS = 3;
+        const MAX_CACHED_TRACKS = 2;
         
         function preloadTrack(index) {
             if (index < 0 || index >= playlist.length) return;
@@ -825,6 +1044,9 @@
             
             // Initialize waveform for first track
             updateWaveformForTrack(firstTrack);
+            
+            // Initialize MediaSession for first track
+            updateMediaSession(firstTrack);
             
             // Zweiten Track vorpuffern
             if (playlist.length > 1) {
@@ -1591,6 +1813,9 @@
             
             // Update streaming links for current track
             updateStreamingLinks(track);
+            
+            // MediaSession API for Bluetooth/lock screen metadata
+            updateMediaSession(track);
         }
 
         function togglePlay() {

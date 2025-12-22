@@ -2008,19 +2008,20 @@ class Simple_Audio_Player {
                 $excerpt = '"' . $track_title . '"' . ($track_artist ? ' by ' . $track_artist : '') . ' - ' . $playlist_title;
                 
                 // Use track cover if available
-                // Priority: cover_url > cover_id (attachment) > playlist cover
+                // Priority: cover_id (always fresh) > cover_url > playlist cover
                 $track_cover = '';
                 
-                // First try direct cover_url
-                if (!empty($track['cover_url'])) {
-                    $track_cover = $track['cover_url'];
-                    // Apply CDN if configured
-                    $track_cover = self::cdn_url($track_cover);
+                // First try cover_id (most reliable - generates fresh URL)
+                if (!empty($track['cover_id'])) {
+                    $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'large');
+                    if ($track_cover) {
+                        $track_cover = self::cdn_url($track_cover);
+                    }
                 }
                 
-                // Fallback to cover_id attachment
-                if (empty($track_cover) && !empty($track['cover_id'])) {
-                    $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'large');
+                // Fallback to stored cover_url
+                if (empty($track_cover) && !empty($track['cover_url'])) {
+                    $track_cover = self::cdn_url($track['cover_url']);
                 }
                 
                 // Set cover if valid URL found
@@ -2535,8 +2536,20 @@ class Simple_Audio_Player {
                                     Pulse (Pulsing circle)
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
-                                    <input type="radio" name="sap_visualizer_type" value="butterfly" <?php checked($viz_type, 'butterfly'); ?> />
-                                    Butterfly (Symmetrical wings)
+                                    <input type="radio" name="sap_visualizer_type" value="circular_bars" <?php checked($viz_type, 'circular_bars'); ?> />
+                                    Circular Bars (Bars in a circle)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="particles" <?php checked($viz_type, 'particles'); ?> />
+                                    Particles (Floating particles)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="starburst" <?php checked($viz_type, 'starburst'); ?> />
+                                    Starburst (Rays from center)
+                                </label>
+                                <label style="display:block; margin-bottom:8px;">
+                                    <input type="radio" name="sap_visualizer_type" value="orbits" <?php checked($viz_type, 'orbits'); ?> />
+                                    Orbits (Rotating rings)
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="off" <?php checked($viz_type, 'off'); ?> />
@@ -2697,8 +2710,18 @@ class Simple_Audio_Player {
                 <div class="sap-track-row" data-index="<?php echo $index; ?>">
                     <span class="sap-track-handle">☰</span>
                     <div class="sap-track-cover-preview">
-                        <?php if (!empty($track['cover_url'])) : ?>
-                            <img src="<?php echo esc_url($track['cover_url']); ?>" />
+                        <?php 
+                        $admin_cover_url = '';
+                        // Prioritize cover_id (always fresh URL from attachment)
+                        if (!empty($track['cover_id'])) {
+                            $admin_cover_url = wp_get_attachment_image_url(intval($track['cover_id']), 'thumbnail');
+                        }
+                        // Fallback to stored cover_url if no cover_id
+                        if (empty($admin_cover_url) && !empty($track['cover_url'])) {
+                            $admin_cover_url = $track['cover_url'];
+                        }
+                        if ($admin_cover_url) : ?>
+                            <img src="<?php echo esc_url($admin_cover_url); ?>" />
                         <?php else : ?>
                             <span class="sap-no-cover">🎵</span>
                         <?php endif; ?>
@@ -2706,7 +2729,7 @@ class Simple_Audio_Player {
                     <input type="hidden" name="sap_tracks[<?php echo $index; ?>][cover_id]" 
                            class="sap-track-cover-id" value="<?php echo esc_attr($track['cover_id'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo $index; ?>][cover_url]" 
-                           class="sap-track-cover-url" value="<?php echo esc_url($track['cover_url'] ?? ''); ?>" />
+                           class="sap-track-cover-url" value="<?php echo esc_url($admin_cover_url); ?>" />
                     <button type="button" class="button sap-select-cover" title="Select cover">🖼️</button>
                     <input type="text" name="sap_tracks[<?php echo $index; ?>][title]" 
                            class="sap-track-title" placeholder="Title" 
@@ -2917,7 +2940,17 @@ class Simple_Audio_Player {
             }
             
             // Add track cover or fallback to playlist cover (validated URL)
-            $track_cover = !empty($track['cover_url']) ? esc_url_raw($track['cover_url']) : $cover;
+            // Priority: cover_id (fresh URL) > cover_url > playlist cover
+            $track_cover = '';
+            if (!empty($track['cover_id'])) {
+                $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
+            }
+            if (empty($track_cover) && !empty($track['cover_url'])) {
+                $track_cover = esc_url_raw($track['cover_url']);
+            }
+            if (empty($track_cover)) {
+                $track_cover = $cover;
+            }
             if ($track_cover && filter_var($track_cover, FILTER_VALIDATE_URL)) {
                 $track_schema['image'] = $track_cover;
             }
@@ -3024,7 +3057,15 @@ class Simple_Audio_Player {
                     $track['url'] = self::cdn_url($track['url']);
                 }
             }
-            if (!empty($track['cover_url'])) {
+            // Handle cover: prioritize cover_id (always fresh URL), fallback to cover_url
+            if (!empty($track['cover_id'])) {
+                // Generate fresh URL from attachment ID (most reliable)
+                $cover_from_id = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
+                if ($cover_from_id) {
+                    $track['cover_url'] = self::cdn_url($cover_from_id);
+                }
+            } elseif (!empty($track['cover_url'])) {
+                // Fallback to stored URL if no cover_id
                 $track['cover_url'] = self::cdn_url($track['cover_url']);
             }
             // Add waveform data if available
