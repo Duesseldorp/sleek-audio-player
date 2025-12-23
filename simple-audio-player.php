@@ -3380,17 +3380,17 @@ class Simple_Audio_Player {
                             <div class="sap-more-divider"></div>
                             <button type="button" class="sap-more-item sap-sleep-timer" data-action="sleep">
                                 <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-                                <span class="sap-sleep-label">Sleep Timer: Off</span>
+                                <span class="sap-sleep-label"><?php echo esc_html__('Sleep Timer', 'simple-audio-player'); ?>: <?php echo esc_html__('Off', 'simple-audio-player'); ?></span>
                             </button>
                             <div class="sap-sleep-submenu" style="display:none;">
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0">Off</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="5">5 Min</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="10">10 Min</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="15">15 Min</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="30">30 Min</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="45">45 Min</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60">1 Hour</button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true">End of Track</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0"><?php echo esc_html__('Off', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="5"><?php echo esc_html__('5 Min', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="10"><?php echo esc_html__('10 Min', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="15"><?php echo esc_html__('15 Min', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="30"><?php echo esc_html__('30 Min', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="45"><?php echo esc_html__('45 Min', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60"><?php echo esc_html__('1 Hour', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true"><?php echo esc_html__('End of Track', 'simple-audio-player'); ?></button>
                             </div>
                             <div class="sap-more-divider sap-stream-divider" style="display:none;"></div>
                             <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-spotify" style="display:none;">

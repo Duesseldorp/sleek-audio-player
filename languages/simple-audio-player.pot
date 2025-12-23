@@ -2,7 +2,7 @@
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Simple Audio Player 2.0.0\n"
+"Project-Id-Version: Simple Audio Player 2.0.1\n"
 "Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
 "POT-Creation-Date: 2024-12-19 16:00+0000\n"
 "MIME-Version: 1.0\n"
@@ -232,4 +232,40 @@ msgstr ""
 
 #: simple-audio-player.php
 msgid "Tap to Play"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Sleep Timer"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "Off"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "5 Min"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "10 Min"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "15 Min"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "30 Min"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "45 Min"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "1 Hour"
+msgstr ""
+
+#: simple-audio-player.php
+msgid "End of Track"
 msgstr ""
