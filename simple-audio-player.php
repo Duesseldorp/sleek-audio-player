@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Simple Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.0.0
+ * Version: 2.0.1
  * Author: Martin Graebing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de

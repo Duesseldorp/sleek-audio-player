@@ -27,7 +27,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ⏩ Playback speed (1x, 1.25x, 1.5x, 2x)
 * 😴 Sleep Timer (5-60 min or end of track)
 * ⬇️ Track download (configurable per track)
-* 🎵 8 Visualizer types (Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Butterfly)
+* 🎵 11 Visualizer types (Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Circular Bars, Particles, Starburst, Orbits)
 * 🎨 Visualizer color customizable via Theme Manager
 * 👆 Double-click cover to cycle visualizers
 * ⏱️ Progress bar with seek functionality
@@ -35,6 +35,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 👆 Click on waveform jumps to position & starts playback
 * 🔊 Volume control with popup slider
 * ⏱️ Click duration to toggle remaining time
+* 💾 Resume playback (remembers position per playlist)
 
 = Cover & Design =
 
@@ -168,10 +169,12 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 = 2.0.1 =
 * 😴 Sleep Timer with live countdown (5, 10, 15, 30, 45, 60 min or end of track)
-* 🛠️ Stability improvements (error handling, validation, graceful degradation)
+* � Resume playback - remembers position per playlist (GDPR-compliant, localStorage only)
+* 🎵 11 Visualizer types (added Circular Bars, Particles, Starburst, Orbits)
+* �🛠️ Stability improvements (error handling, validation, graceful degradation)
+* 🔧 Fixed visualizer acceleration bug
 * 🔧 Fixed jQuery-Migrate deprecation warning
 * ⋮ Improved More menu (fixed positioning, consistent styling)
-* 🎨 Menu stays visible and doesn't scroll with page
 
 = 2.0.0 =
 * 📤 Share button for social media sharing
@@ -183,7 +186,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * 📱 Improved social sharing preview (no emoji in share text)
 
 = 1.9.0 =
-* 🎵 8 Visualizer types: Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Butterfly
+* 🎵 11 Visualizer types: Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Circular Bars, Particles, Starburst, Orbits
 * 👆 Double-click on cover cycles through visualizers
 * ⌨️ Keyboard shortcut V for visualizer cycling
 * 🔊 Volume control with expandable slider (vertical on desktop, horizontal on mobile)
@@ -253,7 +256,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 == Upgrade Notice ==
 
 = 2.0.1 =
-Sleep Timer! Set a timer (5-60 min) or stop after current track. Live countdown in menu. Stability improvements.
+Sleep Timer + Resume Playback! Set a timer or stop after track. Playback position is saved per playlist. 11 visualizer types.
 
 = 2.0.0 =
 New Share button! Share tracks directly to social media with cover art preview. Cleaner UI with More menu.

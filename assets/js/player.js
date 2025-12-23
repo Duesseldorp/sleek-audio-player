@@ -124,6 +124,49 @@
         let sleepCountdownInterval = null;
         let sleepEndTime = null;
         
+        // Progress Memory (for podcasts/long tracks)
+        const playlistId = playerEl.dataset.playlistId || 'default';
+        const progressKey = 'sap_progress_' + playlistId;
+        let lastProgressSave = 0;
+        
+        function saveProgress() {
+            // Throttle saves to every 5 seconds
+            const now = Date.now();
+            if (now - lastProgressSave < 5000) return;
+            lastProgressSave = now;
+            
+            // Only save if position is meaningful (> 5 seconds)
+            if (audio.currentTime > 5 && audio.duration > 30) {
+                const data = {
+                    track: currentIndex,
+                    position: Math.floor(audio.currentTime),
+                    timestamp: now
+                };
+                localStorage.setItem(progressKey, JSON.stringify(data));
+            }
+        }
+        
+        function loadProgress() {
+            try {
+                const saved = localStorage.getItem(progressKey);
+                if (!saved) return null;
+                
+                const data = JSON.parse(saved);
+                // Ignore if older than 30 days
+                if (Date.now() - data.timestamp > 30 * 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem(progressKey);
+                    return null;
+                }
+                return data;
+            } catch (e) {
+                return null;
+            }
+        }
+        
+        function clearProgress() {
+            localStorage.removeItem(progressKey);
+        }
+        
         // Update streaming links in More menu based on current track
         function updateStreamingLinks(track) {
             if (!moreMenu) return;
@@ -1086,7 +1129,38 @@
             const sharedTrack = parseInt(urlParams.get('track'));
             const shouldAutoplay = urlParams.get('play') === '1';
             
-            // If a specific track was shared, load and play it
+            // Check for saved progress (only if no URL parameters)
+            const savedProgress = loadProgress();
+            const hasUrlParams = sharedTrack && sharedTrack > 0;
+            
+            if (!hasUrlParams && savedProgress && savedProgress.track < playlist.length) {
+                // Restore saved position
+                currentIndex = savedProgress.track;
+                const track = playlist[currentIndex];
+                audio.src = track.url;
+                if (nowPlayingEl) nowPlayingEl.textContent = track.title;
+                if (artistEl) artistEl.textContent = track.artist || '';
+                tracks.forEach(t => t.classList.remove('active'));
+                if (tracks[currentIndex]) tracks[currentIndex].classList.add('active');
+                updateCarousel();
+                updateWaveformForTrack(track);
+                updateStreamingLinks(track);
+                if (downloadBtn) {
+                    downloadBtn.classList.toggle('visible', !!track.downloadable);
+                }
+                
+                // Set position after metadata loads
+                audio.addEventListener('loadedmetadata', function restorePosition() {
+                    if (savedProgress.position < audio.duration - 5) {
+                        audio.currentTime = savedProgress.position;
+                    }
+                    audio.removeEventListener('loadedmetadata', restorePosition);
+                }, { once: true });
+                
+                sapLog('Restored progress', savedProgress);
+            }
+            
+            // If a specific track was shared, load and play it (URL params override saved progress)
             if (sharedTrack && sharedTrack > 0 && sharedTrack <= playlist.length) {
                 const trackIndex = sharedTrack - 1; // Convert to 0-indexed
                 currentIndex = trackIndex;
@@ -1834,7 +1908,10 @@
             durationEl.title = 'Click to toggle remaining time';
         }
         
-        audio.addEventListener('timeupdate', updateProgress);
+        audio.addEventListener('timeupdate', function() {
+            updateProgress();
+            saveProgress();
+        });
         audio.addEventListener('loadedmetadata', updateDuration);
         audio.addEventListener('ended', function() {
             // Track completed song in Umami
@@ -1876,6 +1953,9 @@
                 // No repeat - play next unless at end
                 if (currentIndex < playlist.length - 1) {
                     playNext();
+                } else {
+                    // Playlist finished - clear saved progress
+                    clearProgress();
                 }
             }
         });
