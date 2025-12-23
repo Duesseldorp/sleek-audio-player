@@ -6,6 +6,27 @@
 (function() {
     'use strict';
     
+    // === Stability: Error logging helper ===
+    const SAP_DEBUG = false; // Set to true for debugging
+    function sapLog(message, data) {
+        if (!SAP_DEBUG) return;
+        console.log('[SAP]', message, data || '');
+    }
+    function sapError(message, error) {
+        console.error('[SAP Error]', message, error || '');
+    }
+    
+    // === Stability: Safe JSON parse ===
+    function safeJsonParse(str, fallback) {
+        if (!str) return fallback;
+        try {
+            return JSON.parse(str);
+        } catch (e) {
+            sapError('JSON parse failed', e);
+            return fallback;
+        }
+    }
+    
     // Global registry for all audio elements - ensures only one plays at a time
     const allAudioElements = [];
     
@@ -34,7 +55,12 @@
                 pauseAllExcept(audio);
             });
         }
-        const playlist = JSON.parse(playerEl.dataset.playlist || '[]');
+        const playlist = safeJsonParse(playerEl.dataset.playlist, []);
+        
+        // Validate playlist
+        if (!Array.isArray(playlist) || playlist.length === 0) {
+            sapLog('Empty or invalid playlist');
+        }
         const tracks = playerEl.querySelectorAll('.sap-track');
         
         // Buttons
@@ -91,6 +117,12 @@
         const playbackSpeeds = [1, 1.25, 1.5, 2];
         let currentSpeedIndex = 0;
         let showRemainingTime = localStorage.getItem('sap_show_remaining') === 'true';
+        
+        // Sleep Timer State
+        let sleepTimeout = null;
+        let sleepEndOfTrack = false;
+        let sleepCountdownInterval = null;
+        let sleepEndTime = null;
         
         // Update streaming links in More menu based on current track
         function updateStreamingLinks(track) {
@@ -155,25 +187,47 @@
 
         function initAudioContext() {
             if (audioContext) return;
-            if (!corsEnabled) return; // Visualizer requires CORS
+            if (!corsEnabled) {
+                sapLog('CORS not enabled, visualizer disabled');
+                return;
+            }
             
             try {
-                // Optimized AudioContext for better Bluetooth/playback quality
+                // Check for Web Audio API support
                 const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) {
+                    sapLog('Web Audio API not supported');
+                    return;
+                }
+                
+                // Optimized AudioContext for better Bluetooth/playback quality
                 audioContext = new AudioCtx({
                     sampleRate: 48000,        // Standard for Bluetooth audio
                     latencyHint: 'playback'   // Prioritize quality over latency
                 });
+                
+                if (!audioContext) {
+                    sapError('Failed to create AudioContext');
+                    return;
+                }
+                
                 analyser = audioContext.createAnalyser();
                 analyser.fftSize = 2048;                  // Larger buffer for stability
                 analyser.smoothingTimeConstant = 0.85;    // Smoother transitions
                 
-                source = audioContext.createMediaElementSource(audio);
-                source.connect(analyser);
-                analyser.connect(audioContext.destination);
+                // Only create source if audio element exists and has no existing source
+                if (audio && !source) {
+                    source = audioContext.createMediaElementSource(audio);
+                    source.connect(analyser);
+                    analyser.connect(audioContext.destination);
+                }
+                
+                sapLog('AudioContext initialized successfully');
             } catch (e) {
+                sapError('AudioContext initialization failed', e);
                 audioContext = null;
                 analyser = null;
+                source = null;
             }
         }
 
@@ -227,9 +281,10 @@
             if (!visualizerCtx || !analyser) return;
             if (visualizerType === 'off') return;
             
-            const bufferLength = analyser.frequencyBinCount;
-            const dataArray = new Uint8Array(bufferLength);
-            analyser.getByteFrequencyData(dataArray);
+            try {
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
+                analyser.getByteFrequencyData(dataArray);
             
             const width = visualizerCanvas.width;
             const height = visualizerCanvas.height;
@@ -276,7 +331,11 @@
                     break;
             }
             
-            animationId = requestAnimationFrame(drawVisualizer);
+                animationId = requestAnimationFrame(drawVisualizer);
+            } catch (e) {
+                sapError('Visualizer draw error', e);
+                stopVisualizer();
+            }
         }
         
         // Classic frequency bars - drawn at bottom of cover
@@ -524,62 +583,64 @@
         // Particles - floating particles reacting to music
         let particles = [];
         let prevBass = 0;
+        
         function drawParticles(dataArray, width, height, vizColor) {
             const bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10 / 255;
             const mid = dataArray.slice(10, 100).reduce((a, b) => a + b, 0) / 90 / 255;
             const high = dataArray.slice(100, 200).reduce((a, b) => a + b, 0) / 100 / 255;
             
-            // Emit rate based on music intensity
+            // Detect bass hits
             const bassChange = Math.max(0, bass - prevBass);
-            prevBass = bass * 0.7 + prevBass * 0.3;
+            prevBass = bass * 0.8 + prevBass * 0.2;
             
-            // More particles when music is loud, burst on bass hits
-            const baseEmit = 1 + Math.floor(bass * 3);
-            const burstEmit = bassChange > 0.05 ? Math.floor(bassChange * 20) : 0;
-            const emitCount = Math.min(baseEmit + burstEmit, 8);
+            // Continuous emission + burst on bass
+            const baseEmit = particles.length < 15 ? 1 : 0;
+            const burstEmit = bassChange > 0.08 ? 2 : 0;
+            const emitCount = baseEmit + burstEmit;
             
-            for (let i = 0; i < emitCount && particles.length < 60; i++) {
+            for (let i = 0; i < emitCount && particles.length < 25; i++) {
                 const angle = Math.random() * Math.PI * 2;
-                // Speed based on current bass level
-                const speed = 0.5 + bass * 2 + Math.random() * 0.8;
+                const speed = 0.6 + Math.random() * 0.8;
                 particles.push({
                     x: width / 2,
                     y: height / 2,
                     vx: Math.cos(angle) * speed,
                     vy: Math.sin(angle) * speed,
-                    // Bigger particles on bass hits
-                    baseSize: 3 + Math.random() * 4 + bass * 6,
+                    baseSize: 6 + Math.random() * 6 + bass * 8,
                     life: 1,
-                    decay: 0.005 + Math.random() * 0.005
+                    decay: 0.004 + Math.random() * 0.003
                 });
             }
             
-            visualizerCtx.shadowBlur = 25;
+            visualizerCtx.shadowBlur = 30;
             visualizerCtx.shadowColor = vizColor;
             
             // Update and draw particles
             particles = particles.filter(p => {
-                // Slow, gentle movement
+                // Very slow drift outward
                 p.x += p.vx;
                 p.y += p.vy;
                 p.life -= p.decay;
                 
                 if (p.life <= 0) return false;
                 
-                // Size based on frequency: bass = bigger, high = smaller
-                const sizeMultiplier = 1 + bass * 3 - high * 0.5;
-                const size = p.baseSize * Math.max(0.5, sizeMultiplier) * (0.8 + p.life * 0.4);
+                // Size pulses strongly with bass
+                const pulse = 1 + bass * 2.5;
+                const size = p.baseSize * pulse * (0.7 + p.life * 0.5);
                 
-                // Transparent fill with visible stroke
-                visualizerCtx.fillStyle = hexToRgba(vizColor, 0.12 + p.life * 0.08);
-                visualizerCtx.strokeStyle = hexToRgba(vizColor, 0.5 + p.life * 0.4);
-                visualizerCtx.lineWidth = 1.5;
+                // Opacity reacts to mid frequencies
+                const opacity = 0.15 + mid * 0.4;
+                const strokeOpacity = 0.4 + mid * 0.5 + p.life * 0.2;
+                
+                visualizerCtx.fillStyle = hexToRgba(vizColor, opacity * p.life);
+                visualizerCtx.strokeStyle = hexToRgba(vizColor, strokeOpacity);
+                visualizerCtx.lineWidth = 2 + bass * 2;
                 visualizerCtx.beginPath();
                 visualizerCtx.arc(p.x, p.y, size, 0, Math.PI * 2);
                 visualizerCtx.fill();
                 visualizerCtx.stroke();
                 
-                return p.x > -20 && p.x < width + 20 && p.y > -20 && p.y < height + 20;
+                return p.x > -50 && p.x < width + 50 && p.y > -50 && p.y < height + 50;
             });
             
             visualizerCtx.shadowBlur = 0;
@@ -589,32 +650,36 @@
         function drawStarburst(dataArray, width, height, vizColor) {
             const centerX = width / 2;
             const centerY = height / 2;
-            const rayCount = 32;
-            const maxLength = Math.min(width, height) * 0.45;
+            const rayCount = 48;
+            const maxLength = Math.min(width, height) * 0.55;
             const bass = dataArray.slice(0, 10).reduce((a, b) => a + b, 0) / 10 / 255;
+            const mid = dataArray.slice(10, 100).reduce((a, b) => a + b, 0) / 90 / 255;
             
-            visualizerCtx.shadowBlur = 18;
+            // Global pulse based on bass - reduced to 15%
+            const pulse = 1 + bass * 0.15;
+            
+            visualizerCtx.shadowBlur = 25 + bass * 15;
             visualizerCtx.shadowColor = vizColor;
             
             for (let i = 0; i < rayCount; i++) {
                 const dataIndex = Math.floor(i * dataArray.length / rayCount);
                 const value = dataArray[dataIndex] / 255;
                 const angle = (i / rayCount) * Math.PI * 2;
-                const length = (0.2 + value * 0.8) * maxLength;
+                const length = (0.15 + value * 0.85) * maxLength * pulse;
                 
-                const innerRadius = 10 + bass * 15;
+                const innerRadius = 5 + bass * 12;
                 const x1 = centerX + Math.cos(angle) * innerRadius;
                 const y1 = centerY + Math.sin(angle) * innerRadius;
                 const x2 = centerX + Math.cos(angle) * length;
                 const y2 = centerY + Math.sin(angle) * length;
                 
                 const gradient = visualizerCtx.createLinearGradient(x1, y1, x2, y2);
-                gradient.addColorStop(0, hexToRgba(vizColor, 0.8));
-                gradient.addColorStop(0.5, hexToRgba(vizColor, 0.4));
-                gradient.addColorStop(1, hexToRgba(vizColor, 0.05));
+                gradient.addColorStop(0, hexToRgba(vizColor, 0.9));
+                gradient.addColorStop(0.4, hexToRgba(vizColor, 0.5 + mid * 0.3));
+                gradient.addColorStop(1, hexToRgba(vizColor, 0.02));
                 
                 visualizerCtx.strokeStyle = gradient;
-                visualizerCtx.lineWidth = 2 + value * 3;
+                visualizerCtx.lineWidth = 2 + value * 4 + bass * 2;
                 visualizerCtx.lineCap = 'round';
                 visualizerCtx.beginPath();
                 visualizerCtx.moveTo(x1, y1);
@@ -622,13 +687,15 @@
                 visualizerCtx.stroke();
             }
             
-            // Center glow
-            const glowGradient = visualizerCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 25 + bass * 20);
-            glowGradient.addColorStop(0, hexToRgba(vizColor, 0.6));
+            // Center glow - smaller
+            const glowSize = 15 + bass * 20;
+            const glowGradient = visualizerCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, glowSize);
+            glowGradient.addColorStop(0, hexToRgba(vizColor, 0.7 + mid * 0.2));
+            glowGradient.addColorStop(0.5, hexToRgba(vizColor, 0.3));
             glowGradient.addColorStop(1, hexToRgba(vizColor, 0));
             visualizerCtx.fillStyle = glowGradient;
             visualizerCtx.beginPath();
-            visualizerCtx.arc(centerX, centerY, 25 + bass * 20, 0, Math.PI * 2);
+            visualizerCtx.arc(centerX, centerY, glowSize, 0, Math.PI * 2);
             visualizerCtx.fill();
             
             visualizerCtx.shadowBlur = 0;
@@ -636,6 +703,14 @@
         
         // Orbits - rotating rings with audio reaction
         let orbitAngle = 0;
+        
+        // Reset visualizer state on track change
+        function resetVisualizerState() {
+            particles = [];
+            prevBass = 0;
+            orbitAngle = 0;
+        }
+        
         function drawOrbits(dataArray, width, height, vizColor) {
             const centerX = width / 2;
             const centerY = height / 2;
@@ -644,7 +719,7 @@
             const mid = dataArray.slice(10, 100).reduce((a, b) => a + b, 0) / 90 / 255;
             const high = dataArray.slice(100, 200).reduce((a, b) => a + b, 0) / 100 / 255;
             
-            orbitAngle += 0.006 + bass * 0.018;
+            orbitAngle += 0.003 + bass * 0.009;
             
             visualizerCtx.shadowBlur = 18;
             visualizerCtx.shadowColor = vizColor;
@@ -693,11 +768,17 @@
         }
 
         function startVisualizer() {
-            initAudioContext();
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
+            try {
+                initAudioContext();
+                if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume().catch(e => {
+                        sapError('Failed to resume AudioContext', e);
+                    });
+                }
+                drawVisualizer();
+            } catch (e) {
+                sapError('startVisualizer failed', e);
             }
-            drawVisualizer();
         }
 
         function stopVisualizer() {
@@ -1112,12 +1193,69 @@
         
         // === More Menu ===
         if (moreBtn && moreWrapper && moreMenu) {
+            // Position menu dynamically to ensure full visibility
+            function positionMenu() {
+                const btnRect = moreBtn.getBoundingClientRect();
+                const menuHeight = moreMenu.offsetHeight || 300;
+                const menuWidth = moreMenu.offsetWidth || 180;
+                const viewportHeight = window.innerHeight;
+                const viewportWidth = window.innerWidth;
+                const padding = 10;
+                
+                // Calculate best position
+                let top, left;
+                
+                // Prefer opening upward (above button)
+                if (btnRect.top > menuHeight + padding) {
+                    top = btnRect.top - menuHeight - 8;
+                    moreMenu.style.transformOrigin = 'bottom right';
+                } else {
+                    // Open downward if no space above
+                    top = btnRect.bottom + 8;
+                    moreMenu.style.transformOrigin = 'top right';
+                }
+                
+                // Horizontal position - align to right edge of button
+                left = btnRect.right - menuWidth;
+                
+                // Ensure menu stays in viewport
+                if (left < padding) left = padding;
+                if (left + menuWidth > viewportWidth - padding) {
+                    left = viewportWidth - menuWidth - padding;
+                }
+                if (top < padding) top = padding;
+                if (top + menuHeight > viewportHeight - padding) {
+                    top = viewportHeight - menuHeight - padding;
+                }
+                
+                moreMenu.style.top = top + 'px';
+                moreMenu.style.left = left + 'px';
+            }
+            
             moreBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const isActive = moreWrapper.classList.toggle('active');
                 this.setAttribute('aria-expanded', isActive);
+                if (isActive) {
+                    positionMenu();
+                }
                 this.blur();
             });
+            
+            // Close menu on scroll (menu stays fixed, closes when user scrolls)
+            window.addEventListener('scroll', function() {
+                if (moreWrapper.classList.contains('active')) {
+                    moreWrapper.classList.remove('active');
+                    moreBtn.setAttribute('aria-expanded', 'false');
+                }
+            }, { passive: true });
+            
+            // Reposition only on resize
+            window.addEventListener('resize', function() {
+                if (moreWrapper.classList.contains('active')) {
+                    positionMenu();
+                }
+            }, { passive: true });
             
             // Close menu when clicking outside
             document.addEventListener('click', function(e) {
@@ -1165,6 +1303,110 @@
                     }
                 });
             }
+            
+            // === Sleep Timer ===
+            const sleepTimerBtn = playerEl.querySelector('.sap-sleep-timer');
+            const sleepSubmenu = playerEl.querySelector('.sap-sleep-submenu');
+            const sleepOptions = playerEl.querySelectorAll('.sap-sleep-option');
+            
+            function updateSleepLabel() {
+                const label = sleepTimerBtn ? sleepTimerBtn.querySelector('.sap-sleep-label') : null;
+                if (!label) return;
+                
+                if (sleepEndOfTrack) {
+                    label.textContent = 'Sleep: End of Track';
+                    sleepTimerBtn.classList.add('active');
+                } else if (sleepEndTime) {
+                    const remainingMs = Math.max(0, sleepEndTime - Date.now());
+                    const remainingMin = Math.floor(remainingMs / 60000);
+                    const remainingSec = Math.floor((remainingMs % 60000) / 1000);
+                    
+                    if (remainingMin > 0) {
+                        label.textContent = 'Sleep: ' + remainingMin + ':' + String(remainingSec).padStart(2, '0');
+                    } else {
+                        label.textContent = 'Sleep: ' + remainingSec + 's';
+                    }
+                    sleepTimerBtn.classList.add('active');
+                } else {
+                    label.textContent = 'Sleep Timer: Off';
+                    sleepTimerBtn.classList.remove('active');
+                }
+            }
+            
+            function clearSleepTimer() {
+                if (sleepTimeout) {
+                    clearTimeout(sleepTimeout);
+                    sleepTimeout = null;
+                }
+                if (sleepCountdownInterval) {
+                    clearInterval(sleepCountdownInterval);
+                    sleepCountdownInterval = null;
+                }
+                sleepEndTime = null;
+                sleepEndOfTrack = false;
+                updateSleepLabel();
+            }
+            
+            function setSleepTimer(minutes, endOfTrack = false) {
+                clearSleepTimer();
+                
+                if (endOfTrack) {
+                    sleepEndOfTrack = true;
+                    updateSleepLabel();
+                    sapLog('Sleep timer set: end of track');
+                    return;
+                }
+                
+                if (minutes <= 0) {
+                    sapLog('Sleep timer disabled');
+                    return;
+                }
+                
+                sleepEndTime = Date.now() + (minutes * 60 * 1000);
+                sleepTimeout = setTimeout(function() {
+                    audio.pause();
+                    clearSleepTimer();
+                    sapLog('Sleep timer triggered - playback paused');
+                }, minutes * 60 * 1000);
+                
+                // Update countdown every second for live display
+                sleepCountdownInterval = setInterval(updateSleepLabel, 1000);
+                updateSleepLabel();
+                sapLog('Sleep timer set', { minutes: minutes });
+            }
+            
+            if (sleepTimerBtn) {
+                sleepTimerBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Toggle submenu
+                    if (sleepSubmenu) {
+                        const isVisible = sleepSubmenu.style.display !== 'none';
+                        sleepSubmenu.style.display = isVisible ? 'none' : 'block';
+                    }
+                });
+            }
+            
+            sleepOptions.forEach(function(option) {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const minutes = parseInt(this.dataset.minutes) || 0;
+                    const endOfTrack = this.dataset.endOfTrack === 'true';
+                    
+                    setSleepTimer(minutes, endOfTrack);
+                    
+                    // Mark active option
+                    sleepOptions.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Hide submenu
+                    if (sleepSubmenu) {
+                        sleepSubmenu.style.display = 'none';
+                    }
+                });
+            });
         }
         
         function shareTrack() {
@@ -1601,6 +1843,20 @@
                 });
             }
             
+            // Check Sleep Timer - End of Track mode
+            if (sleepEndOfTrack) {
+                sapLog('Sleep timer: end of track - stopping playback');
+                sleepEndOfTrack = false;
+                sleepEndTime = null;
+                // Update label
+                const sleepLabel = playerEl.querySelector('.sap-sleep-label');
+                const sleepBtn = playerEl.querySelector('.sap-sleep-timer');
+                if (sleepLabel) sleepLabel.textContent = 'Sleep Timer: Off';
+                if (sleepBtn) sleepBtn.classList.remove('active');
+                // Don't play next track - just stop
+                return;
+            }
+            
             // Handle repeat modes
             if (repeatMode === 'track') {
                 // Repeat current track
@@ -1761,6 +2017,9 @@
             audio.pause();
             audio.currentTime = 0;
             
+            // Reset visualizer state for new track
+            resetVisualizerState();
+            
             // Update UI immediately
             tracks.forEach(t => t.classList.remove('active'));
             if (tracks[index]) tracks[index].classList.add('active');
@@ -1799,11 +2058,31 @@
                 }
             });
             
-            // Handle load errors
+            // Handle load errors with detailed error messages
             audio.onerror = function(e) {
                 isLoading = false;
                 hideLoadingSpinner();
-                showErrorFeedback('Track could not be loaded');
+                
+                // Get detailed error info
+                let errorMsg = 'Track could not be loaded';
+                if (audio.error) {
+                    switch(audio.error.code) {
+                        case MediaError.MEDIA_ERR_ABORTED:
+                            errorMsg = 'Playback aborted';
+                            break;
+                        case MediaError.MEDIA_ERR_NETWORK:
+                            errorMsg = 'Network error';
+                            break;
+                        case MediaError.MEDIA_ERR_DECODE:
+                            errorMsg = 'Audio decode error';
+                            break;
+                        case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                            errorMsg = 'Format not supported';
+                            break;
+                    }
+                }
+                sapError('Audio load failed', { error: audio.error, track: track.title });
+                showErrorFeedback(errorMsg);
             };
             
             // Download button in menu

@@ -468,11 +468,16 @@
 }
 
 .sap-speed-label {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    font-weight: 400;
     position: relative;
     z-index: 1;
+}
+
+/* Speed label in menu - inherit font size from parent */
+.sap-more-menu .sap-speed-label {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: normal;
 }
 
 /* Repeat Badge (shows "1" for single track repeat) */
@@ -673,28 +678,42 @@
 }
 
 .sap-more-menu {
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    min-width: 160px;
-    max-height: 280px;
+    position: fixed;
+    min-width: 180px;
+    max-width: 240px;
+    max-height: calc(100vh - 100px);
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 8px 0;
     background: var(--sap-card);
     border: 1px solid var(--sap-border);
     border-radius: var(--sap-radius-sm);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(8px);
-    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
-    z-index: 99999;
+    transform: scale(0.95);
+    transform-origin: bottom right;
+    transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
+    z-index: 999999;
+}
+
+.sap-more-menu::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sap-more-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.sap-more-menu::-webkit-scrollbar-thumb {
+    background: var(--sap-border);
+    border-radius: 3px;
 }
 
 .sap-more-wrapper.active .sap-more-menu {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: scale(1);
 }
 
 .sap-more-item {
@@ -703,12 +722,17 @@
     gap: 12px;
     width: 100%;
     padding: 10px 16px;
+    margin: 0;
     background: none;
     border: none;
     color: var(--sap-gray-200);
-    font-size: 13px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
+    box-sizing: border-box;
 }
 
 .sap-more-item:hover {
@@ -739,12 +763,78 @@
 .sap-more-divider {
     height: 1px;
     background: var(--sap-border);
+    margin: 4px 0;
+}
+
+/* Streaming divider has more space */
+.sap-stream-divider {
     margin: 8px 0;
+}
+
+/* Sleep Timer */
+.sap-sleep-timer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sap-sleep-timer.active svg {
+    fill: var(--sap-accent);
+}
+
+.sap-sleep-timer.active .sap-sleep-label {
+    color: var(--sap-accent);
+}
+
+.sap-sleep-submenu {
+    padding: 0;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin: 4px 8px;
+    overflow: hidden;
+}
+
+.sap-sleep-submenu .sap-sleep-option {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 8px 16px;
+    margin: 0;
+    background: none;
+    border: none;
+    color: var(--sap-gray-200);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.4;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    text-align: left;
+    box-sizing: border-box;
+}
+
+.sap-sleep-submenu .sap-sleep-option:hover {
+    background: var(--sap-blue-tint);
+    color: var(--sap-white);
+}
+
+.sap-sleep-submenu .sap-sleep-option.active {
+    color: var(--sap-accent);
+    font-weight: 600;
+}
+
+.sap-sleep-submenu .sap-sleep-option.active::before {
+    content: '✓';
+    margin-right: 8px;
+    font-size: 11px;
 }
 
 /* Streaming Links in More Menu */
 .sap-stream-link {
     text-decoration: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 400;
 }
 
 .sap-stream-spotify:hover {

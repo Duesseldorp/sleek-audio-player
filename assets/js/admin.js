@@ -1,15 +1,30 @@
 /**
  * Simple Audio Player - Admin JavaScript
  * WordPress Media Library Integration
+ * Version: 2.0.1 - Enhanced stability
  */
 
 (function($) {
     'use strict';
+    
+    // === Stability: Error logging ===
+    function sapLog(message, data) {
+        if (console && console.log) {
+            console.log('[SAP Admin]', message, data || '');
+        }
+    }
+    
+    function sapError(message, error) {
+        if (console && console.error) {
+            console.error('[SAP Admin Error]', message, error || '');
+        }
+    }
 
     $(document).ready(function() {
         
         // Check if wp.media is available
         if (typeof wp === 'undefined' || typeof wp.media === 'undefined') {
+            sapLog('WordPress Media Library not available');
             return;
         }
         

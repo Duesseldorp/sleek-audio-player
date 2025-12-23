@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -22,11 +22,13 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ▶️ Play/Pause/Prev/Next Controls
 * 🔀 Shuffle mode
 * 📤 Share button with social media preview
-* ⋮ More menu (Download, Repeat, Speed)
+* ⋮ More menu (Download, Repeat, Speed, Sleep Timer)
 * 🔁 Repeat mode (Off / All / One)
 * ⏩ Playback speed (1x, 1.25x, 1.5x, 2x)
+* 😴 Sleep Timer (5-60 min or end of track)
 * ⬇️ Track download (configurable per track)
 * 🎵 8 Visualizer types (Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Butterfly)
+* 🎨 Visualizer color customizable via Theme Manager
 * 👆 Double-click cover to cycle visualizers
 * ⏱️ Progress bar with seek functionality
 * 🌊 Waveform display with progress color
@@ -164,6 +166,13 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.0.1 =
+* 😴 Sleep Timer with live countdown (5, 10, 15, 30, 45, 60 min or end of track)
+* 🛠️ Stability improvements (error handling, validation, graceful degradation)
+* 🔧 Fixed jQuery-Migrate deprecation warning
+* ⋮ Improved More menu (fixed positioning, consistent styling)
+* 🎨 Menu stays visible and doesn't scroll with page
+
 = 2.0.0 =
 * 📤 Share button for social media sharing
 * ⋮ More menu with Download, Repeat and Speed options
@@ -242,6 +251,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+Sleep Timer! Set a timer (5-60 min) or stop after current track. Live countdown in menu. Stability improvements.
 
 = 2.0.0 =
 New Share button! Share tracks directly to social media with cover art preview. Cleaner UI with More menu.

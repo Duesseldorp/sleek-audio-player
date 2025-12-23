@@ -15,7 +15,104 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.0.0');
+define('SAP_VERSION', '2.0.1');
+define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
+
+/**
+ * Logging helper for debugging
+ */
+function sap_log($message, $data = null) {
+    if (!SAP_DEBUG) return;
+    
+    $log_message = '[SAP] ' . $message;
+    if ($data !== null) {
+        $log_message .= ' | Data: ' . (is_array($data) || is_object($data) ? wp_json_encode($data) : $data);
+    }
+    error_log($log_message);
+}
+
+/**
+ * Validate track data array
+ * @param array $track Track data
+ * @return array Sanitized track data with defaults
+ */
+function sap_validate_track($track) {
+    if (!is_array($track)) {
+        return null;
+    }
+    
+    return array(
+        'title' => isset($track['title']) ? sanitize_text_field($track['title']) : '',
+        'artist' => isset($track['artist']) ? sanitize_text_field($track['artist']) : '',
+        'url' => isset($track['url']) ? esc_url_raw($track['url']) : '',
+        'attachment_id' => isset($track['attachment_id']) ? absint($track['attachment_id']) : 0,
+        'cover_id' => isset($track['cover_id']) ? absint($track['cover_id']) : 0,
+        'cover_url' => isset($track['cover_url']) ? esc_url_raw($track['cover_url']) : '',
+        'spotify' => isset($track['spotify']) ? esc_url_raw($track['spotify']) : '',
+        'apple' => isset($track['apple']) ? esc_url_raw($track['apple']) : '',
+        'amazon' => isset($track['amazon']) ? esc_url_raw($track['amazon']) : '',
+        'downloadable' => !empty($track['downloadable']),
+        'duration' => isset($track['duration']) ? sanitize_text_field($track['duration']) : '',
+        'waveform' => isset($track['waveform']) && is_array($track['waveform']) ? $track['waveform'] : null,
+    );
+}
+
+/**
+ * Validate playlist tracks array
+ * @param mixed $tracks Tracks data from post meta
+ * @return array Validated tracks array
+ */
+function sap_validate_tracks($tracks) {
+    if (!is_array($tracks)) {
+        return array();
+    }
+    
+    $validated = array();
+    foreach ($tracks as $track) {
+        $valid_track = sap_validate_track($track);
+        if ($valid_track && !empty($valid_track['url'])) {
+            $validated[] = $valid_track;
+        }
+    }
+    
+    return $validated;
+}
+
+/**
+ * Safe database query wrapper with fallback for older WordPress versions
+ * @param string $query SQL query
+ * @param mixed ...$args Query arguments
+ * @return mixed Query result or false on error
+ */
+function sap_db_query($query, ...$args) {
+    global $wpdb;
+    
+    try {
+        // Check if using %i placeholder (WP 6.2+)
+        if (strpos($query, '%i') !== false) {
+            // Check WordPress version for %i support
+            global $wp_version;
+            if (version_compare($wp_version, '6.2', '<')) {
+                // Fallback: Replace %i with backtick-escaped table name
+                // This is a simplified fallback - works for single table queries
+                $query = preg_replace('/%i/', '`' . esc_sql($args[0]) . '`', $query, 1);
+                array_shift($args);
+                if (!empty($args)) {
+                    return $wpdb->prepare($query, ...$args);
+                }
+                return $query;
+            }
+        }
+        
+        if (!empty($args)) {
+            return $wpdb->prepare($query, ...$args);
+        }
+        return $query;
+    } catch (Exception $e) {
+        sap_log('Database query error', $e->getMessage());
+        return false;
+    }
+}
 define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
 
@@ -104,18 +201,33 @@ class SAP_Theme_Manager {
         ) $charset_collate;";
         
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
         
-        // Insert default theme if not exists
-        $existing = $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i WHERE is_default = 1", $table_name));
-        if (!$existing) {
-            $wpdb->insert($table_name, array(
-                'name' => 'Standard',
-                'colors' => json_encode(self::$default_theme['colors']),
-                'settings' => json_encode(self::$default_theme['settings']),
-                'is_default' => 1,
-            ));
+        try {
+            dbDelta($sql);
+        } catch (Exception $e) {
+            sap_log('Failed to create themes table', $e->getMessage());
+            return false;
         }
+        
+        // Insert default theme if not exists - use esc_sql for table name (compatible with all WP versions)
+        try {
+            $existing = $wpdb->get_var("SELECT COUNT(*) FROM `" . esc_sql($table_name) . "` WHERE is_default = 1");
+            if (!$existing) {
+                $result = $wpdb->insert($table_name, array(
+                    'name' => 'Standard',
+                    'colors' => wp_json_encode(self::$default_theme['colors']),
+                    'settings' => wp_json_encode(self::$default_theme['settings']),
+                    'is_default' => 1,
+                ));
+                if ($result === false) {
+                    sap_log('Failed to insert default theme', $wpdb->last_error);
+                }
+            }
+        } catch (Exception $e) {
+            sap_log('Error checking/inserting default theme', $e->getMessage());
+        }
+        
+        return true;
     }
     
     /**
@@ -148,14 +260,29 @@ class SAP_Theme_Manager {
      */
     public function get_all_themes() {
         global $wpdb;
-        $results = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY is_default DESC, name ASC", $this->table_name), ARRAY_A);
         
-        foreach ($results as &$theme) {
-            $theme['colors'] = json_decode($theme['colors'], true);
-            $theme['settings'] = json_decode($theme['settings'], true);
+        try {
+            // Use esc_sql for table name (compatible with all WP versions)
+            $results = $wpdb->get_results(
+                "SELECT * FROM `" . esc_sql($this->table_name) . "` ORDER BY is_default DESC, name ASC",
+                ARRAY_A
+            );
+            
+            if ($results === null) {
+                sap_log('Failed to get themes', $wpdb->last_error);
+                return array();
+            }
+            
+            foreach ($results as &$theme) {
+                $theme['colors'] = json_decode($theme['colors'], true) ?: array();
+                $theme['settings'] = json_decode($theme['settings'], true) ?: array();
+            }
+            
+            return $results;
+        } catch (Exception $e) {
+            sap_log('Exception getting themes', $e->getMessage());
+            return array();
         }
-        
-        return $results;
     }
     
     /**
@@ -163,14 +290,27 @@ class SAP_Theme_Manager {
      */
     public function get_theme($id) {
         global $wpdb;
-        $theme = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$this->table_name} WHERE id = %d", $id), ARRAY_A);
         
-        if ($theme) {
-            $theme['colors'] = json_decode($theme['colors'], true);
-            $theme['settings'] = json_decode($theme['settings'], true);
+        if (!$id || !is_numeric($id)) {
+            return null;
         }
         
-        return $theme;
+        try {
+            $theme = $wpdb->get_row(
+                $wpdb->prepare("SELECT * FROM `" . esc_sql($this->table_name) . "` WHERE id = %d", absint($id)),
+                ARRAY_A
+            );
+            
+            if ($theme) {
+                $theme['colors'] = json_decode($theme['colors'], true) ?: array();
+                $theme['settings'] = json_decode($theme['settings'], true) ?: array();
+            }
+            
+            return $theme;
+        } catch (Exception $e) {
+            sap_log('Exception getting theme', $e->getMessage());
+            return null;
+        }
     }
     
     /**
@@ -188,7 +328,10 @@ class SAP_Theme_Manager {
         
         // Return default theme
         global $wpdb;
-        $theme = $wpdb->get_row($wpdb->prepare("SELECT * FROM %i WHERE is_default = 1", $this->table_name), ARRAY_A);
+        $theme = $wpdb->get_row(
+            "SELECT * FROM `" . esc_sql($this->table_name) . "` WHERE is_default = 1",
+            ARRAY_A
+        );
         
         if ($theme) {
             $theme['colors'] = json_decode($theme['colors'], true);
@@ -1325,9 +1468,9 @@ class SAP_Theme_Manager {
             
             // Load first theme on init
             if ($('.sap-theme-item').length) {
-                $('.sap-theme-item.active').first().click();
+                $('.sap-theme-item.active').first().trigger('click');
                 if (!$('.sap-theme-item.editing').length) {
-                    $('.sap-theme-item').first().click();
+                    $('.sap-theme-item').first().trigger('click');
                 }
             }
         });
@@ -3040,14 +3183,35 @@ class Simple_Audio_Player {
         }
 
         $tracks = get_post_meta($post_id, '_sap_tracks', true);
+        
+        // Validate and sanitize tracks using helper function
+        $tracks = sap_validate_tracks($tracks);
+        
         if (empty($tracks)) {
+            sap_log('No valid tracks found for playlist', $post_id);
             return '<p>' . __('No tracks found.', 'simple-audio-player') . '</p>';
         }
         
         // Apply URL protection or CDN URLs to audio
         $url_protection = get_option('sap_url_protection', false);
+        $valid_tracks = array();
         
-        foreach ($tracks as &$track) {
+        foreach ($tracks as $track) {
+            // Skip tracks without valid URL
+            if (empty($track['url'])) {
+                sap_log('Skipping track without URL', $track['title']);
+                continue;
+            }
+            
+            // Verify attachment exists if attachment_id is set
+            if (!empty($track['attachment_id'])) {
+                $attachment = get_post($track['attachment_id']);
+                if (!$attachment || $attachment->post_type !== 'attachment') {
+                    sap_log('Attachment not found, using stored URL', $track['attachment_id']);
+                    // Keep the stored URL as fallback
+                }
+            }
+            
             if (!empty($track['url'])) {
                 if ($url_protection && !empty($track['attachment_id'])) {
                     // Use obfuscated streaming URL (bypasses CDN)
@@ -3057,17 +3221,24 @@ class Simple_Audio_Player {
                     $track['url'] = self::cdn_url($track['url']);
                 }
             }
+            
             // Handle cover: prioritize cover_id (always fresh URL), fallback to cover_url
             if (!empty($track['cover_id'])) {
-                // Generate fresh URL from attachment ID (most reliable)
-                $cover_from_id = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
-                if ($cover_from_id) {
-                    $track['cover_url'] = self::cdn_url($cover_from_id);
+                // Verify cover attachment exists
+                $cover_attachment = get_post($track['cover_id']);
+                if ($cover_attachment && $cover_attachment->post_type === 'attachment') {
+                    $cover_from_id = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
+                    if ($cover_from_id) {
+                        $track['cover_url'] = self::cdn_url($cover_from_id);
+                    }
+                } else {
+                    sap_log('Cover attachment not found', $track['cover_id']);
                 }
             } elseif (!empty($track['cover_url'])) {
                 // Fallback to stored URL if no cover_id
                 $track['cover_url'] = self::cdn_url($track['cover_url']);
             }
+            
             // Add waveform data if available
             if (!empty($track['attachment_id'])) {
                 $waveform = SAP_Waveform_Manager::get_waveform($track['attachment_id']);
@@ -3075,8 +3246,18 @@ class Simple_Audio_Player {
                     $track['waveform'] = $waveform;
                 }
             }
+            
+            $valid_tracks[] = $track;
         }
-        unset($track);
+        
+        // Use validated tracks
+        $tracks = $valid_tracks;
+        
+        // Final check - ensure we have at least one playable track
+        if (empty($tracks)) {
+            sap_log('No playable tracks after validation', $post_id);
+            return '<p>' . __('No playable tracks found.', 'simple-audio-player') . '</p>';
+        }
 
         $cover = self::cdn_url(get_the_post_thumbnail_url($post_id, 'medium'));
         $title = get_the_title($post_id);
@@ -3196,6 +3377,21 @@ class Simple_Audio_Player {
                                 <svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44z"/><path d="M10.59 15.41a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg>
                                 <span class="sap-speed-label">Speed: 1x</span>
                             </button>
+                            <div class="sap-more-divider"></div>
+                            <button type="button" class="sap-more-item sap-sleep-timer" data-action="sleep">
+                                <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+                                <span class="sap-sleep-label">Sleep Timer: Off</span>
+                            </button>
+                            <div class="sap-sleep-submenu" style="display:none;">
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0">Off</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="5">5 Min</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="10">10 Min</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="15">15 Min</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="30">30 Min</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="45">45 Min</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60">1 Hour</button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true">End of Track</button>
+                            </div>
                             <div class="sap-more-divider sap-stream-divider" style="display:none;"></div>
                             <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-spotify" style="display:none;">
                                 <span>Spotify</span>
