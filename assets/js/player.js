@@ -769,6 +769,9 @@
 
         function startVisualizer() {
             try {
+                // Stop any existing animation loop first to prevent multiple loops
+                stopVisualizer();
+                
                 initAudioContext();
                 if (audioContext && audioContext.state === 'suspended') {
                     audioContext.resume().catch(e => {
