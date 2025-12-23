@@ -374,15 +374,17 @@
     background: var(--sap-accent);
 }
 
-.sap-btn:active {
+.sap-btn:active,
+.sap-btn.sap-tapped {
     transform: scale(0.9);
-    background: var(--sap-accent-light);
+    background: var(--sap-white) !important;
+    color: var(--sap-accent) !important;
     transition: transform 0.05s ease-out, background 0.05s ease-out;
 }
 
 .sap-btn:focus {
     outline: none;
-    background: var(--sap-accent);
+    background: var(--sap-accent) !important;
 }
 
 .sap-btn svg {
@@ -422,15 +424,17 @@
     background: var(--sap-accent);
 }
 
-.sap-play:active {
+.sap-play:active,
+.sap-play.sap-tapped {
     transform: scale(0.9);
-    background: var(--sap-accent-light);
+    background: var(--sap-white) !important;
+    color: var(--sap-accent) !important;
     transition: transform 0.05s ease-out, background 0.05s ease-out;
 }
 
 .sap-play:focus {
     outline: none;
-    background: var(--sap-accent);
+    background: var(--sap-accent) !important;
 }
 
 .sap-play svg {
@@ -442,22 +446,18 @@
 .sap-shuffle.active,
 .sap-repeat.active,
 .sap-speed.active {
-    color: var(--sap-accent);
+    background: var(--sap-accent-light);
+    color: var(--sap-white);
 }
 
-.sap-shuffle.active::before,
-.sap-repeat.active::before,
-.sap-speed.active::before {
-    opacity: 0.18;
-    transform: scale(1);
-    background: var(--sap-accent);
-}
-
-.sap-shuffle.active:hover::before,
-.sap-repeat.active:hover::before,
-.sap-speed.active:hover::before {
-    background: var(--sap-accent);
-    opacity: 0.25;
+.sap-shuffle.active:active,
+.sap-shuffle.active.sap-tapped,
+.sap-repeat.active:active,
+.sap-repeat.active.sap-tapped,
+.sap-speed.active:active,
+.sap-speed.active.sap-tapped {
+    background: var(--sap-white) !important;
+    color: var(--sap-accent) !important;
 }
 
 /* Speed Button */
@@ -738,8 +738,21 @@
     color: var(--sap-white);
 }
 
+.sap-more-item:active,
+.sap-more-item.sap-tapped {
+    background: var(--sap-accent) !important;
+    color: var(--sap-white) !important;
+    transform: scale(0.97);
+}
+
 .sap-more-item.active {
     color: var(--sap-accent);
+}
+
+.sap-more-item.active:active,
+.sap-more-item.active.sap-tapped {
+    background: var(--sap-white) !important;
+    color: var(--sap-accent) !important;
 }
 
 .sap-more-item svg {
@@ -1096,16 +1109,62 @@
 .sap-player.is-playing .sap-icon-play { display: none; }
 .sap-player.is-playing .sap-icon-pause { display: block; }
 
-/* ===== Touch Devices - Reset focus after tap ===== */
+/* ===== Touch Devices - Only .sap-tapped shows highlight ===== */
 @media (hover: none), (pointer: coarse) {
+    /* Disable CSS :active/:focus highlight - JS handles it via .sap-tapped */
+    .sap-btn:active,
     .sap-btn:focus,
     .sap-btn:focus-visible,
+    .sap-play:active,
     .sap-play:focus,
-    .sap-play:focus-visible {
+    .sap-play:focus-visible,
+    .sap-shuffle.active:active,
+    .sap-shuffle.active:focus,
+    .sap-repeat.active:active,
+    .sap-repeat.active:focus,
+    .sap-speed.active:active,
+    .sap-speed.active:focus {
         background: var(--sap-accent) !important;
         color: var(--sap-white) !important;
         transform: none !important;
         outline: none !important;
+    }
+    
+    /* Active toggle buttons keep their light background */
+    .sap-shuffle.active,
+    .sap-repeat.active,
+    .sap-speed.active {
+        background: var(--sap-accent-light) !important;
+    }
+    
+    /* More menu items: reset active/focus */
+    .sap-more-item:active,
+    .sap-more-item:focus,
+    .sap-more-item.active:active,
+    .sap-more-item.active:focus {
+        background: transparent !important;
+        transform: none !important;
+    }
+    
+    /* Only .sap-tapped class shows highlight (controlled by JS touch events) */
+    .sap-btn.sap-tapped,
+    .sap-play.sap-tapped,
+    .sap-shuffle.active.sap-tapped,
+    .sap-repeat.active.sap-tapped,
+    .sap-speed.active.sap-tapped {
+        background: var(--sap-white) !important;
+        color: var(--sap-accent) !important;
+        transform: scale(0.9) !important;
+    }
+    
+    .sap-more-item.sap-tapped {
+        background: var(--sap-accent) !important;
+        color: var(--sap-white) !important;
+    }
+    
+    .sap-more-item.active.sap-tapped {
+        background: var(--sap-white) !important;
+        color: var(--sap-accent) !important;
     }
 }
 

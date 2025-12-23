@@ -44,13 +44,51 @@
     });
 
     function initPlayer(playerEl) {
-        // Helper: Remove focus immediately after click (for mobile)
+        // Helper: Remove focus after click
         function blurButton(btn) {
             if (btn) {
                 btn.blur();
-                setTimeout(function() { btn.blur(); }, 10);
-                setTimeout(function() { btn.blur(); }, 100);
+                document.activeElement && document.activeElement.blur();
             }
+        }
+        
+        // Setup touch handling for all buttons (mobile highlight fix)
+        function setupTouchButton(btn) {
+            if (!btn) return;
+            
+            var tapTimeout;
+            
+            btn.addEventListener('touchstart', function(e) {
+                var self = this;
+                clearTimeout(tapTimeout);
+                self.classList.add('sap-tapped');
+            }, { passive: true });
+            
+            btn.addEventListener('touchend', function(e) {
+                var self = this;
+                // Small delay to show the tap effect, then remove
+                tapTimeout = setTimeout(function() {
+                    self.classList.remove('sap-tapped');
+                    self.blur();
+                    // Also blur any focused element
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                }, 100);
+            }, { passive: true });
+            
+            btn.addEventListener('touchcancel', function() {
+                this.classList.remove('sap-tapped');
+            }, { passive: true });
+            
+            // Also handle click for hybrid devices
+            btn.addEventListener('click', function() {
+                var self = this;
+                setTimeout(function() {
+                    self.classList.remove('sap-tapped');
+                    self.blur();
+                }, 150);
+            });
         }
         
         const audio = playerEl.querySelector('.sap-audio');
@@ -98,6 +136,12 @@
         const coverTrack = playerEl.querySelector('.sap-cover-track');
         const coverSlides = playerEl.querySelectorAll('.sap-cover-slide');
                 const visualizerCanvas = playerEl.querySelector('.sap-visualizer');
+        
+        // Setup touch handlers for all control buttons (mobile highlight fix)
+        [playBtn, prevBtn, nextBtn, shuffleBtn, shareBtn, moreBtn, volumeBtn].forEach(setupTouchButton);
+        
+        // Setup touch handlers for more menu items
+        [downloadBtn, repeatBtn, speedBtn, streamSpotify, streamApple, streamAmazon].forEach(setupTouchButton);
         
         // Icons
         const iconPlay = playerEl.querySelector('.sap-icon-play');
