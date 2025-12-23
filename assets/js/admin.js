@@ -93,9 +93,9 @@
             frame.on('select', function() {
                 var attachment = frame.state().get('selection').first().toJSON();
                 
-                var thumbUrl = attachment.sizes && attachment.sizes.thumbnail 
-                    ? attachment.sizes.thumbnail.url 
-                    : attachment.url;
+                var thumbUrl = attachment.sizes && attachment.sizes.medium 
+                    ? attachment.sizes.medium.url 
+                    : (attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url);
                 
                 $row.find('.sap-track-cover-id').val(attachment.id);
                 $row.find('.sap-track-cover-url').val(attachment.url);

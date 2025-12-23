@@ -8,6 +8,7 @@
     --sap-bg: #0a1118;
     --sap-card: #0f1a24;
     --sap-card-hover: #162230;
+    --sap-card-active: #1e2d3d;
     --sap-border: rgba(79, 128, 156, 0.15);
     --sap-accent: #e85d3d;
     --sap-accent-light: #f4795d;
@@ -357,39 +358,31 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--sap-gray-300);
-    background: transparent;
-    transition: color 0.12s ease-out, transform 0.12s ease-out;
+    color: var(--sap-white);
+    background: var(--sap-accent);
+    transition: background 0.12s ease-out, transform 0.12s ease-out;
     position: relative;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
 }
 
 .sap-btn::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: var(--sap-accent);
-    opacity: 0;
-    transition: opacity 0.12s ease-out;
+    display: none;
 }
 
 .sap-btn:hover {
-    color: var(--sap-white);
-}
-
-.sap-btn:hover::before {
-    opacity: 0.85;
+    background: var(--sap-accent);
 }
 
 .sap-btn:active {
     transform: scale(0.9);
-    transition: transform 0.05s ease-out;
+    background: var(--sap-accent-light);
+    transition: transform 0.05s ease-out, background 0.05s ease-out;
 }
 
-.sap-btn:active::before {
-    opacity: 1;
+.sap-btn:focus {
+    outline: none;
+    background: var(--sap-accent);
 }
 
 .sap-btn svg {
@@ -426,13 +419,18 @@
 }
 
 .sap-play:hover {
-    background: var(--sap-accent-light);
+    background: var(--sap-accent);
 }
 
 .sap-play:active {
     transform: scale(0.9);
+    background: var(--sap-accent-light);
+    transition: transform 0.05s ease-out, background 0.05s ease-out;
+}
+
+.sap-play:focus {
+    outline: none;
     background: var(--sap-accent);
-    transition: transform 0.05s ease-out;
 }
 
 .sap-play svg {
@@ -1097,6 +1095,19 @@
 .sap-icon-pause { display: none; }
 .sap-player.is-playing .sap-icon-play { display: none; }
 .sap-player.is-playing .sap-icon-pause { display: block; }
+
+/* ===== Touch Devices - Reset focus after tap ===== */
+@media (hover: none), (pointer: coarse) {
+    .sap-btn:focus,
+    .sap-btn:focus-visible,
+    .sap-play:focus,
+    .sap-play:focus-visible {
+        background: var(--sap-accent) !important;
+        color: var(--sap-white) !important;
+        transform: none !important;
+        outline: none !important;
+    }
+}
 
 /* ===== Responsive ===== */
 @media (max-width: 480px) {

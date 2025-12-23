@@ -159,6 +159,7 @@ class SAP_Theme_Manager {
         'settings' => array(
             'sap-radius' => '16px',
             'sap-radius-sm' => '10px',
+            'sap-transition' => 'cubic-bezier(0.4, 0, 0.2, 1)',
         ),
     );
     
@@ -584,11 +585,31 @@ class SAP_Theme_Manager {
         $settings_labels = array(
             'sap-radius' => 'Border Radius',
             'sap-radius-sm' => 'Border Radius (Small)',
+            'sap-transition' => 'Animation Timing',
         );
         ?>
         <style>
+            :root {
+                --tm-accent: #6366f1;
+                --tm-accent-light: #818cf8;
+                --tm-accent-bg: #eef2ff;
+                --tm-bg: #f8fafc;
+                --tm-card: #ffffff;
+                --tm-border: #e2e8f0;
+                --tm-text: #1e293b;
+                --tm-text-secondary: #64748b;
+                --tm-muted: #94a3b8;
+                --tm-success: #22c55e;
+                --tm-success-bg: #f0fdf4;
+                --tm-danger: #ef4444;
+                --tm-danger-bg: #fef2f2;
+                --tm-warning: #f59e0b;
+                --tm-warning-bg: #fef3c7;
+                --tm-radius: 12px;
+                --tm-radius-sm: 8px;
+            }
             .sap-theme-manager {
-                max-width: 1400px;
+                max-width: 1600px;
                 margin: 20px auto;
                 padding: 0 20px;
             }
@@ -597,58 +618,72 @@ class SAP_Theme_Manager {
                 justify-content: space-between;
                 align-items: center;
                 margin-bottom: 30px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid var(--tm-border);
             }
             .sap-theme-header h1 {
                 margin: 0;
                 font-size: 28px;
-                font-weight: 600;
+                font-weight: 700;
+                color: var(--tm-text);
+                letter-spacing: -0.02em;
+            }
+            .sap-theme-header-actions {
+                display: flex;
+                gap: 10px;
             }
             .sap-theme-grid {
                 display: grid;
-                grid-template-columns: 320px 1fr;
+                grid-template-columns: 340px 1fr;
                 gap: 30px;
             }
             .sap-themes-list {
-                background: #fff;
-                border: 1px solid #ddd;
-                border-radius: 8px;
+                background: var(--tm-card);
+                border: 1px solid var(--tm-border);
+                border-radius: var(--tm-radius);
                 overflow: hidden;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             }
             .sap-themes-list-header {
-                padding: 16px 20px;
-                background: #f8f9fa;
-                border-bottom: 1px solid #ddd;
+                padding: 18px 20px;
+                background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+                border-bottom: 1px solid var(--tm-border);
                 font-weight: 600;
+                font-size: 13px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: var(--tm-text);
             }
             .sap-theme-item {
                 padding: 16px 20px;
-                border-bottom: 1px solid #eee;
+                border-bottom: 1px solid var(--tm-border);
                 cursor: pointer;
-                transition: background 0.2s;
+                transition: all 0.2s ease;
                 display: flex;
                 align-items: center;
-                gap: 12px;
+                gap: 14px;
             }
             .sap-theme-item:last-child {
                 border-bottom: none;
             }
             .sap-theme-item:hover {
-                background: #f8f9fa;
+                background: var(--tm-accent-bg);
             }
             .sap-theme-item.active {
-                background: #e7f3ff;
-                border-left: 3px solid #2271b1;
+                background: var(--tm-accent-bg);
+                border-left: 4px solid var(--tm-accent);
             }
             .sap-theme-item.editing {
-                background: #fff8e5;
-                border-left: 3px solid #dba617;
+                background: var(--tm-warning-bg);
+                border-left: 4px solid var(--tm-warning);
             }
             .sap-theme-swatch {
-                width: 40px;
-                height: 40px;
-                border-radius: 8px;
+                width: 44px;
+                height: 44px;
+                border-radius: var(--tm-radius-sm);
                 flex-shrink: 0;
-                border: 2px solid #ddd;
+                border: 2px solid var(--tm-border);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
             .sap-theme-info {
                 flex: 1;
@@ -656,92 +691,119 @@ class SAP_Theme_Manager {
             .sap-theme-name {
                 font-weight: 600;
                 margin-bottom: 2px;
+                color: var(--tm-text);
             }
             .sap-theme-badge {
                 display: inline-block;
                 font-size: 10px;
-                padding: 2px 6px;
-                border-radius: 4px;
+                padding: 3px 8px;
+                border-radius: 12px;
                 margin-left: 8px;
-                font-weight: 500;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.03em;
             }
             .sap-badge-default {
-                background: #e0e0e0;
-                color: #666;
+                background: var(--tm-border);
+                color: var(--tm-text-secondary);
             }
             .sap-badge-active {
-                background: #d4edda;
-                color: #155724;
+                background: var(--tm-success-bg);
+                color: var(--tm-success);
             }
             .sap-theme-editor {
-                background: #fff;
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 24px;
+                background: var(--tm-card);
+                border: 1px solid var(--tm-border);
+                border-radius: var(--tm-radius);
+                padding: 28px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             }
             .sap-editor-header {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 24px;
-                padding-bottom: 16px;
-                border-bottom: 1px solid #eee;
+                margin-bottom: 28px;
+                padding-bottom: 20px;
+                border-bottom: 1px solid var(--tm-border);
             }
             .sap-editor-title {
-                font-size: 18px;
-                font-weight: 600;
+                font-size: 20px;
+                font-weight: 700;
+                color: var(--tm-text);
             }
             .sap-editor-actions {
                 display: flex;
-                gap: 8px;
+                gap: 10px;
             }
             .sap-color-section {
-                margin-bottom: 24px;
+                margin-bottom: 28px;
             }
             .sap-color-section h3 {
                 font-size: 14px;
                 font-weight: 600;
                 margin-bottom: 16px;
-                color: #333;
+                color: var(--tm-text);
+                padding-bottom: 10px;
+                border-bottom: 1px solid var(--tm-border);
             }
             .sap-color-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                gap: 12px;
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                gap: 14px;
             }
             .sap-color-field {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                background: #f8f9fa;
-                padding: 8px 12px;
-                border-radius: 6px;
-                border: 1px solid #eee;
+                gap: 10px;
+                background: var(--tm-bg);
+                padding: 10px 14px;
+                border-radius: var(--tm-radius-sm);
+                border: 1px solid var(--tm-border);
+                transition: all 0.2s ease;
+            }
+            .sap-color-field:hover {
+                border-color: var(--tm-accent);
+                box-shadow: 0 0 0 3px var(--tm-accent-bg);
             }
             .sap-color-field label {
-                width: 100px;
+                width: 110px;
                 flex-shrink: 0;
                 font-size: 12px;
-                color: #555;
+                color: var(--tm-text-secondary);
                 line-height: 1.3;
+                font-weight: 500;
             }
             .sap-color-field input[type="color"] {
-                width: 36px;
-                height: 36px;
+                width: 40px;
+                height: 40px;
                 padding: 2px;
-                border: 1px solid #ddd;
-                border-radius: 6px;
+                border: 2px solid var(--tm-border);
+                border-radius: var(--tm-radius-sm);
+                cursor: pointer;
+                transition: all 0.2s ease;
+            }
+            .sap-color-field input[type="color"]:hover {
+                border-color: var(--tm-accent);
+                transform: scale(1.05);
                 cursor: pointer;
                 flex-shrink: 0;
             }
             .sap-color-field input[type="text"] {
                 flex: 1;
                 min-width: 0;
-                padding: 8px 10px;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                font-family: monospace;
+                padding: 10px 12px;
+                border: 1px solid var(--tm-border);
+                border-radius: var(--tm-radius-sm);
+                font-family: 'SF Mono', Monaco, 'Courier New', monospace;
                 font-size: 12px;
+                color: var(--tm-text);
+                background: var(--tm-card);
+                transition: all 0.2s ease;
+            }
+            .sap-color-field input[type="text"]:focus {
+                border-color: var(--tm-accent);
+                outline: none;
+                box-shadow: 0 0 0 3px var(--tm-accent-bg);
             }
             .sap-theme-preview {
                 margin-top: 30px;
@@ -924,75 +986,103 @@ class SAP_Theme_Manager {
                 color: var(--preview-gray-400, rgba(120, 150, 170, 0.4));
             }
             .sap-name-field {
-                margin-bottom: 24px;
+                margin-bottom: 28px;
             }
             .sap-name-field label {
                 display: block;
                 font-weight: 600;
-                margin-bottom: 8px;
+                margin-bottom: 10px;
+                color: var(--tm-text);
+                font-size: 14px;
             }
             .sap-name-field input {
                 width: 100%;
-                max-width: 300px;
-                padding: 10px 14px;
-                border: 1px solid #ddd;
-                border-radius: 6px;
-                font-size: 14px;
+                max-width: 320px;
+                padding: 12px 16px;
+                border: 1px solid var(--tm-border);
+                border-radius: var(--tm-radius-sm);
+                font-size: 15px;
+                color: var(--tm-text);
+                background: var(--tm-bg);
+                transition: all 0.2s ease;
+            }
+            .sap-name-field input:focus {
+                border-color: var(--tm-accent);
+                outline: none;
+                box-shadow: 0 0 0 3px var(--tm-accent-bg);
+                background: var(--tm-card);
             }
             .sap-btn {
-                padding: 10px 20px;
-                border-radius: 6px;
+                padding: 11px 22px;
+                border-radius: var(--tm-radius-sm);
                 font-size: 13px;
-                font-weight: 500;
+                font-weight: 600;
                 cursor: pointer;
                 border: none;
-                transition: all 0.2s;
+                transition: all 0.2s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .sap-btn:hover {
+                transform: translateY(-1px);
+            }
+            .sap-btn:active {
+                transform: translateY(0);
             }
             .sap-btn-primary {
-                background: #2271b1;
+                background: linear-gradient(135deg, var(--tm-accent) 0%, var(--tm-accent-light) 100%);
                 color: #fff;
+                box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
             }
             .sap-btn-primary:hover {
-                background: #135e96;
+                box-shadow: 0 4px 16px rgba(99, 102, 241, 0.35);
             }
             .sap-btn-secondary {
-                background: #f0f0f0;
-                color: #333;
-                border: 1px solid #ddd;
+                background: var(--tm-bg);
+                color: var(--tm-text-secondary);
+                border: 1px solid var(--tm-border);
             }
             .sap-btn-secondary:hover {
-                background: #e5e5e5;
+                background: var(--tm-card);
+                border-color: var(--tm-accent);
+                color: var(--tm-accent);
             }
             .sap-btn-danger {
-                background: #dc3545;
+                background: linear-gradient(135deg, var(--tm-danger) 0%, #f87171 100%);
                 color: #fff;
+                box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
             }
             .sap-btn-danger:hover {
-                background: #c82333;
+                box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
             }
             .sap-btn-success {
-                background: #28a745;
+                background: linear-gradient(135deg, var(--tm-success) 0%, #4ade80 100%);
                 color: #fff;
+                box-shadow: 0 2px 8px rgba(34, 197, 94, 0.25);
             }
             .sap-btn-success:hover {
-                background: #218838;
+                box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35);
             }
             .sap-new-theme-btn {
                 width: 100%;
-                padding: 14px;
+                padding: 18px;
                 text-align: center;
-                background: #f8f9fa;
-                border: 2px dashed #ddd;
-                border-radius: 8px;
-                color: #666;
+                background: var(--tm-bg);
+                border: 2px dashed var(--tm-border);
+                border-radius: var(--tm-radius);
+                color: var(--tm-text-secondary);
                 cursor: pointer;
-                margin-top: 12px;
-                transition: all 0.2s;
+                margin-top: 16px;
+                transition: all 0.2s ease;
+                font-weight: 600;
+                font-size: 14px;
             }
             .sap-new-theme-btn:hover {
-                border-color: #2271b1;
-                color: #2271b1;
-                background: #f0f7fc;
+                border-color: var(--tm-accent);
+                color: var(--tm-accent);
+                background: var(--tm-accent-bg);
+                transform: translateY(-1px);
             }
             @media (max-width: 900px) {
                 .sap-theme-grid {
@@ -1004,6 +1094,11 @@ class SAP_Theme_Manager {
         <div class="sap-theme-manager">
             <div class="sap-theme-header">
                 <h1>🎨 Theme Manager</h1>
+                <div class="sap-theme-header-actions">
+                    <button type="button" class="sap-btn sap-btn-secondary" id="sap-import-theme">📥 Import</button>
+                    <button type="button" class="sap-btn sap-btn-secondary" id="sap-export-theme">📤 Export</button>
+                    <input type="file" id="sap-import-file" accept=".json" style="display:none;">
+                </div>
             </div>
             
             <div class="sap-theme-grid">
@@ -1473,6 +1568,83 @@ class SAP_Theme_Manager {
                     $('.sap-theme-item').first().trigger('click');
                 }
             }
+            
+            // ===== Export Theme =====
+            $('#sap-export-theme').on('click', function() {
+                var name = $('#sap-theme-name').val() || 'theme';
+                var themeData = {
+                    name: name,
+                    version: '1.0',
+                    exported: new Date().toISOString(),
+                    colors: {},
+                    settings: {}
+                };
+                
+                // Collect colors
+                $('.sap-color-input').each(function() {
+                    themeData.colors[$(this).data('var')] = $(this).val();
+                });
+                
+                // Collect settings
+                $('.sap-setting-input').each(function() {
+                    themeData.settings[$(this).data('var')] = $(this).val();
+                });
+                
+                // Create download
+                var json = JSON.stringify(themeData, null, 2);
+                var blob = new Blob([json], {type: 'application/json'});
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'sap-theme-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+            
+            // ===== Import Theme =====
+            $('#sap-import-theme').on('click', function() {
+                $('#sap-import-file').trigger('click');
+            });
+            
+            $('#sap-import-file').on('change', function(e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        var themeData = JSON.parse(e.target.result);
+                        
+                        // Validate structure
+                        if (!themeData.colors || !themeData.settings) {
+                            alert('Invalid theme file: missing colors or settings.');
+                            return;
+                        }
+                        
+                        // Load imported theme into editor
+                        loadTheme({
+                            id: '', // New theme
+                            name: themeData.name ? themeData.name + ' (Imported)' : 'Imported Theme',
+                            colors: themeData.colors,
+                            settings: themeData.settings,
+                            is_default: 0
+                        });
+                        
+                        // Clear active editing state
+                        $('.sap-theme-item').removeClass('editing');
+                        
+                        alert('Theme imported! Click "Save" to save it.');
+                    } catch (err) {
+                        alert('Error parsing theme file: ' + err.message);
+                    }
+                };
+                reader.readAsText(file);
+                
+                // Reset file input
+                $(this).val('');
+            });
         });
         </script>
         <?php
@@ -2550,6 +2722,12 @@ class Simple_Audio_Player {
             'default' => true,
         ));
         
+        register_setting('sap_settings', 'sap_remember_position', array(
+            'type' => 'boolean',
+            'sanitize_callback' => 'rest_sanitize_boolean',
+            'default' => false,
+        ));
+        
         register_setting('sap_settings', 'sap_visualizer_type', array(
             'type' => 'string',
             'sanitize_callback' => 'sanitize_text_field',
@@ -2640,6 +2818,25 @@ class Simple_Audio_Player {
                             <p class="description">
                                 When enabled, clicking the cover image starts the first track.<br>
                                 Disable this to prevent accidental playback on mobile devices.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row">
+                            <label for="sap_remember_position">⏱️ Remember Position</label>
+                        </th>
+                        <td>
+                            <label>
+                                <input type="checkbox" 
+                                       id="sap_remember_position" 
+                                       name="sap_remember_position" 
+                                       value="1"
+                                       <?php checked(get_option('sap_remember_position', false)); ?> />
+                                Remember playback position
+                            </label>
+                            <p class="description">
+                                When enabled, the player remembers where the listener stopped.<br>
+                                Playback resumes from that position on the next visit.
                             </p>
                         </td>
                     </tr>
@@ -2764,6 +2961,7 @@ class Simple_Audio_Player {
         wp_localize_script('simple-audio-player', 'sapSettings', array(
             'umamiTracking' => (bool) get_option('sap_umami_tracking', false),
             'coverClickPlay' => (bool) get_option('sap_cover_click_play', true),
+            'rememberPosition' => (bool) get_option('sap_remember_position', false),
             'visualizerType' => get_option('sap_visualizer_type', 'bars'),
         ));
     }
@@ -2857,7 +3055,7 @@ class Simple_Audio_Player {
                         $admin_cover_url = '';
                         // Prioritize cover_id (always fresh URL from attachment)
                         if (!empty($track['cover_id'])) {
-                            $admin_cover_url = wp_get_attachment_image_url(intval($track['cover_id']), 'thumbnail');
+                            $admin_cover_url = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
                         }
                         // Fallback to stored cover_url if no cover_id
                         if (empty($admin_cover_url) && !empty($track['cover_url'])) {
@@ -3086,7 +3284,7 @@ class Simple_Audio_Player {
             // Priority: cover_id (fresh URL) > cover_url > playlist cover
             $track_cover = '';
             if (!empty($track['cover_id'])) {
-                $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
+                $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'large');
             }
             if (empty($track_cover) && !empty($track['cover_url'])) {
                 $track_cover = esc_url_raw($track['cover_url']);
@@ -3227,7 +3425,7 @@ class Simple_Audio_Player {
                 // Verify cover attachment exists
                 $cover_attachment = get_post($track['cover_id']);
                 if ($cover_attachment && $cover_attachment->post_type === 'attachment') {
-                    $cover_from_id = wp_get_attachment_image_url(intval($track['cover_id']), 'medium');
+                    $cover_from_id = wp_get_attachment_image_url(intval($track['cover_id']), 'large');
                     if ($cover_from_id) {
                         $track['cover_url'] = self::cdn_url($cover_from_id);
                     }
@@ -3259,7 +3457,7 @@ class Simple_Audio_Player {
             return '<p>' . __('No playable tracks found.', 'simple-audio-player') . '</p>';
         }
 
-        $cover = self::cdn_url(get_the_post_thumbnail_url($post_id, 'medium'));
+        $cover = self::cdn_url(get_the_post_thumbnail_url($post_id, 'large'));
         $title = get_the_title($post_id);
         $spotify = get_post_meta($post_id, '_sap_spotify', true);
         $apple = get_post_meta($post_id, '_sap_apple', true);

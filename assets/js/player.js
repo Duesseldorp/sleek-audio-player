@@ -44,6 +44,15 @@
     });
 
     function initPlayer(playerEl) {
+        // Helper: Remove focus immediately after click (for mobile)
+        function blurButton(btn) {
+            if (btn) {
+                btn.blur();
+                setTimeout(function() { btn.blur(); }, 10);
+                setTimeout(function() { btn.blur(); }, 100);
+            }
+        }
+        
         const audio = playerEl.querySelector('.sap-audio');
         
         // Register audio element globally
@@ -130,6 +139,9 @@
         let lastProgressSave = 0;
         
         function saveProgress() {
+            // Check if feature is enabled
+            if (typeof sapSettings === 'undefined' || !sapSettings.rememberPosition) return;
+            
             // Throttle saves to every 5 seconds
             const now = Date.now();
             if (now - lastProgressSave < 5000) return;
@@ -147,6 +159,9 @@
         }
         
         function loadProgress() {
+            // Check if feature is enabled
+            if (typeof sapSettings === 'undefined' || !sapSettings.rememberPosition) return null;
+            
             try {
                 const saved = localStorage.getItem(progressKey);
                 if (!saved) return null;
@@ -1224,7 +1239,7 @@
             overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,17,24,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;cursor:pointer;overflow:hidden;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
             
             const btn = overlay.querySelector('.sap-play-overlay-btn');
-            btn.style.cssText = 'width:80px;height:80px;background:var(--sap-accent,#e85d3d);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;box-shadow:0 0 30px var(--sap-accent-glow,rgba(232,93,61,0.35));transition:transform 0.2s ease,box-shadow 0.2s ease;';
+            btn.style.cssText = 'width:80px;height:80px;background:var(--sap-accent,#e85d3d);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:16px;transition:transform 0.2s ease,background 0.2s ease;';
             
             const svg = btn.querySelector('svg');
             svg.style.cssText = 'width:36px;height:36px;fill:#fff;margin-left:4px;';
@@ -1248,24 +1263,24 @@
 
         if (playBtn) playBtn.addEventListener('click', function() {
             togglePlay();
-            this.blur();
+            blurButton(this);
         });
         if (prevBtn) prevBtn.addEventListener('click', function() {
             playPrev();
-            this.blur();
+            blurButton(this);
         });
         if (nextBtn) nextBtn.addEventListener('click', function() {
             playNext();
-            this.blur();
+            blurButton(this);
         });
         if (shuffleBtn) shuffleBtn.addEventListener('click', function() {
             toggleShuffle();
-            this.blur();
+            blurButton(this);
         });
         // === Share Function ===
         if (shareBtn) shareBtn.addEventListener('click', function() {
             shareTrack();
-            this.blur();
+            blurButton(this);
         });
         
         // === More Menu ===
@@ -1316,7 +1331,7 @@
                 if (isActive) {
                     positionMenu();
                 }
-                this.blur();
+                blurButton(this);
             });
             
             // Close menu on scroll (menu stays fixed, closes when user scrolls)

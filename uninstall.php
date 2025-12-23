@@ -23,6 +23,7 @@ delete_option('sap_cdn_url');
 delete_option('sap_umami_tracking');
 delete_option('sap_url_protection');
 delete_option('sap_cover_click_play');
+delete_option('sap_remember_position');
 delete_option('sap_visualizer_type');
 
 // Optional: Delete all playlist post meta (uncomment if desired)

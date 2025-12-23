@@ -20,6 +20,24 @@
     --sap-admin-danger-bg: #450a0a;
     --sap-admin-radius: 12px;
     --sap-admin-radius-sm: 8px;
+    /* Light Theme Variables für Admin Pages */
+    --sap-light-bg: #f8fafc;
+    --sap-light-card: #ffffff;
+    --sap-light-card-hover: #f1f5f9;
+    --sap-light-border: #e2e8f0;
+    --sap-light-border-hover: #cbd5e1;
+    --sap-light-text: #1e293b;
+    --sap-light-text-secondary: #64748b;
+    --sap-light-muted: #94a3b8;
+    --sap-light-accent: #6366f1;
+    --sap-light-accent-light: #818cf8;
+    --sap-light-accent-bg: #eef2ff;
+    --sap-light-success: #22c55e;
+    --sap-light-success-bg: #f0fdf4;
+    --sap-light-danger: #ef4444;
+    --sap-light-danger-bg: #fef2f2;
+    --sap-light-warning: #f59e0b;
+    --sap-light-warning-bg: #fffbeb;
 }
 
 /* ===== Metabox Override ===== */
@@ -153,6 +171,9 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
 }
 
 .sap-no-cover {
@@ -220,9 +241,11 @@ input.sap-track-link {
     border: 1px solid var(--sap-admin-border);
 }
 
-/* ===== Buttons Base ===== */
-.sap-select-cover,
-.sap-select-audio {
+/* ===== Track Metabox Buttons (Dark Theme) ===== */
+#sap_tracks .sap-select-cover,
+#sap_tracks .sap-select-audio,
+.sap-track-row .sap-select-cover,
+.sap-track-row .sap-select-audio {
     background: var(--sap-admin-card) !important;
     color: var(--sap-admin-text) !important;
     border: 1px solid var(--sap-admin-border) !important;
@@ -241,8 +264,10 @@ input.sap-track-link {
     line-height: 1.4 !important;
 }
 
-.sap-select-cover:hover,
-.sap-select-audio:hover {
+#sap_tracks .sap-select-cover:hover,
+#sap_tracks .sap-select-audio:hover,
+.sap-track-row .sap-select-cover:hover,
+.sap-track-row .sap-select-audio:hover {
     background: var(--sap-admin-accent) !important;
     border-color: var(--sap-admin-accent) !important;
     color: white !important;
@@ -250,13 +275,16 @@ input.sap-track-link {
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important;
 }
 
-.sap-select-cover:active,
-.sap-select-audio:active {
+#sap_tracks .sap-select-cover:active,
+#sap_tracks .sap-select-audio:active,
+.sap-track-row .sap-select-cover:active,
+.sap-track-row .sap-select-audio:active {
     transform: translateY(0) scale(0.98);
 }
 
-/* ===== Remove Button ===== */
-.sap-remove-track {
+/* ===== Remove Button (Dark Theme) ===== */
+#sap_tracks .sap-remove-track,
+.sap-track-row .sap-remove-track {
     background: transparent !important;
     border: 1px solid var(--sap-admin-border) !important;
     border-radius: var(--sap-admin-radius-sm) !important;
@@ -269,7 +297,8 @@ input.sap-track-link {
     line-height: 1.4 !important;
 }
 
-.sap-remove-track:hover {
+#sap_tracks .sap-remove-track:hover,
+.sap-track-row .sap-remove-track:hover {
     background: var(--sap-admin-danger-bg) !important;
     border-color: var(--sap-admin-danger) !important;
     color: #fca5a5 !important;
@@ -320,9 +349,9 @@ input.sap-track-link {
     opacity: 0.5;
 }
 
-/* ===== Action Buttons ===== */
-#sap-add-track,
-#sap-bulk-add {
+/* ===== Action Buttons (Dark Theme) ===== */
+#sap_tracks #sap-add-track,
+#sap_tracks #sap-bulk-add {
     display: inline-flex !important;
     align-items: center;
     gap: 8px;
@@ -340,8 +369,8 @@ input.sap-track-link {
     line-height: 1.4 !important;
 }
 
-#sap-add-track:hover,
-#sap-bulk-add:hover {
+#sap_tracks #sap-add-track:hover,
+#sap_tracks #sap-bulk-add:hover {
     background: var(--sap-admin-accent) !important;
     border-color: var(--sap-admin-accent) !important;
     color: white !important;
@@ -349,13 +378,13 @@ input.sap-track-link {
     box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3) !important;
 }
 
-#sap-add-track {
+#sap_tracks #sap-add-track {
     background: var(--sap-admin-accent) !important;
     border-color: var(--sap-admin-accent) !important;
     color: white !important;
 }
 
-#sap-add-track:hover {
+#sap_tracks #sap-add-track:hover {
     background: var(--sap-admin-accent-hover) !important;
     border-color: var(--sap-admin-accent-hover) !important;
 }
@@ -623,3 +652,161 @@ input.sap-track-link {
 .sap-track-row:nth-child(6) { animation-delay: 0.12s; }
 .sap-track-row:nth-child(7) { animation-delay: 0.14s; }
 .sap-track-row:nth-child(8) { animation-delay: 0.16s; }
+
+/* =====================================================
+   GLOBAL ADMIN PAGE STYLES
+   Modern, consistent styling for all SAP admin pages
+   ===================================================== */
+
+/* ===== Post Edit Screen ===== */
+.post-type-sap_playlist #poststuff {
+    padding-top: 10px;
+}
+
+.post-type-sap_playlist #post-body-content {
+    margin-bottom: 24px;
+}
+
+/* Title Input */
+.post-type-sap_playlist #titlewrap {
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.post-type-sap_playlist #titlediv #title {
+    padding: 12px 14px !important;
+    font-size: 15px !important;
+    font-weight: 500 !important;
+    color: var(--sap-light-text) !important;
+    border: 1px solid var(--sap-light-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    background: var(--sap-light-card) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.post-type-sap_playlist #titlediv #title:focus {
+    border-color: var(--sap-light-accent) !important;
+    box-shadow: 0 0 0 3px var(--sap-light-accent-bg) !important;
+    outline: none !important;
+}
+
+.post-type-sap_playlist #titlediv #title::placeholder {
+    color: var(--sap-light-muted) !important;
+}
+
+/* ===== Postboxes (Metaboxes) ===== */
+.post-type-sap_playlist .postbox {
+    background: var(--sap-light-card) !important;
+    border: 1px solid var(--sap-light-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+    margin-bottom: 16px !important;
+}
+
+.post-type-sap_playlist .postbox .postbox-header {
+    background: var(--sap-light-bg) !important;
+    border-bottom: 1px solid var(--sap-light-border) !important;
+    border-radius: var(--sap-admin-radius-sm) var(--sap-admin-radius-sm) 0 0 !important;
+    padding: 10px 14px !important;
+}
+
+.post-type-sap_playlist .postbox .postbox-header h2,
+.post-type-sap_playlist .postbox .postbox-header .hndle {
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    color: var(--sap-light-text) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.04em !important;
+}
+
+.post-type-sap_playlist .postbox .inside {
+    padding: 16px !important;
+    margin: 0 !important;
+}
+
+/* Handle Icons */
+.post-type-sap_playlist .postbox .handle-order-higher,
+.post-type-sap_playlist .postbox .handle-order-lower,
+.post-type-sap_playlist .postbox .handlediv {
+    color: var(--sap-light-muted) !important;
+    width: 28px !important;
+    height: 28px !important;
+}
+
+.post-type-sap_playlist .postbox .handle-order-higher:hover,
+.post-type-sap_playlist .postbox .handle-order-lower:hover,
+.post-type-sap_playlist .postbox .handlediv:hover {
+    color: var(--sap-light-accent) !important;
+    background: var(--sap-light-accent-bg) !important;
+    border-radius: 4px !important;
+}
+
+/* ===== Publish Box ===== */
+.post-type-sap_playlist #submitdiv .inside {
+    padding: 12px !important;
+}
+
+.post-type-sap_playlist #major-publishing-actions {
+    background: var(--sap-light-bg) !important;
+    border-top: 1px solid var(--sap-light-border) !important;
+    padding: 12px !important;
+    margin: 0 -12px -12px -12px !important;
+    border-radius: 0 0 var(--sap-admin-radius-sm) var(--sap-admin-radius-sm) !important;
+}
+
+/* Primary Button (Publish) - nur außerhalb der Track-Metabox */
+.post-type-sap_playlist #publish {
+    background: var(--sap-light-accent) !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: white !important;
+    padding: 8px 18px !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    text-shadow: none !important;
+    box-shadow: 0 1px 3px rgba(99, 102, 241, 0.3) !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.post-type-sap_playlist #publish:hover {
+    background: var(--sap-light-accent-light) !important;
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.4) !important;
+}
+
+.post-type-sap_playlist #delete-action a {
+    color: var(--sap-light-danger) !important;
+    text-decoration: none !important;
+}
+
+.post-type-sap_playlist #delete-action a:hover {
+    color: #dc2626 !important;
+    text-decoration: underline !important;
+}
+
+/* Misc Publishing Actions */
+.post-type-sap_playlist #misc-publishing-actions {
+    padding: 0 !important;
+}
+
+.post-type-sap_playlist #misc-publishing-actions .misc-pub-section {
+    padding: 10px 0 !important;
+    border-bottom: 1px solid var(--sap-light-border) !important;
+    color: var(--sap-light-text-secondary) !important;
+    font-size: 13px !important;
+}
+
+.post-type-sap_playlist #misc-publishing-actions .misc-pub-section:last-child {
+    border-bottom: none !important;
+}
+
+/* Edit links in publish box */
+.post-type-sap_playlist #misc-publishing-actions a {
+    color: var(--sap-light-accent) !important;
+}
+
+.post-type-sap_playlist #misc-publishing-actions a:hover {
+    color: var(--sap-light-accent-light) !important;
+}
+
