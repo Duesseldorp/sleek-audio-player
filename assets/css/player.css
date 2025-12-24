@@ -358,33 +358,42 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--sap-white);
-    background: var(--sap-accent);
-    transition: background 0.12s ease-out, transform 0.12s ease-out;
+    color: var(--sap-gray-200);
+    background: var(--sap-card-hover);
+    transition: background 0.1s ease-out, transform 0.1s ease-out, color 0.1s ease-out;
     position: relative;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
+    outline: none;
+    border: none;
+    touch-action: manipulation;
 }
 
 .sap-btn::before {
     display: none;
 }
 
-.sap-btn:hover {
-    background: var(--sap-accent);
-}
-
+/* NO hover/active/focus highlights - all handled via .sap-pressed class */
+.sap-btn:hover,
 .sap-btn:active,
-.sap-btn.sap-tapped {
-    transform: scale(0.9);
-    background: var(--sap-white) !important;
-    color: var(--sap-accent) !important;
-    transition: transform 0.05s ease-out, background 0.05s ease-out;
+.sap-btn:focus,
+.sap-btn:focus-visible,
+.sap-btn:focus-within {
+    background: var(--sap-card-hover) !important;
+    color: var(--sap-gray-200) !important;
+    transform: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.sap-btn:focus {
-    outline: none;
+/* Pressed state - JS controlled (works on both desktop and mobile) */
+.sap-btn.sap-pressed,
+.sap-btn.sap-pressed:hover,
+.sap-btn.sap-pressed:active,
+.sap-btn.sap-pressed:focus {
+    transform: scale(0.9) !important;
     background: var(--sap-accent) !important;
+    color: var(--sap-white) !important;
 }
 
 .sap-btn svg {
@@ -410,31 +419,36 @@
 .sap-play {
     width: 48px;
     height: 48px;
-    background: var(--sap-accent);
-    color: var(--sap-white);
+    background: var(--sap-card-hover);
+    color: var(--sap-gray-200);
     margin: 0 4px;
-    transition: background 0.12s ease-out, transform 0.12s ease-out;
 }
 
 .sap-play::before {
     display: none;
 }
 
-.sap-play:hover {
-    background: var(--sap-accent);
-}
-
+/* NO hover/active/focus highlights - all handled via .sap-pressed class */
+.sap-play:hover,
 .sap-play:active,
-.sap-play.sap-tapped {
-    transform: scale(0.9);
-    background: var(--sap-white) !important;
-    color: var(--sap-accent) !important;
-    transition: transform 0.05s ease-out, background 0.05s ease-out;
+.sap-play:focus,
+.sap-play:focus-visible,
+.sap-play:focus-within {
+    background: var(--sap-card-hover) !important;
+    color: var(--sap-gray-200) !important;
+    transform: none !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
-.sap-play:focus {
-    outline: none;
+/* Pressed state - JS controlled */
+.sap-play.sap-pressed,
+.sap-play.sap-pressed:hover,
+.sap-play.sap-pressed:active,
+.sap-play.sap-pressed:focus {
+    transform: scale(0.9) !important;
     background: var(--sap-accent) !important;
+    color: var(--sap-white) !important;
 }
 
 .sap-play svg {
@@ -450,14 +464,28 @@
     color: var(--sap-white);
 }
 
+/* Reset hover/active/focus for active toggle buttons */
+.sap-shuffle.active:hover,
 .sap-shuffle.active:active,
-.sap-shuffle.active.sap-tapped,
+.sap-shuffle.active:focus,
+.sap-repeat.active:hover,
 .sap-repeat.active:active,
-.sap-repeat.active.sap-tapped,
+.sap-repeat.active:focus,
+.sap-speed.active:hover,
 .sap-speed.active:active,
-.sap-speed.active.sap-tapped {
+.sap-speed.active:focus {
+    background: var(--sap-accent-light) !important;
+    color: var(--sap-white) !important;
+    transform: none !important;
+}
+
+/* Pressed state for active toggle buttons */
+.sap-shuffle.active.sap-pressed,
+.sap-repeat.active.sap-pressed,
+.sap-speed.active.sap-pressed {
     background: var(--sap-white) !important;
     color: var(--sap-accent) !important;
+    transform: scale(0.9) !important;
 }
 
 /* Speed Button */
@@ -733,24 +761,31 @@
     box-sizing: border-box;
 }
 
+/* Hover effect for menu items on desktop */
 .sap-more-item:hover {
-    background: var(--sap-blue-tint);
+    background: var(--sap-card-active);
     color: var(--sap-white);
 }
 
 .sap-more-item:active,
-.sap-more-item.sap-tapped {
+.sap-more-item:focus {
+    outline: none;
+}
+
+/* Pressed state for menu items - JS controlled */
+.sap-more-item.sap-pressed,
+.sap-more-item.sap-pressed:hover,
+.sap-more-item.sap-pressed:active {
     background: var(--sap-accent) !important;
     color: var(--sap-white) !important;
-    transform: scale(0.97);
+    transform: scale(0.97) !important;
 }
 
 .sap-more-item.active {
     color: var(--sap-accent);
 }
 
-.sap-more-item.active:active,
-.sap-more-item.active.sap-tapped {
+.sap-more-item.active.sap-pressed {
     background: var(--sap-white) !important;
     color: var(--sap-accent) !important;
 }
@@ -1109,63 +1144,127 @@
 .sap-player.is-playing .sap-icon-play { display: none; }
 .sap-player.is-playing .sap-icon-pause { display: block; }
 
-/* ===== Touch Devices - Only .sap-tapped shows highlight ===== */
-@media (hover: none), (pointer: coarse) {
-    /* Disable CSS :active/:focus highlight - JS handles it via .sap-tapped */
+/* ===== Touch Device Overrides (pure CSS, no JS needed) ===== */
+/* On devices without hover capability, disable all hover effects */
+@media (hover: none) {
+    .sap-btn:hover,
     .sap-btn:active,
-    .sap-btn:focus,
-    .sap-btn:focus-visible,
+    .sap-btn:focus {
+        background: var(--sap-card-hover) !important;
+        color: var(--sap-gray-200) !important;
+        transform: none !important;
+    }
+    
+    .sap-play:hover,
     .sap-play:active,
-    .sap-play:focus,
-    .sap-play:focus-visible,
+    .sap-play:focus {
+        background: var(--sap-card-hover) !important;
+        color: var(--sap-gray-200) !important;
+        transform: none !important;
+    }
+    
+    .sap-shuffle.active:hover,
     .sap-shuffle.active:active,
-    .sap-shuffle.active:focus,
+    .sap-repeat.active:hover,
     .sap-repeat.active:active,
-    .sap-repeat.active:focus,
-    .sap-speed.active:active,
-    .sap-speed.active:focus {
+    .sap-speed.active:hover,
+    .sap-speed.active:active {
+        background: var(--sap-accent-light) !important;
+        transform: none !important;
+    }
+    
+    .sap-more-item:hover,
+    .sap-more-item:active {
+        background: transparent !important;
+        color: var(--sap-gray-200) !important;
+        transform: none !important;
+    }
+    
+    /* .sap-pressed still works on touch */
+    .sap-btn.sap-pressed,
+    .sap-play.sap-pressed {
         background: var(--sap-accent) !important;
         color: var(--sap-white) !important;
-        transform: none !important;
-        outline: none !important;
+        transform: scale(0.9) !important;
     }
     
-    /* Active toggle buttons keep their light background */
-    .sap-shuffle.active,
-    .sap-repeat.active,
-    .sap-speed.active {
-        background: var(--sap-accent-light) !important;
-    }
-    
-    /* More menu items: reset active/focus */
-    .sap-more-item:active,
-    .sap-more-item:focus,
-    .sap-more-item.active:active,
-    .sap-more-item.active:focus {
-        background: transparent !important;
-        transform: none !important;
-    }
-    
-    /* Only .sap-tapped class shows highlight (controlled by JS touch events) */
-    .sap-btn.sap-tapped,
-    .sap-play.sap-tapped,
-    .sap-shuffle.active.sap-tapped,
-    .sap-repeat.active.sap-tapped,
-    .sap-speed.active.sap-tapped {
+    .sap-shuffle.active.sap-pressed,
+    .sap-repeat.active.sap-pressed,
+    .sap-speed.active.sap-pressed {
         background: var(--sap-white) !important;
         color: var(--sap-accent) !important;
         transform: scale(0.9) !important;
     }
     
-    .sap-more-item.sap-tapped {
+    .sap-more-item.sap-pressed {
         background: var(--sap-accent) !important;
         color: var(--sap-white) !important;
     }
-    
-    .sap-more-item.active.sap-tapped {
-        background: var(--sap-white) !important;
-        color: var(--sap-accent) !important;
-    }
+}
+
+/* ===== Touched State (JS adds .sap-touched after touch to prevent sticky hover) ===== */
+/* CRITICAL: These rules MUST override .sap-pressed when touch has ended */
+/* Using :not(.sap-pressed) ensures clean state after touch */
+.sap-btn.sap-touched:not(.sap-pressed),
+.sap-btn.sap-touched:not(.sap-pressed):hover,
+.sap-btn.sap-touched:not(.sap-pressed):active,
+.sap-btn.sap-touched:not(.sap-pressed):focus,
+.sap-btn.sap-touched:not(.sap-pressed):focus-visible {
+    background: var(--sap-card-hover) !important;
+    color: var(--sap-gray-200) !important;
+    transform: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.sap-play.sap-touched:not(.sap-pressed),
+.sap-play.sap-touched:not(.sap-pressed):hover,
+.sap-play.sap-touched:not(.sap-pressed):active,
+.sap-play.sap-touched:not(.sap-pressed):focus,
+.sap-play.sap-touched:not(.sap-pressed):focus-visible {
+    background: var(--sap-card-hover) !important;
+    color: var(--sap-gray-200) !important;
+    transform: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.sap-shuffle.active.sap-touched:not(.sap-pressed),
+.sap-shuffle.active.sap-touched:not(.sap-pressed):hover,
+.sap-repeat.active.sap-touched:not(.sap-pressed),
+.sap-repeat.active.sap-touched:not(.sap-pressed):hover,
+.sap-speed.active.sap-touched:not(.sap-pressed),
+.sap-speed.active.sap-touched:not(.sap-pressed):hover {
+    background: var(--sap-accent-light) !important;
+    transform: none !important;
+}
+
+.sap-more-item.sap-touched,
+.sap-more-item.sap-touched:hover {
+    background: transparent !important;
+    color: var(--sap-gray-200) !important;
+    transform: none !important;
+}
+
+/* Streaming links touched state */
+.sap-link.sap-touched,
+.sap-link.sap-touched:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Track list touched state */
+.sap-track.sap-touched,
+.sap-track.sap-touched:hover {
+    background: transparent !important;
+    padding-left: 16px !important;
+    transform: none !important;
+}
+
+.sap-track.active.sap-touched,
+.sap-track.active.sap-touched:hover {
+    background: var(--sap-track-active) !important;
+    padding-left: 14px !important;
 }
 
 /* ===== Responsive ===== */
@@ -1443,3 +1542,4 @@
 .sap-cover img {
     transition: opacity 0.3s ease, transform 0.6s var(--sap-transition);
 }
+

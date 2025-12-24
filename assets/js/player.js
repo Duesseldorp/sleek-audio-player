@@ -48,47 +48,64 @@
         function blurButton(btn) {
             if (btn) {
                 btn.blur();
-                document.activeElement && document.activeElement.blur();
             }
         }
         
-        // Setup touch handling for all buttons (mobile highlight fix)
-        function setupTouchButton(btn) {
+        // Press handling for buttons - registers BOTH mouse and touch events
+        function setupPressButton(btn) {
             if (!btn) return;
             
-            var tapTimeout;
+            btn.classList.remove('sap-pressed');
             
-            btn.addEventListener('touchstart', function(e) {
-                var self = this;
-                clearTimeout(tapTimeout);
-                self.classList.add('sap-tapped');
+            // Mouse events - but NOT if this is an emulated event after touch
+            btn.addEventListener('mousedown', function() {
+                // Skip if this is emulated mouse event after touch
+                if (this.classList.contains('sap-touched')) return;
+                this.classList.add('sap-pressed');
+            });
+            btn.addEventListener('mouseup', function() {
+                this.classList.remove('sap-pressed');
+                this.blur();
+            });
+            btn.addEventListener('mouseleave', function() {
+                this.classList.remove('sap-pressed');
+            });
+            
+            // Click event - ensures reset after full click cycle
+            btn.addEventListener('click', function() {
+                this.classList.remove('sap-pressed');
+                this.blur();
+            });
+            
+            // Touch events - add sap-touched class to override hover states via CSS
+            btn.addEventListener('touchstart', function() {
+                // Remove sap-touched from ALL buttons first
+                playerEl.querySelectorAll('.sap-touched').forEach(function(el) {
+                    el.classList.remove('sap-touched');
+                });
+                this.classList.add('sap-pressed');
+                this.classList.add('sap-touched');
             }, { passive: true });
             
-            btn.addEventListener('touchend', function(e) {
+            btn.addEventListener('touchend', function() {
                 var self = this;
-                // Small delay to show the tap effect, then remove
-                tapTimeout = setTimeout(function() {
-                    self.classList.remove('sap-tapped');
-                    self.blur();
-                    // Also blur any focused element
-                    if (document.activeElement) {
-                        document.activeElement.blur();
-                    }
-                }, 100);
+                self.classList.remove('sap-pressed');
+                self.blur();
+                
+                // Clear :hover state after click events have fired
+                setTimeout(function() {
+                    self.style.pointerEvents = 'none';
+                    void self.offsetHeight;
+                    requestAnimationFrame(function() {
+                        self.style.pointerEvents = '';
+                    });
+                }, 50);
             }, { passive: true });
             
             btn.addEventListener('touchcancel', function() {
-                this.classList.remove('sap-tapped');
+                this.classList.remove('sap-pressed');
+                this.blur();
             }, { passive: true });
-            
-            // Also handle click for hybrid devices
-            btn.addEventListener('click', function() {
-                var self = this;
-                setTimeout(function() {
-                    self.classList.remove('sap-tapped');
-                    self.blur();
-                }, 150);
-            });
         }
         
         const audio = playerEl.querySelector('.sap-audio');
@@ -137,11 +154,24 @@
         const coverSlides = playerEl.querySelectorAll('.sap-cover-slide');
                 const visualizerCanvas = playerEl.querySelector('.sap-visualizer');
         
-        // Setup touch handlers for all control buttons (mobile highlight fix)
-        [playBtn, prevBtn, nextBtn, shuffleBtn, shareBtn, moreBtn, volumeBtn].forEach(setupTouchButton);
+        // Setup press handlers for all control buttons (unified desktop + mobile)
+        [playBtn, prevBtn, nextBtn, shuffleBtn, shareBtn, moreBtn, volumeBtn].forEach(setupPressButton);
         
-        // Setup touch handlers for more menu items
-        [downloadBtn, repeatBtn, speedBtn, streamSpotify, streamApple, streamAmazon].forEach(setupTouchButton);
+        // Setup press handlers for more menu items
+        [downloadBtn, repeatBtn, speedBtn, streamSpotify, streamApple, streamAmazon].forEach(setupPressButton);
+        
+        // Setup touch handlers for streaming links (prevent sticky hover)
+        const streamingLinks = playerEl.querySelectorAll('.sap-link');
+        streamingLinks.forEach(function(link) {
+            link.addEventListener('touchstart', function() {
+                streamingLinks.forEach(l => l.classList.remove('sap-touched'));
+                this.classList.add('sap-touched');
+            }, { passive: true });
+            
+            link.addEventListener('touchend', function() {
+                // Keep sap-touched to prevent sticky hover
+            }, { passive: true });
+        });
         
         // Icons
         const iconPlay = playerEl.querySelector('.sap-icon-play');
@@ -445,7 +475,7 @@
             const barCount = 64;
             const barWidth = width / barCount;
             const gap = 2;
-            const maxBarHeight = height * 0.25; // Limit bar height to 25% of cover
+            const maxBarHeight = height * 0.30; // Limit bar height to 30% of cover
             
             for (let i = 0; i < barCount; i++) {
                 const dataIndex = Math.floor(i * dataArray.length / barCount);
@@ -476,7 +506,7 @@
             for (let i = 0; i < barCount; i++) {
                 const dataIndex = Math.floor(i * dataArray.length / barCount);
                 const value = dataArray[dataIndex];
-                const barHeight = (value / 255) * centerY * 0.85;
+                const barHeight = (value / 255) * centerY * 0.4;
                 
                 const x = startX + (i * barWidth);
                 
@@ -575,24 +605,50 @@
             }
         }
         
-        // Wave visualization - filled waveform
+        // Wave visualization - filled waveform (smoothed)
         function drawWave(dataArray, width, height, vizColor) {
             const timeDataArray = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteTimeDomainData(timeDataArray);
+            
+            // Downsample for smoother appearance
+            const sampleCount = 64;
+            const sampleSize = Math.floor(timeDataArray.length / sampleCount);
+            const smoothedData = [];
+            
+            for (let i = 0; i < sampleCount; i++) {
+                let sum = 0;
+                for (let j = 0; j < sampleSize; j++) {
+                    sum += timeDataArray[i * sampleSize + j];
+                }
+                smoothedData.push(sum / sampleSize);
+            }
             
             visualizerCtx.fillStyle = hexToRgba(vizColor, 0.6);
             visualizerCtx.beginPath();
             visualizerCtx.moveTo(0, height);
             
-            const sliceWidth = width / timeDataArray.length;
-            let x = 0;
+            const sliceWidth = width / sampleCount;
             
-            for (let i = 0; i < timeDataArray.length; i++) {
-                const v = (timeDataArray[i] - 128) / 128.0;
+            // First point
+            const v0 = (smoothedData[0] - 128) / 128.0;
+            const y0 = (height / 2) + (v0 * height * 0.4 * 2);
+            visualizerCtx.lineTo(0, y0);
+            
+            // Draw smooth curves through points
+            for (let i = 1; i < sampleCount; i++) {
+                const v = (smoothedData[i] - 128) / 128.0;
                 const y = (height / 2) + (v * height * 0.4 * 2);
-                visualizerCtx.lineTo(x, y);
-                x += sliceWidth;
+                const x = i * sliceWidth;
+                const xPrev = (i - 1) * sliceWidth;
+                const xMid = (xPrev + x) / 2;
+                
+                visualizerCtx.quadraticCurveTo(xPrev, (height / 2) + ((smoothedData[i-1] - 128) / 128.0 * height * 0.4 * 2), xMid, (y + (height / 2) + ((smoothedData[i-1] - 128) / 128.0 * height * 0.4 * 2)) / 2);
             }
+            
+            // Last point
+            const vLast = (smoothedData[sampleCount - 1] - 128) / 128.0;
+            const yLast = (height / 2) + (vLast * height * 0.4 * 2);
+            visualizerCtx.lineTo(width, yLast);
             
             visualizerCtx.lineTo(width, height);
             visualizerCtx.closePath();
@@ -2027,6 +2083,17 @@
                 e.stopPropagation();
                 playTrack(index);
             });
+            
+            // Touch events for tracks - prevent sticky hover on mobile
+            track.addEventListener('touchstart', function() {
+                // Remove sap-touched from all tracks first
+                tracks.forEach(t => t.classList.remove('sap-touched'));
+                this.classList.add('sap-touched');
+            }, { passive: true });
+            
+            track.addEventListener('touchend', function() {
+                // Keep sap-touched class to prevent sticky hover
+            }, { passive: true });
             
             // Keyboard support for accessibility
             track.addEventListener('keydown', function(e) {
