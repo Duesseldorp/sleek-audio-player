@@ -33,7 +33,8 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ⏱️ Progress bar with seek functionality
 * 🌊 Waveform display with progress color
 * 👆 Click on waveform jumps to position & starts playback
-* 🔊 Volume control with popup slider
+* � Touch-drag on waveform for precise seeking (swipe to scrub)
+* � Volume control with popup slider
 * ⏱️ Click duration to toggle remaining time
 * 💾 Resume playback (remembers position per playlist)
 
@@ -44,6 +45,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ✨ Ken Burns animation during playback
 * 💫 Pulse effect on track change
 * 🔍 Hover zoom on cover
+* 💿 Cover animation selector in More menu (Off / Ken Burns / Vinyl)
 * 📱 Responsive design (Wide & Standard Layout)
 * 🎨 Theme Manager with live preview
 * 🔒 URL protection for audio files (optional)
@@ -97,13 +99,24 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 == Usage ==
 
-= Shortcodes =
+= Shortcode =
+
+`[simple_player id="123"]`
+
+= Shortcode Parameters =
+
+| Parameter | Values | Default | Description |
+|-----------|--------|---------|-------------|
+| `id` | number | required | Playlist ID |
+| `layout` | `wide` | standard | Horizontal layout with cover on left |
+
+= Examples =
 
 Standard Layout:
-[simple_player id="123"]
+`[simple_player id="123"]`
 
 Wide Layout (horizontal):
-[simple_player id="123" layout="wide"]
+`[simple_player id="123" layout="wide"]`
 
 = Creating a Playlist =
 

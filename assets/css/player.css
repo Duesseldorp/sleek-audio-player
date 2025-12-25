@@ -141,6 +141,11 @@
     animation: sapKenBurns 20s ease-in-out infinite !important;
 }
 
+/* Cover animation disabled via More menu */
+.sap-player.sap-anim-none.is-playing .sap-cover-slide.active img {
+    animation: none !important;
+}
+
 .sap-player.is-playing .sap-cover-carousel:hover .sap-cover-slide.active img {
     animation-play-state: paused;
     transform: scale(1.05);
@@ -168,22 +173,76 @@
 
 /* Vinyl spin effect (optional class) */
 @keyframes sapVinylSpin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
-.sap-player.sap-vinyl.is-playing .sap-cover-slide.active img {
-    border-radius: 50%;
-    animation: sapVinylSpin 4s linear infinite;
+/* Light reflection shimmer moving across the vinyl */
+@keyframes sapVinylShimmer {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .sap-player.sap-vinyl .sap-cover-slide.active img {
     border-radius: 50%;
-    transition: transform 0.3s ease;
+    /* Smooth start/stop transition */
+    transition: animation-duration 0.5s ease;
+}
+
+/* Vinyl label (center circle) - semi-transparent to show cover through */
+.sap-player.sap-vinyl .sap-cover-slide.active::after {
+    content: '';
+    position: absolute;
+    inset: 35%;
+    background: radial-gradient(circle, 
+        rgba(20, 20, 20, 0.85) 0%, 
+        rgba(20, 20, 20, 0.85) 35%, 
+        rgba(60, 60, 60, 0.7) 38%, 
+        rgba(40, 40, 40, 0.6) 45%,
+        rgba(20, 20, 20, 0.5) 50%,
+        rgba(20, 20, 20, 0.4) 100%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 2;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+/* Light reflection overlay */
+.sap-player.sap-vinyl .sap-cover-slide.active::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(
+        135deg,
+        transparent 0%,
+        transparent 40%,
+        rgba(255, 255, 255, 0.08) 45%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.08) 55%,
+        transparent 60%,
+        transparent 100%
+    );
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* Rotating vinyl - smooth ease-out when stopping */
+.sap-player.sap-vinyl .sap-cover-slide.active img {
+    animation: sapVinylSpin 8s linear infinite paused !important;
+    /* This creates the slow-down effect when pausing */
+}
+
+/* Playing state - vinyl spins, reflection moves slower */
+.sap-player.sap-vinyl.is-playing .sap-cover-slide.active img {
+    animation: sapVinylSpin 8s linear infinite !important;
+    animation-play-state: running !important;
+}
+
+/* Light shimmer rotates slower than vinyl for realistic effect */
+.sap-player.sap-vinyl.is-playing .sap-cover-slide.active::before {
+    animation: sapVinylShimmer 12s linear infinite;
 }
 
 /* Audio Visualizer */

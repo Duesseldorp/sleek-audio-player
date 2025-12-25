@@ -1460,6 +1460,11 @@
                 if (!moreWrapper.contains(e.target)) {
                     moreWrapper.classList.remove('active');
                     moreBtn.setAttribute('aria-expanded', 'false');
+                    // Also hide submenus
+                    const sleepSub = moreWrapper.querySelector('.sap-sleep-submenu');
+                    const coverSub = moreWrapper.querySelector('.sap-cover-anim-submenu');
+                    if (sleepSub) sleepSub.style.display = 'none';
+                    if (coverSub) coverSub.style.display = 'none';
                 }
             });
             
@@ -1602,6 +1607,75 @@
                     // Hide submenu
                     if (sleepSubmenu) {
                         sleepSubmenu.style.display = 'none';
+                    }
+                });
+            });
+            
+            // === Cover Animation ===
+            const coverAnimBtn = playerEl.querySelector('.sap-cover-anim');
+            const coverAnimSubmenu = playerEl.querySelector('.sap-cover-anim-submenu');
+            const coverAnimOptions = playerEl.querySelectorAll('.sap-cover-anim-option');
+            const coverAnimModes = ['none', 'kenburns', 'vinyl'];
+            let currentCoverAnim = localStorage.getItem('sap_cover_anim') || 'kenburns';
+            
+            function setCoverAnimation(mode) {
+                currentCoverAnim = mode;
+                localStorage.setItem('sap_cover_anim', mode);
+                
+                // Remove all animation classes
+                playerEl.classList.remove('sap-anim-none', 'sap-anim-kenburns', 'sap-vinyl');
+                
+                // Add appropriate class
+                if (mode === 'none') {
+                    playerEl.classList.add('sap-anim-none');
+                } else if (mode === 'vinyl') {
+                    playerEl.classList.add('sap-vinyl');
+                }
+                // kenburns is default (no extra class needed)
+                
+                // Update label
+                const label = coverAnimBtn ? coverAnimBtn.querySelector('.sap-cover-anim-label') : null;
+                if (label) {
+                    const modeNames = { none: 'Off', kenburns: 'Ken Burns', vinyl: 'Vinyl' };
+                    label.textContent = 'Cover: ' + (modeNames[mode] || mode);
+                }
+                
+                // Mark active option
+                coverAnimOptions.forEach(function(opt) {
+                    opt.classList.toggle('active', opt.dataset.anim === mode);
+                });
+                
+                sapLog('Cover animation set', { mode: mode });
+            }
+            
+            // Initialize cover animation from localStorage
+            setCoverAnimation(currentCoverAnim);
+            
+            if (coverAnimBtn) {
+                coverAnimBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    // Toggle submenu
+                    if (coverAnimSubmenu) {
+                        const isVisible = coverAnimSubmenu.style.display !== 'none';
+                        coverAnimSubmenu.style.display = isVisible ? 'none' : 'block';
+                        // Hide sleep submenu if open
+                        if (sleepSubmenu) sleepSubmenu.style.display = 'none';
+                    }
+                });
+            }
+            
+            coverAnimOptions.forEach(function(option) {
+                option.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const anim = this.dataset.anim || 'kenburns';
+                    setCoverAnimation(anim);
+                    
+                    // Hide submenu
+                    if (coverAnimSubmenu) {
+                        coverAnimSubmenu.style.display = 'none';
                     }
                 });
             });

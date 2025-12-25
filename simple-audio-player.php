@@ -3500,7 +3500,7 @@ class Simple_Audio_Player {
         <?php 
         $layout = strtolower(trim($atts['layout']));
         $is_wide = ($layout === 'wide');
-        $layout_class = $is_wide ? ' sap-wide' : '';
+        $layout_class = ($is_wide ? ' sap-wide' : '');
         
         // Inline styles for wide layout (cache-proof)
         // Note: No !important here so CSS media queries can override on mobile
@@ -3601,6 +3601,15 @@ class Simple_Audio_Player {
                                 <button type="button" class="sap-more-item sap-sleep-option" data-minutes="45"><?php echo esc_html__('45 Min', 'simple-audio-player'); ?></button>
                                 <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60"><?php echo esc_html__('1 Hour', 'simple-audio-player'); ?></button>
                                 <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true"><?php echo esc_html__('End of Track', 'simple-audio-player'); ?></button>
+                            </div>
+                            <button type="button" class="sap-more-item sap-cover-anim" data-action="cover-anim">
+                                <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9.41 15.95L12 12.36l2.59 3.59L17 13l4 5H3l4-4z"/></svg>
+                                <span class="sap-cover-anim-label"><?php echo esc_html__('Cover', 'simple-audio-player'); ?>: Ken Burns</span>
+                            </button>
+                            <div class="sap-cover-anim-submenu" style="display:none;">
+                                <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="none"><?php echo esc_html__('Off', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="kenburns">Ken Burns</button>
+                                <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="vinyl">Vinyl</button>
                             </div>
                             <div class="sap-more-divider sap-stream-divider" style="display:none;"></div>
                             <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-spotify" style="display:none;">
