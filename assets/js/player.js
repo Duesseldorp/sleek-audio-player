@@ -2020,8 +2020,51 @@
             });
         }
         
-        if (waveformContainer) waveformContainer.addEventListener('click', seek);
-        else if (progressContainer) progressContainer.addEventListener('click', seek);
+        // Waveform/Progress seeking - click and touch drag support
+        const seekContainer = waveformContainer || progressContainer;
+        if (seekContainer) {
+            seekContainer.addEventListener('click', seek);
+            
+            // Touch drag support for seeking
+            let seekDragging = false;
+            
+            seekContainer.addEventListener('touchstart', function(e) {
+                seekDragging = true;
+                audio.pause(); // Pause during drag
+                seekFromTouch(e);
+            }, { passive: true });
+            
+            seekContainer.addEventListener('touchmove', function(e) {
+                if (!seekDragging) return;
+                e.preventDefault();
+                seekFromTouch(e);
+            }, { passive: false });
+            
+            seekContainer.addEventListener('touchend', function() {
+                if (seekDragging && audio.duration && !isNaN(audio.duration)) {
+                    // Auto-play after seek drag
+                    audio.play().catch(() => {});
+                }
+                seekDragging = false;
+            }, { passive: true });
+            
+            seekContainer.addEventListener('touchcancel', function() {
+                seekDragging = false;
+            }, { passive: true });
+            
+            function seekFromTouch(e) {
+                if (!e.touches || !e.touches[0]) return;
+                const rect = seekContainer.getBoundingClientRect();
+                const x = e.touches[0].clientX - rect.left;
+                const percent = Math.max(0, Math.min(1, x / rect.width));
+                
+                if (audio.duration && !isNaN(audio.duration)) {
+                    audio.currentTime = percent * audio.duration;
+                    updateProgress();
+                    drawWaveform(percent);
+                }
+            }
+        }
         
         // Click on duration toggles between total and remaining time
         if (durationEl) {
