@@ -8,6 +8,7 @@
     --sap-bg: #0a1118;
     --sap-card: #0f1a24;
     --sap-card-hover: #162230;
+    --sap-btn-bg: #162230;
     --sap-card-active: #1e2d3d;
     --sap-border: rgba(79, 128, 156, 0.15);
     --sap-accent: #e85d3d;
@@ -359,7 +360,7 @@
     align-items: center;
     justify-content: center;
     color: var(--sap-gray-200);
-    background: var(--sap-card-hover);
+    background: transparent;
     transition: background 0.1s ease-out, transform 0.1s ease-out, color 0.1s ease-out;
     position: relative;
     -webkit-tap-highlight-color: transparent;
@@ -379,7 +380,7 @@
 .sap-btn:focus,
 .sap-btn:focus-visible,
 .sap-btn:focus-within {
-    background: var(--sap-card-hover) !important;
+    background: transparent !important;
     color: var(--sap-gray-200) !important;
     transform: none !important;
     outline: none !important;
@@ -387,10 +388,11 @@
 }
 
 /* Pressed state - JS controlled (works on both desktop and mobile) */
-.sap-btn.sap-pressed,
-.sap-btn.sap-pressed:hover,
-.sap-btn.sap-pressed:active,
-.sap-btn.sap-pressed:focus {
+/* Higher specificity with .sap-player to ensure it overrides :active */
+.sap-player .sap-btn.sap-pressed,
+.sap-player .sap-btn.sap-pressed:hover,
+.sap-player .sap-btn.sap-pressed:active,
+.sap-player .sap-btn.sap-pressed:focus {
     transform: scale(0.9) !important;
     background: var(--sap-accent) !important;
     color: var(--sap-white) !important;
@@ -419,7 +421,7 @@
 .sap-play {
     width: 48px;
     height: 48px;
-    background: var(--sap-card-hover);
+    background: transparent;
     color: var(--sap-gray-200);
     margin: 0 4px;
 }
@@ -434,7 +436,7 @@
 .sap-play:focus,
 .sap-play:focus-visible,
 .sap-play:focus-within {
-    background: var(--sap-card-hover) !important;
+    background: transparent !important;
     color: var(--sap-gray-200) !important;
     transform: none !important;
     outline: none !important;
@@ -442,10 +444,10 @@
 }
 
 /* Pressed state - JS controlled */
-.sap-play.sap-pressed,
-.sap-play.sap-pressed:hover,
-.sap-play.sap-pressed:active,
-.sap-play.sap-pressed:focus {
+.sap-player .sap-play.sap-pressed,
+.sap-player .sap-play.sap-pressed:hover,
+.sap-player .sap-play.sap-pressed:active,
+.sap-player .sap-play.sap-pressed:focus {
     transform: scale(0.9) !important;
     background: var(--sap-accent) !important;
     color: var(--sap-white) !important;
@@ -1147,10 +1149,16 @@
 /* ===== Touch Device Overrides (pure CSS, no JS needed) ===== */
 /* On devices without hover capability, disable all hover effects */
 @media (hover: none) {
+    /* On touch devices, disable transitions for instant feedback */
+    .sap-btn,
+    .sap-play {
+        transition: none !important;
+    }
+    
     .sap-btn:hover,
     .sap-btn:active,
     .sap-btn:focus {
-        background: var(--sap-card-hover) !important;
+        background: transparent !important;
         color: var(--sap-gray-200) !important;
         transform: none !important;
     }
@@ -1158,7 +1166,7 @@
     .sap-play:hover,
     .sap-play:active,
     .sap-play:focus {
-        background: var(--sap-card-hover) !important;
+        background: transparent !important;
         color: var(--sap-gray-200) !important;
         transform: none !important;
     }
@@ -1180,9 +1188,9 @@
         transform: none !important;
     }
     
-    /* .sap-pressed still works on touch */
-    .sap-btn.sap-pressed,
-    .sap-play.sap-pressed {
+    /* .sap-pressed still works on touch - higher specificity */
+    .sap-player .sap-btn.sap-pressed,
+    .sap-player .sap-play.sap-pressed {
         background: var(--sap-accent) !important;
         color: var(--sap-white) !important;
         transform: scale(0.9) !important;
@@ -1203,30 +1211,32 @@
 }
 
 /* ===== Touched State (JS adds .sap-touched after touch to prevent sticky hover) ===== */
-/* CRITICAL: These rules MUST override .sap-pressed when touch has ended */
-/* Using :not(.sap-pressed) ensures clean state after touch */
-.sap-btn.sap-touched:not(.sap-pressed),
-.sap-btn.sap-touched:not(.sap-pressed):hover,
-.sap-btn.sap-touched:not(.sap-pressed):active,
-.sap-btn.sap-touched:not(.sap-pressed):focus,
-.sap-btn.sap-touched:not(.sap-pressed):focus-visible {
-    background: var(--sap-card-hover) !important;
+/* CRITICAL: These rules reset state AFTER touch has ended (when .sap-pressed is removed) */
+/* transition: none ensures INSTANT reset on mobile */
+.sap-player .sap-btn.sap-touched:not(.sap-pressed),
+.sap-player .sap-btn.sap-touched:not(.sap-pressed):hover,
+.sap-player .sap-btn.sap-touched:not(.sap-pressed):active,
+.sap-player .sap-btn.sap-touched:not(.sap-pressed):focus,
+.sap-player .sap-btn.sap-touched:not(.sap-pressed):focus-visible {
+    background: transparent !important;
     color: var(--sap-gray-200) !important;
     transform: none !important;
     outline: none !important;
     box-shadow: none !important;
+    transition: none !important;
 }
 
-.sap-play.sap-touched:not(.sap-pressed),
-.sap-play.sap-touched:not(.sap-pressed):hover,
-.sap-play.sap-touched:not(.sap-pressed):active,
-.sap-play.sap-touched:not(.sap-pressed):focus,
-.sap-play.sap-touched:not(.sap-pressed):focus-visible {
-    background: var(--sap-card-hover) !important;
+.sap-player .sap-play.sap-touched:not(.sap-pressed),
+.sap-player .sap-play.sap-touched:not(.sap-pressed):hover,
+.sap-player .sap-play.sap-touched:not(.sap-pressed):active,
+.sap-player .sap-play.sap-touched:not(.sap-pressed):focus,
+.sap-player .sap-play.sap-touched:not(.sap-pressed):focus-visible {
+    background: transparent !important;
     color: var(--sap-gray-200) !important;
     transform: none !important;
     outline: none !important;
     box-shadow: none !important;
+    transition: none !important;
 }
 
 .sap-shuffle.active.sap-touched:not(.sap-pressed),

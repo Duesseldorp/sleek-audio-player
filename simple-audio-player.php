@@ -137,6 +137,7 @@ class SAP_Theme_Manager {
             'sap-bg' => '#0a1118',
             'sap-card' => '#0f1a24',
             'sap-card-hover' => '#162230',
+            'sap-btn-bg' => '#162230',
             'sap-border' => 'rgba(79, 128, 156, 0.15)',
             // Accent colors
             'sap-accent' => '#e85d3d',
@@ -543,41 +544,52 @@ class SAP_Theme_Manager {
         // Grouped color labels for better organization
         $color_groups = array(
             'background' => array(
-                'title' => '🎨 Background',
+                'title' => '🎨 Backgrounds',
                 'colors' => array(
-                    'sap-bg' => 'Player Background',
-                    'sap-card' => 'Card Background',
-                    'sap-card-hover' => 'Card Hover',
+                    'sap-bg' => 'Player Background (outer)',
+                    'sap-card' => 'Player Background (inner)',
                     'sap-border' => 'Border Color',
                 )
             ),
-            'accent' => array(
-                'title' => '✨ Accent & Buttons',
+            'buttons' => array(
+                'title' => '🔘 Buttons',
                 'colors' => array(
-                    'sap-accent' => 'Main Accent (Play Button)',
-                    'sap-accent-light' => 'Accent Light (Hover)',
-                    'sap-accent-glow' => 'Accent Glow (Shadow)',
-                    'sap-accent-glow-strong' => 'Accent Glow Strong',
-                    'sap-accent-glow-soft' => 'Accent Glow Soft',
-                    'sap-visualizer' => 'Visualizer Color',
-                    'sap-waveform-inactive' => 'Waveform Inactive',
-                    'sap-track-active' => 'Active Track Background',
+                    'sap-btn-bg' => 'Button Background (pressed)',
+                    'sap-accent' => 'Active Toggle Color (Shuffle, Repeat)',
+                    'sap-accent-light' => 'Active Toggle Hover',
+                )
+            ),
+            'playlist' => array(
+                'title' => '📋 Playlist',
+                'colors' => array(
+                    'sap-card-hover' => 'Track Hover (mouse over)',
+                    'sap-track-active' => 'Current Track (background)',
+                )
+            ),
+            'progress' => array(
+                'title' => '🎵 Progress & Visualizer',
+                'colors' => array(
+                    'sap-visualizer' => 'Progress Bar & Visualizer',
+                    'sap-waveform-inactive' => 'Progress Bar (inactive)',
+                    'sap-accent-glow' => 'Glow Effect (shadow)',
+                    'sap-accent-glow-strong' => 'Glow Effect (strong)',
+                    'sap-accent-glow-soft' => 'Glow Effect (soft)',
                 )
             ),
             'text' => array(
-                'title' => '📝 Text & Typography',
+                'title' => '📝 Text',
                 'colors' => array(
-                    'sap-white' => 'Title (White)',
-                    'sap-gray-100' => 'Text Light',
-                    'sap-gray-200' => 'Text Normal',
-                    'sap-gray-300' => 'Text Dimmed (Artist)',
-                    'sap-gray-400' => 'Text Very Dimmed',
+                    'sap-white' => 'Title & Primary Text',
+                    'sap-gray-100' => 'Track Title in Playlist',
+                    'sap-gray-200' => 'Button Icons & Subtitle',
+                    'sap-gray-300' => 'Artist & Time Display',
+                    'sap-gray-400' => 'Track Numbers & Dimmed Text',
                 )
             ),
             'effects' => array(
                 'title' => '💫 Effects',
                 'colors' => array(
-                    'sap-blue-tint' => 'Blue Overlay',
+                    'sap-blue-tint' => 'Blue Overlay (Cover)',
                 )
             ),
         );

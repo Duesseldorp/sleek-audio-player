@@ -57,10 +57,11 @@
             
             btn.classList.remove('sap-pressed');
             
-            // Mouse events - but NOT if this is an emulated event after touch
-            btn.addEventListener('mousedown', function() {
-                // Skip if this is emulated mouse event after touch
-                if (this.classList.contains('sap-touched')) return;
+            // Mouse events
+            btn.addEventListener('mousedown', function(e) {
+                // Skip emulated mouse events from touch (they fire ~300ms after touch)
+                if (e.sourceCapabilities && e.sourceCapabilities.firesTouchEvents) return;
+                this.classList.remove('sap-touched'); // Clear touch state on real mouse click
                 this.classList.add('sap-pressed');
             });
             btn.addEventListener('mouseup', function() {
@@ -71,10 +72,12 @@
                 this.classList.remove('sap-pressed');
             });
             
-            // Click event - ensures reset after full click cycle
+            // Click event - ensures reset after full click cycle (fires after touchend on mobile)
             btn.addEventListener('click', function() {
                 this.classList.remove('sap-pressed');
                 this.blur();
+                // Force style recalculation
+                void this.offsetHeight;
             });
             
             // Touch events - add sap-touched class to override hover states via CSS
@@ -89,17 +92,20 @@
             
             btn.addEventListener('touchend', function() {
                 var self = this;
+                // Remove pressed state IMMEDIATELY
                 self.classList.remove('sap-pressed');
                 self.blur();
                 
-                // Clear :hover state after click events have fired
-                setTimeout(function() {
+                // Force immediate style recalculation
+                void self.offsetHeight;
+                
+                // Clear any lingering :hover/:active states
+                requestAnimationFrame(function() {
                     self.style.pointerEvents = 'none';
-                    void self.offsetHeight;
                     requestAnimationFrame(function() {
                         self.style.pointerEvents = '';
                     });
-                }, 50);
+                });
             }, { passive: true });
             
             btn.addEventListener('touchcancel', function() {
