@@ -1,6 +1,10 @@
 /**
  * Simple Audio Player - JavaScript
  * Vanilla JS - no jQuery required
+ * 
+ * @author Martin Gräbing
+ * @link https://www.duesseldorp.de
+ * @license GPL-2.0-or-later
  */
 
 (function() {
@@ -2884,9 +2888,18 @@
                 // Get the player's control functions via custom event
                 let handled = false;
                 
+                // Visual feedback for keyboard shortcuts
+                function flashButton(btn) {
+                    if (!btn) return;
+                    btn.classList.add('sap-key-pressed');
+                    setTimeout(() => btn.classList.remove('sap-key-pressed'), 150);
+                }
+                
                 switch(e.code) {
                     case 'Space':
                         e.preventDefault();
+                        const playBtn = targetPlayer.querySelector('.sap-play');
+                        flashButton(playBtn);
                         if (targetAudio.paused) {
                             targetAudio.play().catch(() => {});
                         } else {
@@ -2910,50 +2923,58 @@
                         break;
                     case 'ArrowUp':
                         e.preventDefault();
+                        const volUpBtn = targetPlayer.querySelector('.sap-volume-btn');
+                        flashButton(volUpBtn);
                         targetAudio.volume = Math.min(1, targetAudio.volume + 0.1);
                         handled = true;
                         break;
                     case 'ArrowDown':
                         e.preventDefault();
+                        const volDownBtn = targetPlayer.querySelector('.sap-volume-btn');
+                        flashButton(volDownBtn);
                         targetAudio.volume = Math.max(0, targetAudio.volume - 0.1);
                         handled = true;
                         break;
                     case 'KeyM':
+                        const muteBtn = targetPlayer.querySelector('.sap-volume-btn');
+                        flashButton(muteBtn);
                         targetAudio.muted = !targetAudio.muted;
                         handled = true;
                         break;
                     case 'KeyN':
-                        // Trigger next button click
                         const nextBtn = targetPlayer.querySelector('.sap-next');
+                        flashButton(nextBtn);
                         if (nextBtn) nextBtn.click();
                         handled = true;
                         break;
                     case 'KeyP':
-                        // Trigger prev button click
                         const prevBtn = targetPlayer.querySelector('.sap-prev');
+                        flashButton(prevBtn);
                         if (prevBtn) prevBtn.click();
                         handled = true;
                         break;
                     case 'KeyS':
-                        // Trigger shuffle button click
                         const shuffleBtn = targetPlayer.querySelector('.sap-shuffle');
+                        flashButton(shuffleBtn);
                         if (shuffleBtn) shuffleBtn.click();
                         handled = true;
                         break;
                     case 'KeyR':
-                        // Trigger repeat button click
                         const repeatBtn = targetPlayer.querySelector('.sap-repeat');
+                        flashButton(repeatBtn);
                         if (repeatBtn) repeatBtn.click();
                         handled = true;
                         break;
                     case 'KeyL':
-                        // Trigger speed button click
                         const speedBtn = targetPlayer.querySelector('.sap-speed');
+                        flashButton(speedBtn);
                         if (speedBtn) speedBtn.click();
                         handled = true;
                         break;
                     case 'KeyV':
-                        // Cycle visualizer type
+                        // Cycle visualizer type - flash cover area
+                        const cover = targetPlayer.querySelector('.sap-cover-carousel');
+                        flashButton(cover);
                         if (typeof cycleVisualizer === 'function') {
                             cycleVisualizer();
                         }

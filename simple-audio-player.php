@@ -2,8 +2,8 @@
 /**
  * Plugin Name: Simple Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.0.1
- * Author: Martin Graebing
+ * Version: 2.0.2
+ * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
  * Text Domain: simple-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.0.1');
+define('SAP_VERSION', '2.0.2');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**

@@ -1,6 +1,10 @@
 /**
  * Simple Audio Player - Premium Dark Mode
  * Clean UX + Smooth Animations
+ * 
+ * @author Martin Gräbing
+ * @link https://www.duesseldorp.de
+ * @license GPL-2.0-or-later
  */
 
 /* ===== Variables ===== */
@@ -448,10 +452,14 @@
 
 /* Pressed state - JS controlled (works on both desktop and mobile) */
 /* Higher specificity with .sap-player to ensure it overrides :active */
+/* .sap-key-pressed is used for keyboard shortcut visual feedback */
 .sap-player .sap-btn.sap-pressed,
 .sap-player .sap-btn.sap-pressed:hover,
 .sap-player .sap-btn.sap-pressed:active,
-.sap-player .sap-btn.sap-pressed:focus {
+.sap-player .sap-btn.sap-pressed:focus,
+.sap-player .sap-btn.sap-key-pressed,
+.sap-player .sap-play.sap-key-pressed,
+.sap-player .sap-cover-carousel.sap-key-pressed {
     transform: scale(0.9) !important;
     background: var(--sap-accent) !important;
     color: var(--sap-white) !important;

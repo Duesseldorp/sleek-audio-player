@@ -1,5 +1,5 @@
 # German translation for Simple Audio Player
-# Copyright (C) 2024 Martin Graebing
+# Copyright (C) 2024 Martin Gräbing
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
@@ -7,7 +7,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
 "POT-Creation-Date: 2024-12-19 16:00+0000\n"
 "PO-Revision-Date: 2024-12-19 16:30+0100\n"
-"Last-Translator: Martin Graebing <info@duesseldorp.de>\n"
+"Last-Translator: Martin Gräbing <info@duesseldorp.de>\n"
 "Language-Team: German <info@duesseldorp.de>\n"
 "Language: de_DE\n"
 "MIME-Version: 1.0\n"

@@ -1,3 +1,11 @@
+/**
+ * Simple Audio Player - Gutenberg Block
+ * 
+ * @author Martin Gräbing
+ * @link https://www.duesseldorp.de
+ * @license GPL-2.0-or-later
+ */
+
 (function(wp) {
     const { registerBlockType } = wp.blocks;
     const { useState, useEffect } = wp.element;

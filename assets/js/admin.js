@@ -1,7 +1,10 @@
 /**
  * Simple Audio Player - Admin JavaScript
  * WordPress Media Library Integration
- * Version: 2.0.1 - Enhanced stability
+ * 
+ * @author Martin Gräbing
+ * @link https://www.duesseldorp.de
+ * @license GPL-2.0-or-later
  */
 
 (function($) {

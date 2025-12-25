@@ -1,12 +1,12 @@
 === Simple Audio Player ===
 Contributors: martingraebing
-Author: Martin Graebing
+Author: Martin Gräbing
 Author URI: https://www.duesseldorp.de
 Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.7
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -181,11 +181,18 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.0.2 =
+* 💿 Cover Animation selector in More menu (Off / Ken Burns / Vinyl)
+* 💿 Vinyl mode with realistic rotation, center label and light reflection
+* 🎨 Adaptive Colors: Visualizer color extracted from cover art
+* 👆 Touch-drag on waveform for precise seeking (swipe to scrub)
+* 🔧 Improved color visibility on dark covers
+
 = 2.0.1 =
 * 😴 Sleep Timer with live countdown (5, 10, 15, 30, 45, 60 min or end of track)
-* � Resume playback - remembers position per playlist (GDPR-compliant, localStorage only)
+* 💾 Resume playback - remembers position per playlist (GDPR-compliant, localStorage only)
 * 🎵 11 Visualizer types (added Circular Bars, Particles, Starburst, Orbits)
-* �🛠️ Stability improvements (error handling, validation, graceful degradation)
+* 🛠️ Stability improvements (error handling, validation, graceful degradation)
 * 🔧 Fixed visualizer acceleration bug
 * 🔧 Fixed jQuery-Migrate deprecation warning
 * ⋮ Improved More menu (fixed positioning, consistent styling)
@@ -268,6 +275,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.0.2 =
+Vinyl mode! Cover animation selector with realistic vinyl spin effect. Adaptive Colors extracts visualizer color from cover art. Touch-drag seeking on waveform.
 
 = 2.0.1 =
 Sleep Timer + Resume Playback! Set a timer or stop after track. Playback position is saved per playlist. 11 visualizer types.

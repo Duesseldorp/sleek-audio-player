@@ -4,6 +4,10 @@
  * 
  * Removes all plugin data when the plugin is deleted.
  * This file is called automatically by WordPress when the plugin is deleted.
+ * 
+ * @author Martin Gräbing
+ * @link https://www.duesseldorp.de
+ * @license GPL-2.0-or-later
  */
 
 // Exit if not called by WordPress
