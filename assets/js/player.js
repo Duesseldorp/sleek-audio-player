@@ -409,8 +409,14 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
         
-        // Get visualizer color from CSS variable
+        // Get visualizer color - adaptive or from CSS variable
         function getVizColor() {
+            // Check for adaptive color first
+            const adaptiveColor = playerEl.getAdaptiveColor ? playerEl.getAdaptiveColor() : null;
+            if (adaptiveColor) {
+                return adaptiveColor;
+            }
+            // Fallback to CSS variable
             const computedStyle = getComputedStyle(document.documentElement);
             return computedStyle.getPropertyValue('--sap-visualizer').trim() || '#e85d3d';
         }
@@ -1679,6 +1685,210 @@
                     }
                 });
             });
+            
+            // === Adaptive Visualizer Colors ===
+            const adaptiveColorBtn = playerEl.querySelector('.sap-adaptive-color');
+            let adaptiveColorsEnabled = localStorage.getItem('sap_adaptive_colors') === 'true';
+            let currentAdaptiveColor = null;
+            let colorCache = {}; // Cache extracted colors per image URL
+            
+            function updateAdaptiveColorLabel() {
+                const label = adaptiveColorBtn ? adaptiveColorBtn.querySelector('.sap-adaptive-color-label') : null;
+                if (label) {
+                    label.textContent = 'Adaptive Colors: ' + (adaptiveColorsEnabled ? 'On' : 'Off');
+                }
+                if (adaptiveColorBtn) {
+                    adaptiveColorBtn.classList.toggle('active', adaptiveColorsEnabled);
+                }
+            }
+            
+            function toggleAdaptiveColors() {
+                adaptiveColorsEnabled = !adaptiveColorsEnabled;
+                localStorage.setItem('sap_adaptive_colors', adaptiveColorsEnabled);
+                updateAdaptiveColorLabel();
+                
+                if (adaptiveColorsEnabled) {
+                    extractColorFromCurrentCover();
+                } else {
+                    currentAdaptiveColor = null;
+                }
+                
+                sapLog('Adaptive colors', { enabled: adaptiveColorsEnabled });
+            }
+            
+            // Extract dominant vibrant color from image
+            function extractDominantColor(img, callback) {
+                if (!img || !img.complete || !img.naturalWidth) {
+                    callback(null);
+                    return;
+                }
+                
+                // Check cache first
+                const src = img.src;
+                if (colorCache[src]) {
+                    callback(colorCache[src]);
+                    return;
+                }
+                
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const size = 50; // Small size for performance
+                    canvas.width = size;
+                    canvas.height = size;
+                    
+                    ctx.drawImage(img, 0, 0, size, size);
+                    
+                    const imageData = ctx.getImageData(0, 0, size, size).data;
+                    const colorCounts = {};
+                    
+                    // Sample pixels and find vibrant colors
+                    for (let i = 0; i < imageData.length; i += 16) { // Sample every 4th pixel
+                        const r = imageData[i];
+                        const g = imageData[i + 1];
+                        const b = imageData[i + 2];
+                        
+                        // Skip very dark or very light colors
+                        const brightness = (r + g + b) / 3;
+                        if (brightness < 30 || brightness > 220) continue;
+                        
+                        // Calculate saturation
+                        const max = Math.max(r, g, b);
+                        const min = Math.min(r, g, b);
+                        const saturation = max === 0 ? 0 : (max - min) / max;
+                        
+                        // Only count sufficiently saturated colors
+                        if (saturation < 0.3) continue;
+                        
+                        // Quantize to reduce color space
+                        const key = (Math.round(r / 32) * 32) + ',' + 
+                                    (Math.round(g / 32) * 32) + ',' + 
+                                    (Math.round(b / 32) * 32);
+                        
+                        colorCounts[key] = (colorCounts[key] || 0) + 1;
+                    }
+                    
+                    // Find most common vibrant color
+                    let maxCount = 0;
+                    let dominantColor = null;
+                    
+                    for (const key in colorCounts) {
+                        if (colorCounts[key] > maxCount) {
+                            maxCount = colorCounts[key];
+                            dominantColor = key;
+                        }
+                    }
+                    
+                    if (dominantColor) {
+                        const parts = dominantColor.split(',');
+                        const color = '#' + 
+                            parseInt(parts[0]).toString(16).padStart(2, '0') +
+                            parseInt(parts[1]).toString(16).padStart(2, '0') +
+                            parseInt(parts[2]).toString(16).padStart(2, '0');
+                        
+                        // Boost saturation for better visibility
+                        const boostedColor = boostColorSaturation(color);
+                        colorCache[src] = boostedColor;
+                        callback(boostedColor);
+                    } else {
+                        callback(null);
+                    }
+                } catch (e) {
+                    // CORS or other error - fail silently
+                    sapLog('Color extraction failed (CORS?)', e.message);
+                    callback(null);
+                }
+            }
+            
+            // Boost color saturation for better visibility
+            function boostColorSaturation(hex) {
+                const r = parseInt(hex.slice(1, 3), 16) / 255;
+                const g = parseInt(hex.slice(3, 5), 16) / 255;
+                const b = parseInt(hex.slice(5, 7), 16) / 255;
+                
+                const max = Math.max(r, g, b);
+                const min = Math.min(r, g, b);
+                let h, s, l = (max + min) / 2;
+                
+                if (max === min) {
+                    h = s = 0;
+                } else {
+                    const d = max - min;
+                    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                    switch (max) {
+                        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                        case g: h = ((b - r) / d + 2) / 6; break;
+                        case b: h = ((r - g) / d + 4) / 6; break;
+                    }
+                }
+                
+                // Boost saturation (min 65%) and ensure good lightness (50-65%)
+                // This ensures visibility even on dark covers
+                s = Math.max(0.65, Math.min(1, s * 1.4));
+                l = Math.max(0.5, Math.min(0.65, l * 1.3));
+                
+                // HSL to RGB
+                function hue2rgb(p, q, t) {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                }
+                
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                const rNew = Math.round(hue2rgb(p, q, h + 1/3) * 255);
+                const gNew = Math.round(hue2rgb(p, q, h) * 255);
+                const bNew = Math.round(hue2rgb(p, q, h - 1/3) * 255);
+                
+                return '#' + rNew.toString(16).padStart(2, '0') +
+                             gNew.toString(16).padStart(2, '0') +
+                             bNew.toString(16).padStart(2, '0');
+            }
+            
+            function extractColorFromCurrentCover() {
+                if (!adaptiveColorsEnabled) return;
+                
+                const activeSlide = playerEl.querySelector('.sap-cover-slide.active img');
+                if (activeSlide) {
+                    extractDominantColor(activeSlide, function(color) {
+                        if (color) {
+                            currentAdaptiveColor = color;
+                            sapLog('Adaptive color extracted', color);
+                        }
+                    });
+                }
+            }
+            
+            // Initialize adaptive colors
+            updateAdaptiveColorLabel();
+            if (adaptiveColorsEnabled) {
+                // Wait for cover image to load
+                setTimeout(extractColorFromCurrentCover, 500);
+            }
+            
+            if (adaptiveColorBtn) {
+                adaptiveColorBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleAdaptiveColors();
+                });
+            }
+            
+            // Re-extract color on track change (hook into existing updateCover function)
+            const originalUpdateCover = typeof updateCover === 'function' ? updateCover : null;
+            if (originalUpdateCover) {
+                // Color extraction happens after cover update via setTimeout
+            }
+            
+            // Export functions for use elsewhere in player
+            playerEl.getAdaptiveColor = function() {
+                return adaptiveColorsEnabled ? currentAdaptiveColor : null;
+            };
+            
+            playerEl.extractAdaptiveColor = extractColorFromCurrentCover;
         }
         
         function shareTrack() {
@@ -2360,6 +2570,11 @@
             
             // Carousel aktualisieren
             updateCarousel();
+            
+            // Extract adaptive color from new cover (after carousel update)
+            if (playerEl.extractAdaptiveColor) {
+                setTimeout(playerEl.extractAdaptiveColor, 100);
+            }
             
             // Update waveform for new track
             updateWaveformForTrack(track);

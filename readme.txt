@@ -29,6 +29,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ⬇️ Track download (configurable per track)
 * 🎵 11 Visualizer types (Bars, Mirror, Circular, Oscilloscope, Dots, Wave, Pulse, Circular Bars, Particles, Starburst, Orbits)
 * 🎨 Visualizer color customizable via Theme Manager
+* 🎨 Adaptive Colors: Visualizer color extracted from cover art (toggle in More menu)
 * 👆 Double-click cover to cycle visualizers
 * ⏱️ Progress bar with seek functionality
 * 🌊 Waveform display with progress color
