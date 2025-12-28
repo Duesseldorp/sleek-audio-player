@@ -1,11 +1,11 @@
 === Simple Audio Player ===
-Contributors: martingraebing
+Contributors: d0211
 Author: Martin Gräbing
 Author URI: https://www.duesseldorp.de
 Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
-Tested up to: 6.7
+Tested up to: 6.9
 Stable tag: 2.0.2
 Requires PHP: 7.4
 License: GPLv2 or later

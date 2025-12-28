@@ -18,8 +18,9 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 global $wpdb;
 
 // Delete themes table
-$table_name = $wpdb->prefix . 'sap_themes';
-$wpdb->query("DROP TABLE IF EXISTS $table_name");
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+$table_name = esc_sql( $wpdb->prefix . 'sap_themes' );
+$wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 
 // Delete options
 delete_option('sap_active_theme_id');
