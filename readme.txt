@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.0.2
+Stable tag: 2.0.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -107,6 +107,9 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 `[sleek_player id="123"]`
 
+Legacy shortcode (still supported):
+`[simple_player id="123"]`
+
 = Shortcode Parameters =
 
 | Parameter | Values | Default | Description |
@@ -183,6 +186,12 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 4. Backend: Settings
 
 == Changelog ==
+
+= 2.0.3 =
+* 🔄 Renamed plugin to "Sleek Audio Player"
+* 🔧 Fixed Theme Import (auto-save on import)
+* 🛠️ Auto-create database table after plugin rename
+* ✅ Legacy shortcode `[simple_player]` still supported for backwards compatibility
 
 = 2.0.2 =
 * 💿 Cover Animation selector in More menu (Off / Ken Burns / Vinyl)
@@ -281,6 +290,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.0.3 =
+Plugin renamed to "Sleek Audio Player". All existing playlists and settings remain intact. Legacy shortcode [simple_player] still works.
 
 = 2.0.2 =
 Vinyl mode! Cover animation selector with realistic vinyl spin effect. Adaptive Colors extracts visualizer color from cover art. Touch-drag seeking on waveform. Security hardening for WordPress plugin directory compliance.

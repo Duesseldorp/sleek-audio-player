@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.0.2
+ * Version: 2.0.3
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.0.2');
+define('SAP_VERSION', '2.0.3');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -172,12 +172,29 @@ class SAP_Theme_Manager {
         global $wpdb;
         $this->table_name = $wpdb->prefix . 'sap_themes';
         
+        // Ensure table exists (important after plugin rename or manual installation)
+        $this->maybe_create_table();
+        
         add_action('admin_menu', array($this, 'add_theme_menu'));
         add_action('admin_init', array($this, 'register_theme_settings'));
         add_action('wp_ajax_sap_save_theme', array($this, 'ajax_save_theme'));
         add_action('wp_ajax_sap_delete_theme', array($this, 'ajax_delete_theme'));
         add_action('wp_ajax_sap_get_theme', array($this, 'ajax_get_theme'));
         add_action('wp_ajax_sap_set_active_theme', array($this, 'ajax_set_active_theme'));
+    }
+    
+    /**
+     * Check if table exists and create if not
+     */
+    private function maybe_create_table() {
+        global $wpdb;
+        
+        // Check if table exists
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$this->table_name}'") === $this->table_name;
+        
+        if (!$table_exists) {
+            self::create_table();
+        }
     }
     
     /**
@@ -462,19 +479,33 @@ class SAP_Theme_Manager {
             'settings' => array(),
         );
         
-        // Parse colors
-        if (!empty($_POST['colors']) && is_array($_POST['colors'])) {
-            $colors = map_deep(wp_unslash($_POST['colors']), 'sanitize_text_field');
-            foreach ($colors as $key => $value) {
-                $data['colors'][sanitize_key($key)] = $value;
+        // Parse colors - support both array and JSON string
+        if (!empty($_POST['colors'])) {
+            $colors_raw = wp_unslash($_POST['colors']);
+            if (is_string($colors_raw)) {
+                $colors = json_decode($colors_raw, true);
+            } else {
+                $colors = $colors_raw;
+            }
+            if (is_array($colors)) {
+                foreach ($colors as $key => $value) {
+                    $data['colors'][sanitize_key($key)] = sanitize_text_field($value);
+                }
             }
         }
         
-        // Parse settings
-        if (!empty($_POST['settings']) && is_array($_POST['settings'])) {
-            $settings = map_deep(wp_unslash($_POST['settings']), 'sanitize_text_field');
-            foreach ($settings as $key => $value) {
-                $data['settings'][sanitize_key($key)] = $value;
+        // Parse settings - support both array and JSON string
+        if (!empty($_POST['settings'])) {
+            $settings_raw = wp_unslash($_POST['settings']);
+            if (is_string($settings_raw)) {
+                $settings = json_decode($settings_raw, true);
+            } else {
+                $settings = $settings_raw;
+            }
+            if (is_array($settings)) {
+                foreach ($settings as $key => $value) {
+                    $data['settings'][sanitize_key($key)] = sanitize_text_field($value);
+                }
             }
         }
         
@@ -1644,19 +1675,27 @@ class SAP_Theme_Manager {
                             return;
                         }
                         
-                        // Load imported theme into editor
-                        loadTheme({
+                        // Prepare theme name
+                        var themeName = themeData.name ? themeData.name + ' (Imported)' : 'Imported Theme';
+                        
+                        // Auto-save the imported theme (send as JSON strings for PHP compatibility)
+                        var saveData = {
+                            action: 'sap_save_theme',
+                            nonce: nonce,
                             id: '', // New theme
-                            name: themeData.name ? themeData.name + ' (Imported)' : 'Imported Theme',
-                            colors: themeData.colors,
-                            settings: themeData.settings,
-                            is_default: 0
+                            name: themeName,
+                            colors: JSON.stringify(themeData.colors),
+                            settings: JSON.stringify(themeData.settings)
+                        };
+                        
+                        $.post(ajaxurl, saveData, function(response) {
+                            if (response.success) {
+                                alert('Theme "' + themeName + '" imported and saved!');
+                                location.reload();
+                            } else {
+                                alert('Error saving imported theme: ' + response.data);
+                            }
                         });
-                        
-                        // Clear active editing state
-                        $('.sap-theme-item').removeClass('editing');
-                        
-                        alert('Theme imported! Click "Save" to save it.');
                     } catch (err) {
                         alert('Error parsing theme file: ' + err.message);
                     }
