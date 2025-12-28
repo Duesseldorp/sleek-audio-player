@@ -1,6 +1,6 @@
 <?php
 /**
- * Simple Audio Player - Uninstall
+ * Sleek Audio Player - Uninstall
  * 
  * Removes all plugin data when the plugin is deleted.
  * This file is called automatically by WordPress when the plugin is deleted.

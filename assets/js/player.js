@@ -1,5 +1,5 @@
 /**
- * Simple Audio Player - JavaScript
+ * Sleek Audio Player - JavaScript
  * Vanilla JS - no jQuery required
  * 
  * @author Martin Gräbing

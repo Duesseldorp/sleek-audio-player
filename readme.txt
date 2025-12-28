@@ -1,4 +1,4 @@
-=== Simple Audio Player ===
+=== Sleek Audio Player ===
 Contributors: d0211
 Author: Martin Gräbing
 Author URI: https://www.duesseldorp.de
@@ -95,7 +95,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 == Installation ==
 
-1. Upload the `simple-audio-player` folder to `/wp-content/plugins/`
+1. Upload the `sleek-audio-player` folder to `/wp-content/plugins/`
 2. Activate the plugin in WordPress Admin
 3. Create a new playlist under "Playlists"
 4. Add tracks and set cover images
@@ -105,7 +105,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 = Shortcode =
 
-`[simple_player id="123"]`
+`[sleek_player id="123"]`
 
 = Shortcode Parameters =
 
@@ -117,10 +117,10 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 = Examples =
 
 Standard Layout:
-`[simple_player id="123"]`
+`[sleek_player id="123"]`
 
 Wide Layout (horizontal):
-`[simple_player id="123" layout="wide"]`
+`[sleek_player id="123" layout="wide"]`
 
 = Creating a Playlist =
 

@@ -1,5 +1,5 @@
 /**
- * Simple Audio Player - Gutenberg Block
+ * Sleek Audio Player - Gutenberg Block
  * 
  * @author Martin Gräbing
  * @link https://www.duesseldorp.de
@@ -13,9 +13,9 @@
     const { InspectorControls, useBlockProps } = wp.blockEditor;
     const { __ } = wp.i18n;
 
-    registerBlockType('simple-audio-player/player', {
-        title: __('Simple Audio Player', 'simple-audio-player'),
-        description: __('Adds an audio player with playlist.', 'simple-audio-player'),
+    registerBlockType('sleek-audio-player/player', {
+        title: __('Sleek Audio Player', 'sleek-audio-player'),
+        description: __('Adds an audio player with playlist.', 'sleek-audio-player'),
         category: 'media',
         icon: 'playlist-audio',
         keywords: [__('audio'), __('music'), __('player'), __('playlist'), __('mp3')],
@@ -59,7 +59,7 @@
             }, [playlistId]);
 
             // Playlist options for dropdown
-            var options = [{ label: __('-- Select Playlist --', 'simple-audio-player'), value: '' }];
+            var options = [{ label: __('-- Select Playlist --', 'sleek-audio-player'), value: '' }];
             playlists.forEach(function(pl) {
                 options.push({ label: pl.name + ' (' + pl.count + ' Tracks)', value: pl.id.toString() });
             });
@@ -73,9 +73,9 @@
                     null,
                     wp.element.createElement(
                         PanelBody,
-                        { title: __('Player Settings', 'simple-audio-player'), initialOpen: true },
+                        { title: __('Player Settings', 'sleek-audio-player'), initialOpen: true },
                         wp.element.createElement(SelectControl, {
-                            label: __('Playlist', 'simple-audio-player'),
+                            label: __('Playlist', 'sleek-audio-player'),
                             value: playlistId,
                             options: options,
                             onChange: function(value) {
@@ -88,7 +88,7 @@
                 loading
                     ? wp.element.createElement(
                         Placeholder,
-                        { icon: 'playlist-audio', label: __('Simple Audio Player', 'simple-audio-player') },
+                        { icon: 'playlist-audio', label: __('Sleek Audio Player', 'sleek-audio-player') },
                         wp.element.createElement(Spinner)
                     )
                     : !playlistId
@@ -96,8 +96,8 @@
                             Placeholder,
                             { 
                                 icon: 'playlist-audio', 
-                                label: __('Simple Audio Player', 'simple-audio-player'),
-                                instructions: __('Select a playlist from the sidebar.', 'simple-audio-player')
+                                label: __('Sleek Audio Player', 'sleek-audio-player'),
+                                instructions: __('Select a playlist from the sidebar.', 'sleek-audio-player')
                             },
                             wp.element.createElement(SelectControl, {
                                 value: playlistId,
@@ -127,7 +127,7 @@
                                     className: 'dashicons dashicons-playlist-audio',
                                     style: { fontSize: '16px' }
                                 }),
-                                'Simple Audio Player – Playlist #' + playlistId
+                                'Sleek Audio Player – Playlist #' + playlistId
                             ),
                             wp.element.createElement('div', {
                                 style: {
@@ -140,7 +140,7 @@
                             }, 
                                 preview 
                                     ? wp.element.createElement('div', { dangerouslySetInnerHTML: { __html: preview } })
-                                    : __('Player preview is shown in the frontend.', 'simple-audio-player')
+                                    : __('Player preview is shown in the frontend.', 'sleek-audio-player')
                             )
                         )
             );

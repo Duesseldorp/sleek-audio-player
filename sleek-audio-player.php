@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name: Simple Audio Player
+ * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
  * Version: 2.0.2
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de
- * Text Domain: simple-audio-player
+ * Text Domain: sleek-audio-player
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * License: GPL v2 or later
@@ -2232,7 +2232,8 @@ class Simple_Audio_Player {
     private function __construct() {
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
-        add_shortcode('simple_player', array($this, 'render_player'));
+        add_shortcode('sleek_player', array($this, 'render_player'));
+        add_shortcode('simple_player', array($this, 'render_player')); // Legacy alias for backwards compatibility
         add_action('init', array($this, 'register_post_type'));
         add_action('init', array($this, 'register_gutenberg_block'));
         add_action('rest_api_init', array($this, 'register_rest_routes'));
@@ -2394,7 +2395,7 @@ class Simple_Audio_Player {
         $site_name = wp_strip_all_tags(get_bloginfo('name'));
         
         ?>
-        <!-- Simple Audio Player - Open Graph Tags -->
+        <!-- Sleek Audio Player - Open Graph Tags -->
         <meta property="og:type" content="music.playlist">
         <meta property="og:title" content="<?php echo esc_attr($title); ?>">
         <meta property="og:description" content="<?php echo esc_attr($excerpt); ?>">
@@ -2433,7 +2434,7 @@ class Simple_Audio_Player {
         );
         
         // Block registrieren
-        register_block_type('simple-audio-player/player', array(
+        register_block_type('sleek-audio-player/player', array(
             'editor_script' => 'sap-block-editor',
             'render_callback' => array($this, 'render_gutenberg_block'),
             'attributes' => array(
@@ -2514,7 +2515,7 @@ class Simple_Audio_Player {
         $playlist = get_post($id);
         
         if (!$playlist || $playlist->post_type !== 'sap_playlist') {
-            return new WP_Error('not_found', __('Playlist not found', 'simple-audio-player'), array('status' => 404));
+            return new WP_Error('not_found', __('Playlist not found', 'sleek-audio-player'), array('status' => 404));
         }
         
         $tracks = get_post_meta($id, '_sap_tracks', true);
@@ -2694,7 +2695,7 @@ class Simple_Audio_Player {
             </style>
         </head>
         <body>
-            <?php echo do_shortcode('[simple_player id="' . intval($post->ID) . '"]'); ?>
+            <?php echo do_shortcode('[sleek_player id="' . intval($post->ID) . '"]'); ?>
             <?php wp_footer(); ?>
         </body>
         </html>
@@ -2763,7 +2764,7 @@ class Simple_Audio_Player {
     public function render_settings_page() {
         ?>
         <div class="wrap">
-            <h1>Simple Audio Player - Settings</h1>
+            <h1>Sleek Audio Player - Settings</h1>
             
             <form method="post" action="options.php">
                 <?php settings_fields('sap_settings'); ?>
@@ -2959,7 +2960,7 @@ class Simple_Audio_Player {
      */
     public function enqueue_assets() {
         wp_enqueue_style(
-            'simple-audio-player',
+            'sleek-audio-player',
             SAP_PLUGIN_URL . 'assets/css/player.css',
             array(),
             SAP_VERSION
@@ -2969,10 +2970,10 @@ class Simple_Audio_Player {
         $theme_manager = SAP_Theme_Manager::get_instance();
         $active_theme = $theme_manager->get_active_theme();
         $theme_css = $theme_manager->generate_theme_css($active_theme);
-        wp_add_inline_style('simple-audio-player', $theme_css);
+        wp_add_inline_style('sleek-audio-player', $theme_css);
 
         wp_enqueue_script(
-            'simple-audio-player',
+            'sleek-audio-player',
             SAP_PLUGIN_URL . 'assets/js/player.js',
             array(),
             SAP_VERSION,
@@ -2980,7 +2981,7 @@ class Simple_Audio_Player {
         );
         
         // Pass settings to JavaScript
-        wp_localize_script('simple-audio-player', 'sapSettings', array(
+        wp_localize_script('sleek-audio-player', 'sapSettings', array(
             'umamiTracking' => (bool) get_option('sap_umami_tracking', false),
             'coverClickPlay' => (bool) get_option('sap_cover_click_play', true),
             'rememberPosition' => (bool) get_option('sap_remember_position', false),
@@ -3022,13 +3023,13 @@ class Simple_Audio_Player {
     public function register_post_type() {
         register_post_type('sap_playlist', array(
             'labels' => array(
-                'name' => __('Playlists', 'simple-audio-player'),
-                'singular_name' => __('Playlist', 'simple-audio-player'),
-                'add_new' => __('Add New', 'simple-audio-player'),
-                'add_new_item' => __('Add New Playlist', 'simple-audio-player'),
-                'edit_item' => __('Edit Playlist', 'simple-audio-player'),
-                'view_item' => __('View Playlist', 'simple-audio-player'),
-                'all_items' => __('All Playlists', 'simple-audio-player'),
+                'name' => __('Playlists', 'sleek-audio-player'),
+                'singular_name' => __('Playlist', 'sleek-audio-player'),
+                'add_new' => __('Add New', 'sleek-audio-player'),
+                'add_new_item' => __('Add New Playlist', 'sleek-audio-player'),
+                'edit_item' => __('Edit Playlist', 'sleek-audio-player'),
+                'view_item' => __('View Playlist', 'sleek-audio-player'),
+                'all_items' => __('All Playlists', 'sleek-audio-player'),
             ),
             'public' => true,
             'publicly_queryable' => true,
@@ -3050,7 +3051,7 @@ class Simple_Audio_Player {
     public function add_meta_boxes() {
         add_meta_box(
             'sap_tracks',
-            __('Tracks', 'simple-audio-player'),
+            __('Tracks', 'sleek-audio-player'),
             array($this, 'render_tracks_metabox'),
             'sap_playlist',
             'normal',
@@ -3135,11 +3136,11 @@ class Simple_Audio_Player {
             <div class="sap-embed-codes">
                 <div class="sap-embed-code">
                     <span class="sap-embed-label">Standard:</span>
-                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[simple_player id="<?php echo esc_attr( $post->ID ); ?>"]</code>
+                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[sleek_player id="<?php echo esc_attr( $post->ID ); ?>"]</code>
                 </div>
                 <div class="sap-embed-code">
                     <span class="sap-embed-label">Wide Layout:</span>
-                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[simple_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]</code>
+                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[sleek_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]</code>
                 </div>
                 <?php if ($post->post_status === 'publish') : ?>
                 <div class="sap-embed-code">
@@ -3182,7 +3183,7 @@ class Simple_Audio_Player {
         <p>
             <label><strong>Shortcode:</strong></label>
             <input type="text" 
-                   value='[simple_player id="<?php echo esc_attr( $post->ID ); ?>"]' 
+                   value='[sleek_player id="<?php echo esc_attr( $post->ID ); ?>"]' 
                    readonly 
                    onclick="this.select(); document.execCommand('copy'); alert('Shortcode copied!');"
                    style="width:100%; background:#f0f0f0; cursor:pointer;" />
@@ -3191,7 +3192,7 @@ class Simple_Audio_Player {
         <p>
             <label><strong>Shortcode (Wide Layout):</strong></label>
             <input type="text" 
-                   value='[simple_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]' 
+                   value='[sleek_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]' 
                    readonly 
                    onclick="this.select(); document.execCommand('copy'); alert('Shortcode copied!');"
                    style="width:100%; background:#f0f0f0; cursor:pointer;" />
@@ -3391,7 +3392,7 @@ class Simple_Audio_Player {
     }
     
     /**
-     * Shortcode: [simple_player id="123" layout="wide"]
+     * Shortcode: [sleek_player id="123" layout="wide"]
      */
     public function render_player($atts) {
         $atts = shortcode_atts(array(
@@ -3401,7 +3402,7 @@ class Simple_Audio_Player {
 
         $post_id = intval($atts['id']);
         if (!$post_id) {
-            return '<p>' . __('No playlist ID specified.', 'simple-audio-player') . '</p>';
+            return '<p>' . __('No playlist ID specified.', 'sleek-audio-player') . '</p>';
         }
 
         $tracks = get_post_meta($post_id, '_sap_tracks', true);
@@ -3411,7 +3412,7 @@ class Simple_Audio_Player {
         
         if (empty($tracks)) {
             sap_log('No valid tracks found for playlist', $post_id);
-            return '<p>' . __('No tracks found.', 'simple-audio-player') . '</p>';
+            return '<p>' . __('No tracks found.', 'sleek-audio-player') . '</p>';
         }
         
         // Apply URL protection or CDN URLs to audio
@@ -3478,7 +3479,7 @@ class Simple_Audio_Player {
         // Final check - ensure we have at least one playable track
         if (empty($tracks)) {
             sap_log('No playable tracks after validation', $post_id);
-            return '<p>' . __('No playable tracks found.', 'simple-audio-player') . '</p>';
+            return '<p>' . __('No playable tracks found.', 'sleek-audio-player') . '</p>';
         }
 
         $cover = self::cdn_url(get_the_post_thumbnail_url($post_id, 'large'));
@@ -3606,30 +3607,30 @@ class Simple_Audio_Player {
                             <div class="sap-more-divider"></div>
                             <button type="button" class="sap-more-item sap-sleep-timer" data-action="sleep">
                                 <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-                                <span class="sap-sleep-label"><?php echo esc_html__('Sleep Timer', 'simple-audio-player'); ?>: <?php echo esc_html__('Off', 'simple-audio-player'); ?></span>
+                                <span class="sap-sleep-label"><?php echo esc_html__('Sleep Timer', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
                             </button>
                             <div class="sap-sleep-submenu" style="display:none;">
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0"><?php echo esc_html__('Off', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="5"><?php echo esc_html__('5 Min', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="10"><?php echo esc_html__('10 Min', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="15"><?php echo esc_html__('15 Min', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="30"><?php echo esc_html__('30 Min', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="45"><?php echo esc_html__('45 Min', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60"><?php echo esc_html__('1 Hour', 'simple-audio-player'); ?></button>
-                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true"><?php echo esc_html__('End of Track', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0"><?php echo esc_html__('Off', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="5"><?php echo esc_html__('5 Min', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="10"><?php echo esc_html__('10 Min', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="15"><?php echo esc_html__('15 Min', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="30"><?php echo esc_html__('30 Min', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="45"><?php echo esc_html__('45 Min', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60"><?php echo esc_html__('1 Hour', 'sleek-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true"><?php echo esc_html__('End of Track', 'sleek-audio-player'); ?></button>
                             </div>
                             <button type="button" class="sap-more-item sap-cover-anim" data-action="cover-anim">
                                 <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9.41 15.95L12 12.36l2.59 3.59L17 13l4 5H3l4-4z"/></svg>
-                                <span class="sap-cover-anim-label"><?php echo esc_html__('Cover', 'simple-audio-player'); ?>: Ken Burns</span>
+                                <span class="sap-cover-anim-label"><?php echo esc_html__('Cover', 'sleek-audio-player'); ?>: Ken Burns</span>
                             </button>
                             <div class="sap-cover-anim-submenu" style="display:none;">
-                                <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="none"><?php echo esc_html__('Off', 'simple-audio-player'); ?></button>
+                                <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="none"><?php echo esc_html__('Off', 'sleek-audio-player'); ?></button>
                                 <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="kenburns">Ken Burns</button>
                                 <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="vinyl">Vinyl</button>
                             </div>
                             <button type="button" class="sap-more-item sap-adaptive-color" data-action="adaptive-color">
                                 <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                                <span class="sap-adaptive-color-label"><?php echo esc_html__('Adaptive Colors', 'simple-audio-player'); ?>: <?php echo esc_html__('Off', 'simple-audio-player'); ?></span>
+                                <span class="sap-adaptive-color-label"><?php echo esc_html__('Adaptive Colors', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
                             </button>
                             <div class="sap-more-divider sap-stream-divider" style="display:none;"></div>
                             <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-spotify" style="display:none;">

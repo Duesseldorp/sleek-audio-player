@@ -1,5 +1,5 @@
 /**
- * Simple Audio Player - Admin JavaScript
+ * Sleek Audio Player - Admin JavaScript
  * WordPress Media Library Integration
  * 
  * @author Martin Gräbing
