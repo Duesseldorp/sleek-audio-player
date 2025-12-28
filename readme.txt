@@ -11,11 +11,22 @@ Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Minimal, fast audio player with download, shuffle, cover art, and visualization.
+Lightweight, customizable audio player with 11 visualizers, waveform display, theme manager, and SEO optimization. No jQuery, no bloat.
 
 == Description ==
 
 A sleek, modern audio player for WordPress - perfect for musicians, podcasters, and bands.
+
+**Why choose Sleek Audio Player?**
+
+* 🚀 **Zero configuration** - Works immediately after activation
+* 🎨 **11 unique visualizers** - More than any other free plugin
+* 🌊 **Waveform display** - Professional look with seek functionality
+* 🔒 **Security-first** - Full WordPress coding standards compliance
+* ⚡ **Lightweight** - No jQuery, no frameworks, no bloat
+* 🎯 **SEO optimized** - Schema.org markup & Open Graph tags included
+* 📱 **Fully responsive** - Looks great on all devices
+* 🎨 **Theme Manager** - Create unlimited custom color schemes
 
 = Player Features =
 
@@ -84,14 +95,16 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 = Technical =
 
-* ⚡ Vanilla JavaScript (no jQuery dependency for player)
-* 🎯 Lightweight (~37KB CSS + ~129KB JS unminified)
-* 🔒 WordPress Security Standards compliant
-* 🛡️ Full input sanitization (sanitize_text_field, esc_url_raw, absint)
-* 🔐 All output escaped (esc_html, esc_attr, esc_url, wp_json_encode)
+* 🎵 Supports MP3, WAV, OGG, M4A, AAC, WebM, FLAC (browser-dependent)
+* ⚡ Vanilla JavaScript - no jQuery, no React, no external dependencies
+* 🎯 Lightweight - minimal impact on page load speed
+* 🔒 WordPress Security Standards compliant (Plugin Check verified)
+* 🛡️ Full input sanitization & output escaping
 * ✅ Nonce verification on all forms and AJAX
-* 🎭 Only one player plays at a time
+* 🎭 Smart playback - only one player plays at a time
 * 🖥️ Cross-browser compatible (Chrome, Firefox, Safari, Edge)
+* 🧩 Gutenberg Block & Shortcode support
+* 🌐 Works with all major caching plugins
 
 == Installation ==
 
