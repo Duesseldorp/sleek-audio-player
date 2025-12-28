@@ -5,7 +5,7 @@
  * Version: 2.0.3
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
- * Plugin URI: https://www.duesseldorp.de
+ * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
  * Text Domain: sleek-audio-player
  * Requires at least: 5.0
  * Requires PHP: 7.4
@@ -98,6 +98,7 @@ function sap_db_query($query, ...$args) {
                 $query = preg_replace('/%i/', '`' . esc_sql($args[0]) . '`', $query, 1);
                 array_shift($args);
                 if (!empty($args)) {
+                    // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query is built safely above with esc_sql
                     return $wpdb->prepare($query, ...$args);
                 }
                 return $query;
@@ -105,6 +106,7 @@ function sap_db_query($query, ...$args) {
         }
         
         if (!empty($args)) {
+            // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Variable query with proper placeholders
             return $wpdb->prepare($query, ...$args);
         }
         return $query;
@@ -2480,6 +2482,10 @@ class Simple_Audio_Player {
                 'playlistId' => array(
                     'type' => 'string',
                     'default' => ''
+                ),
+                'layout' => array(
+                    'type' => 'string',
+                    'default' => 'standard'
                 )
             )
         ));
@@ -2490,12 +2496,18 @@ class Simple_Audio_Player {
      */
     public function render_gutenberg_block($attributes) {
         $playlist_id = isset($attributes['playlistId']) ? intval($attributes['playlistId']) : 0;
+        $layout = isset($attributes['layout']) ? sanitize_text_field($attributes['layout']) : 'standard';
         
         if (!$playlist_id) {
             return '';
         }
         
-        return $this->render_player(array('id' => $playlist_id));
+        $shortcode_atts = array('id' => $playlist_id);
+        if ($layout === 'wide') {
+            $shortcode_atts['layout'] = 'wide';
+        }
+        
+        return $this->render_player($shortcode_atts);
     }
     
     /**
@@ -2676,21 +2688,25 @@ class Simple_Audio_Player {
         header('Pragma: no-cache');
         header('Expires: 0');
         
-        // Stream the file
+        // Stream the file - using direct PHP file operations for binary audio streaming
+        // WP_Filesystem is not suitable for streaming large binary files with byte-range support
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fopen -- Binary audio streaming requires direct file access
         $fp = fopen($file_path, 'rb');
         fseek($fp, $start);
         
         $buffer_size = 8192;
         $bytes_remaining = $length;
         
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary audio streaming
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary audio data
         while ($bytes_remaining > 0 && !feof($fp)) {
             $read_size = min($buffer_size, $bytes_remaining);
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Raw binary audio output
             echo fread($fp, $read_size);
             $bytes_remaining -= $read_size;
             flush();
         }
         
+        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fclose -- Closing file handle from fopen above
         fclose($fp);
         exit;
     }

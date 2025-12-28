@@ -24,12 +24,16 @@
             playlistId: {
                 type: 'string',
                 default: ''
+            },
+            layout: {
+                type: 'string',
+                default: 'standard'
             }
         },
 
         edit: function(props) {
             const { attributes, setAttributes } = props;
-            const { playlistId } = attributes;
+            const { playlistId, layout } = attributes;
             const blockProps = useBlockProps();
             const [playlists, setPlaylists] = useState([]);
             const [loading, setLoading] = useState(true);
@@ -80,6 +84,17 @@
                             options: options,
                             onChange: function(value) {
                                 setAttributes({ playlistId: value });
+                            }
+                        }),
+                        wp.element.createElement(SelectControl, {
+                            label: __('Layout', 'sleek-audio-player'),
+                            value: layout,
+                            options: [
+                                { label: __('Standard', 'sleek-audio-player'), value: 'standard' },
+                                { label: __('Wide', 'sleek-audio-player'), value: 'wide' }
+                            ],
+                            onChange: function(value) {
+                                setAttributes({ layout: value });
                             }
                         })
                     )
