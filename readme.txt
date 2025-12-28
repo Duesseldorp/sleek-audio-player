@@ -34,8 +34,8 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ⏱️ Progress bar with seek functionality
 * 🌊 Waveform display with progress color
 * 👆 Click on waveform jumps to position & starts playback
-* � Touch-drag on waveform for precise seeking (swipe to scrub)
-* � Volume control with popup slider
+* 👆 Touch-drag on waveform for precise seeking (swipe to scrub)
+* 🔊 Volume control with popup slider
 * ⏱️ Click duration to toggle remaining time
 * 💾 Resume playback (remembers position per playlist)
 
@@ -86,7 +86,10 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 * ⚡ Vanilla JavaScript (no jQuery, no framework)
 * 🎯 Only ~15KB CSS + JS
-* 🔒 Security tested (Nonce, Sanitization, Escaping)
+* 🔒 WordPress Security Standards compliant
+* 🛡️ Full input sanitization (sanitize_text_field, esc_url_raw, absint)
+* 🔐 All output escaped (esc_html, esc_attr, esc_url, wp_json_encode)
+* ✅ Nonce verification on all forms and AJAX
 * 🎭 Only one player plays at a time
 * 🖥️ Cross-browser compatible (Chrome, Firefox, Safari, Edge)
 
@@ -187,6 +190,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * 🎨 Adaptive Colors: Visualizer color extracted from cover art
 * 👆 Touch-drag on waveform for precise seeking (swipe to scrub)
 * 🔧 Improved color visibility on dark covers
+* 🔒 Security hardening: Full WordPress coding standards compliance
+* 🛡️ All superglobals properly sanitized with wp_unslash()
+* ✅ All output escaped according to context
 
 = 2.0.1 =
 * 😴 Sleep Timer with live countdown (5, 10, 15, 30, 45, 60 min or end of track)
@@ -216,10 +222,10 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * 📱 Improved mobile support for volume control
 
 = 1.8.0 =
-* � Repeat mode (Off / All / One track)
+* 🔁 Repeat mode (Off / All / One track)
 * ⏩ Playback speed control (1x, 1.25x, 1.5x, 2x)
 * ⌨️ Keyboard shortcuts for Repeat (R) and Speed (L)
-* �🔍 SEO: JSON-LD Schema.org markup for playlists and tracks
+* 🔍 SEO: JSON-LD Schema.org markup for playlists and tracks
 * 📱 SEO: Open Graph & Twitter Card meta tags
 * 🌐 SEO: Public playlist pages with own URL (/playlist/name/)
 * 📋 SEO: Playlist archive at /playlist/
@@ -277,7 +283,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 == Upgrade Notice ==
 
 = 2.0.2 =
-Vinyl mode! Cover animation selector with realistic vinyl spin effect. Adaptive Colors extracts visualizer color from cover art. Touch-drag seeking on waveform.
+Vinyl mode! Cover animation selector with realistic vinyl spin effect. Adaptive Colors extracts visualizer color from cover art. Touch-drag seeking on waveform. Security hardening for WordPress plugin directory compliance.
 
 = 2.0.1 =
 Sleep Timer + Resume Playback! Set a timer or stop after track. Playback position is saved per playlist. 11 visualizer types.
