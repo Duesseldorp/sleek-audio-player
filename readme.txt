@@ -84,8 +84,8 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 = Technical =
 
-* ⚡ Vanilla JavaScript (no jQuery, no framework)
-* 🎯 Only ~15KB CSS + JS
+* ⚡ Vanilla JavaScript (no jQuery dependency for player)
+* 🎯 Lightweight (~37KB CSS + ~129KB JS unminified)
 * 🔒 WordPress Security Standards compliant
 * 🛡️ Full input sanitization (sanitize_text_field, esc_url_raw, absint)
 * 🔐 All output escaped (esc_html, esc_attr, esc_url, wp_json_encode)
