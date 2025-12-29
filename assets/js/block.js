@@ -27,7 +27,7 @@
             },
             layout: {
                 type: 'string',
-                default: 'standard'
+                default: 'wide'
             }
         },
 
@@ -90,8 +90,8 @@
                             label: __('Layout', 'sleek-audio-player'),
                             value: layout,
                             options: [
-                                { label: __('Standard', 'sleek-audio-player'), value: 'standard' },
-                                { label: __('Wide', 'sleek-audio-player'), value: 'wide' }
+                                { label: __('Wide', 'sleek-audio-player'), value: 'wide' },
+                                { label: __('Mini (Embed)', 'sleek-audio-player'), value: 'mini' }
                             ],
                             onChange: function(value) {
                                 setAttributes({ layout: value });

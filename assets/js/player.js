@@ -1895,6 +1895,120 @@
             playerEl.extractAdaptiveColor = extractColorFromCurrentCover;
         }
         
+        // === Embed Modal ===
+        const embedBtn = moreMenu ? moreMenu.querySelector('.sap-embed-btn') : null;
+        const embedModal = playerEl.querySelector('.sap-embed-modal');
+        const embedBackdrop = embedModal ? embedModal.querySelector('.sap-embed-backdrop') : null;
+        const embedClose = embedModal ? embedModal.querySelector('.sap-embed-close') : null;
+        const embedLayouts = embedModal ? embedModal.querySelectorAll('.sap-embed-layout') : [];
+        const embedCode = embedModal ? embedModal.querySelector('.sap-embed-code') : null;
+        const embedCopy = embedModal ? embedModal.querySelector('.sap-embed-copy') : null;
+        const embedPreview = embedModal ? embedModal.querySelector('.sap-embed-preview') : null;
+        
+        // Debug logging
+        sapLog('Embed Modal Init', { 
+            moreMenu: !!moreMenu, 
+            embedBtn: !!embedBtn, 
+            embedModal: !!embedModal 
+        });
+        
+        function openEmbedModal() {
+            const embedBtnEl = moreMenu ? moreMenu.querySelector('.sap-embed-btn') : null;
+            sapLog('openEmbedModal called', { embedModal: !!embedModal, embedBtnEl: !!embedBtnEl });
+            if (!embedModal || !embedBtnEl) return;
+            
+            const baseUrl = embedBtnEl.dataset.embedUrl;
+            embedModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Set default layout (wide)
+            updateEmbedCode('wide', 280, baseUrl);
+            
+            // Close more menu
+            if (moreMenu) moreMenu.classList.remove('active');
+            if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
+        }
+        
+        function closeEmbedModal() {
+            if (!embedModal) return;
+            embedModal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+        
+        function updateEmbedCode(layout, height, baseUrl) {
+            if (!embedCode) return;
+            
+            let url = baseUrl;
+            if (layout === 'wide') {
+                url += (url.includes('?') ? '&' : '?') + 'layout=wide';
+            } else if (layout === 'mini') {
+                url += (url.includes('?') ? '&' : '?') + 'layout=mini';
+            }
+            
+            const code = `<iframe src="${url}" width="100%" height="${height}" frameborder="0" allow="autoplay" style="border-radius:16px;"></iframe>`;
+            embedCode.value = code;
+        }
+        
+        // Use event delegation on moreMenu for embed button
+        if (moreMenu) {
+            moreMenu.addEventListener('click', function(e) {
+                const embedTarget = e.target.closest('.sap-embed-btn');
+                if (embedTarget) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openEmbedModal();
+                }
+            });
+        }
+        
+        if (embedBackdrop) {
+            embedBackdrop.addEventListener('click', closeEmbedModal);
+        }
+        
+        if (embedClose) {
+            embedClose.addEventListener('click', closeEmbedModal);
+        }
+        
+        embedLayouts.forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                embedLayouts.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const layout = this.dataset.layout;
+                const height = parseInt(this.dataset.height) || 500;
+                const embedBtnEl = moreMenu ? moreMenu.querySelector('.sap-embed-btn') : null;
+                const baseUrl = embedBtnEl ? embedBtnEl.dataset.embedUrl : '';
+                updateEmbedCode(layout, height, baseUrl);
+            });
+        });
+        
+        if (embedCopy) {
+            embedCopy.addEventListener('click', function() {
+                if (!embedCode) return;
+                
+                embedCode.select();
+                navigator.clipboard.writeText(embedCode.value).then(() => {
+                    const span = this.querySelector('span');
+                    const originalText = span.textContent;
+                    span.textContent = '✓ Copied!';
+                    this.classList.add('copied');
+                    setTimeout(() => {
+                        span.textContent = originalText;
+                        this.classList.remove('copied');
+                    }, 2000);
+                }).catch(() => {
+                    document.execCommand('copy');
+                });
+            });
+        }
+        
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && embedModal && embedModal.style.display === 'flex') {
+                closeEmbedModal();
+            }
+        });
+        
         function shareTrack() {
             const track = playlist[currentIndex];
             if (!track) return;

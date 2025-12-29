@@ -2485,7 +2485,7 @@ class Simple_Audio_Player {
                 ),
                 'layout' => array(
                     'type' => 'string',
-                    'default' => 'standard'
+                    'default' => 'wide'
                 )
             )
         ));
@@ -2503,8 +2503,8 @@ class Simple_Audio_Player {
         }
         
         $shortcode_atts = array('id' => $playlist_id);
-        if ($layout === 'wide') {
-            $shortcode_atts['layout'] = 'wide';
+        if ($layout === 'wide' || $layout === 'mini') {
+            $shortcode_atts['layout'] = $layout;
         }
         
         return $this->render_player($shortcode_atts);
@@ -2728,6 +2728,14 @@ class Simple_Audio_Player {
         // Enqueue assets
         $this->enqueue_assets();
         
+        // Get layout parameter
+        $layout = isset($_GET['layout']) ? sanitize_text_field(wp_unslash($_GET['layout'])) : '';
+        $valid_layouts = array('wide', 'mini');
+        $layout_attr = in_array($layout, $valid_layouts, true) ? ' layout="' . esc_attr($layout) . '"' : '';
+        
+        // Adjust padding for mini layout
+        $body_padding = ($layout === 'mini') ? '8px' : '16px';
+        
         // Output standalone embed page
         ?>
         <!DOCTYPE html>
@@ -2740,7 +2748,7 @@ class Simple_Audio_Player {
             <style>
                 body { 
                     margin: 0; 
-                    padding: 16px; 
+                    padding: <?php echo esc_attr($body_padding); ?>; 
                     background: transparent;
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 }
@@ -2750,7 +2758,10 @@ class Simple_Audio_Player {
             </style>
         </head>
         <body>
-            <?php echo do_shortcode('[sleek_player id="' . intval($post->ID) . '"]'); ?>
+            <?php 
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $layout_attr is sanitized above
+            echo do_shortcode('[sleek_player id="' . intval($post->ID) . '"' . $layout_attr . ']'); 
+            ?>
             <?php wp_footer(); ?>
         </body>
         </html>
@@ -3572,7 +3583,8 @@ class Simple_Audio_Player {
         <?php 
         $layout = strtolower(trim($atts['layout']));
         $is_wide = ($layout === 'wide');
-        $layout_class = ($is_wide ? ' sap-wide' : '');
+        $is_mini = ($layout === 'mini');
+        $layout_class = $is_wide ? ' sap-wide' : ($is_mini ? ' sap-mini' : '');
         
         // Inline styles for wide layout (cache-proof)
         // Note: No !important here so CSS media queries can override on mobile
@@ -3687,6 +3699,11 @@ class Simple_Audio_Player {
                                 <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
                                 <span class="sap-adaptive-color-label"><?php echo esc_html__('Adaptive Colors', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
                             </button>
+                            <div class="sap-more-divider"></div>
+                            <button type="button" class="sap-more-item sap-embed-btn" data-action="embed" data-embed-url="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post_id))); ?>">
+                                <svg viewBox="0 0 24 24"><path d="M18 16h-2v-1H8v1H6v-1H2v5h20v-5h-4zm2 3H4v-1h16zM6.5 10H4v5h2V10zm3.5 0H8v5h2v-5zm3.5 0H12v5h2V10zm3.5 0h-2v5h2v-5zm3.5 0h-2v5h2v-5zM2 8h20V3H2zm2-3h16v1H4z"/><path d="M9.4 6.4L8 5l-4 4 4 4 1.4-1.4L6.8 9zm5.2 0L16 5l4 4-4 4-1.4-1.4L17.2 9z" transform="translate(0,9) scale(0.6)"/></svg>
+                                <span><?php echo esc_html__('Embed Player', 'sleek-audio-player'); ?></span>
+                            </button>
                             <div class="sap-more-divider sap-stream-divider" style="display:none;"></div>
                             <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-spotify" style="display:none;">
                                 <span>Spotify</span>
@@ -3733,6 +3750,46 @@ class Simple_Audio_Player {
 
             <!-- Hidden Audio Element -->
             <audio class="sap-audio" preload="none"></audio>
+            
+            <!-- Embed Modal -->
+            <div class="sap-embed-modal" style="display:none;" role="dialog" aria-labelledby="sap-embed-title" aria-modal="true">
+                <div class="sap-embed-backdrop"></div>
+                <div class="sap-embed-dialog">
+                    <div class="sap-embed-header">
+                        <h3 id="sap-embed-title"><?php echo esc_html__('Embed Player', 'sleek-audio-player'); ?></h3>
+                        <button type="button" class="sap-embed-close" aria-label="<?php echo esc_attr__('Close', 'sleek-audio-player'); ?>">
+                            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+                        </button>
+                    </div>
+                    <div class="sap-embed-body">
+                        <div class="sap-embed-option">
+                            <label><?php echo esc_html__('Layout', 'sleek-audio-player'); ?></label>
+                            <div class="sap-embed-layouts">
+                                <button type="button" class="sap-embed-layout active" data-layout="wide" data-height="280">
+                                    <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                                    <span>Wide</span>
+                                </button>
+                                <button type="button" class="sap-embed-layout" data-layout="mini" data-height="80">
+                                    <svg viewBox="0 0 24 24"><rect x="2" y="9" width="20" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+                                    <span>Mini</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="sap-embed-option">
+                            <label><?php echo esc_html__('Embed Code', 'sleek-audio-player'); ?></label>
+                            <textarea class="sap-embed-code" readonly rows="3"></textarea>
+                            <button type="button" class="sap-embed-copy">
+                                <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                                <span><?php echo esc_html__('Copy Code', 'sleek-audio-player'); ?></span>
+                            </button>
+                        </div>
+                        <div class="sap-embed-preview-section">
+                            <label><?php echo esc_html__('Preview', 'sleek-audio-player'); ?></label>
+                            <div class="sap-embed-preview"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         <?php
         return ob_get_clean();

@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.0.3
+Stable tag: 2.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -33,7 +33,8 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * ▶️ Play/Pause/Prev/Next Controls
 * 🔀 Shuffle mode
 * 📤 Share button with social media preview
-* ⋮ More menu (Download, Repeat, Speed, Sleep Timer)
+* 🔗 Embed Code Generator (Wide & Mini layouts)
+* ⋮ More menu (Download, Repeat, Speed, Sleep Timer, Embed)
 * 🔁 Repeat mode (Off / All / One)
 * ⏩ Playback speed (1x, 1.25x, 1.5x, 2x)
 * 😴 Sleep Timer (5-60 min or end of track)
@@ -58,7 +59,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 💫 Pulse effect on track change
 * 🔍 Hover zoom on cover
 * 💿 Cover animation selector in More menu (Off / Ken Burns / Vinyl)
-* 📱 Responsive design (Wide & Standard Layout)
+* 📱 Responsive design (Wide & Mini Layout)
 * 🎨 Theme Manager with live preview
 * 🔒 URL protection for audio files (optional)
 
@@ -128,15 +129,15 @@ Legacy shortcode (still supported):
 | Parameter | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `id` | number | required | Playlist ID |
-| `layout` | `wide` | standard | Horizontal layout with cover on left |
+| `layout` | `wide`, `mini` | wide | Layout variant |
 
 = Examples =
 
-Standard Layout:
+Wide Layout (default):
 `[sleek_player id="123"]`
 
-Wide Layout (horizontal):
-`[sleek_player id="123" layout="wide"]`
+Mini Layout (compact embed):
+`[sleek_player id="123" layout="mini"]`
 
 = Creating a Playlist =
 
@@ -199,6 +200,13 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 4. Backend: Settings
 
 == Changelog ==
+
+= 2.1.0 =
+* 🔗 Embed Code Generator in player More menu
+* 📱 Mini Layout for compact embeds (80px height)
+* 🎨 Wide Layout now default
+* 🧩 Gutenberg Block with layout selection (Wide/Mini)
+* 🔧 Improved Mini Player: Cover, Buttons, Title in one row
 
 = 2.0.3 =
 * 🔄 Renamed plugin to "Sleek Audio Player"
@@ -303,6 +311,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+New Embed Code Generator! Share your player on external websites with Wide or Mini layout. Mini layout is perfect for sidebars and compact spaces.
 
 = 2.0.3 =
 Plugin renamed to "Sleek Audio Player". All existing playlists and settings remain intact. Legacy shortcode [simple_player] still works.
