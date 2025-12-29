@@ -171,9 +171,11 @@ Under "Playlists" > "Themes":
 = Embed Codes =
 
 After publishing, the following appear in playlist editing:
-- Shortcode (Standard)
-- Shortcode (Wide Layout)
+- Shortcode (Wide Layout - default)
+- Shortcode (Mini Layout - compact)
 - iFrame code for external websites
+
+In the player's More menu, use "Embed Player" to generate embed codes with live layout selection.
 
 == Frequently Asked Questions ==
 
@@ -194,10 +196,11 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Screenshots ==
 
-1. Player in standard layout
-2. Player in wide layout
+1. Player in wide layout (default)
+2. Player in mini layout (compact embed)
 3. Backend: Edit playlist
 4. Backend: Settings
+5. Embed Code Generator modal
 
 == Changelog ==
 
