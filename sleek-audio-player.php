@@ -3769,7 +3769,7 @@ class Simple_Audio_Player {
                                     <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
                                     <span>Wide</span>
                                 </button>
-                                <button type="button" class="sap-embed-layout" data-layout="mini" data-height="80">
+                                <button type="button" class="sap-embed-layout" data-layout="mini" data-height="150">
                                     <svg viewBox="0 0 24 24"><rect x="2" y="9" width="20" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
                                     <span>Mini</span>
                                 </button>
