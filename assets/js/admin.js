@@ -336,14 +336,6 @@
             });
         });
 
-        // ===== Helper function: HTML-Escape for XSS protection =====
-        function escapeHtml(str) {
-            if (!str) return '';
-            var div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
-
         // ===== Helper function: Add track row =====
         function addTrackRow(data) {
             data = data || {};

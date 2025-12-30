@@ -393,7 +393,7 @@
         
         // Show feedback when visualizer changes
         function showVisualizerFeedback(type) {
-            const names = { bars: 'Bars', mirror: 'Mirror', circular: 'Circular', oscilloscope: 'Oscilloscope', dots: 'Dots', wave: 'Wave', pulse: 'Pulse', butterfly: 'Butterfly' };
+            const names = { bars: 'Bars', mirror: 'Mirror', circular: 'Circular', oscilloscope: 'Oscilloscope', dots: 'Dots', wave: 'Wave', pulse: 'Pulse', circular_bars: 'Circular Bars', particles: 'Particles', starburst: 'Starburst', orbits: 'Orbits' };
             const feedback = document.createElement('div');
             feedback.className = 'sap-viz-feedback';
             feedback.textContent = '🎵 ' + names[type];

@@ -2371,6 +2371,10 @@ class Simple_Audio_Player {
         
         // SEO: Add Open Graph meta tags for playlist pages
         add_action('wp_head', array($this, 'add_open_graph_tags'));
+        
+        // oEmbed: Register as provider for playlist URLs
+        add_action('rest_api_init', array($this, 'register_oembed_endpoint'));
+        add_action('wp_head', array($this, 'add_oembed_discovery'));
     }
     
     /**
@@ -2535,6 +2539,110 @@ class Simple_Audio_Player {
         <?php if ($cover) : ?>
         <meta name="twitter:image" content="<?php echo esc_url($cover); ?>">
         <?php endif; ?>
+        <?php
+    }
+    
+    /**
+     * Register oEmbed REST API endpoint
+     */
+    public function register_oembed_endpoint() {
+        register_rest_route('sleek-audio-player/v1', '/oembed', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'handle_oembed_request'),
+            'permission_callback' => '__return_true',
+            'args' => array(
+                'url' => array(
+                    'required' => true,
+                    'sanitize_callback' => 'esc_url_raw',
+                ),
+                'maxwidth' => array(
+                    'default' => 600,
+                    'sanitize_callback' => 'absint',
+                ),
+                'maxheight' => array(
+                    'default' => 280,
+                    'sanitize_callback' => 'absint',
+                ),
+                'format' => array(
+                    'default' => 'json',
+                    'sanitize_callback' => 'sanitize_text_field',
+                ),
+            ),
+        ));
+    }
+    
+    /**
+     * Handle oEmbed request and return embed data
+     */
+    public function handle_oembed_request($request) {
+        $url = $request->get_param('url');
+        $maxwidth = $request->get_param('maxwidth');
+        $maxheight = $request->get_param('maxheight');
+        
+        // Extract playlist ID from URL
+        $playlist_id = url_to_postid($url);
+        
+        if (!$playlist_id || get_post_type($playlist_id) !== 'sap_playlist') {
+            return new WP_Error('not_found', 'Playlist not found', array('status' => 404));
+        }
+        
+        $post = get_post($playlist_id);
+        if (!$post || $post->post_status !== 'publish') {
+            return new WP_Error('not_found', 'Playlist not found', array('status' => 404));
+        }
+        
+        // Get playlist data
+        $title = get_the_title($playlist_id);
+        
+        // Get cover image
+        $thumbnail_id = get_post_thumbnail_id($playlist_id);
+        $thumbnail_url = $thumbnail_id ? wp_get_attachment_image_url($thumbnail_id, 'medium') : '';
+        
+        // Build embed URL
+        $embed_url = add_query_arg('embed', '1', get_permalink($playlist_id));
+        
+        // Calculate dimensions (maintain aspect ratio)
+        $width = min($maxwidth, 600);
+        $height = min($maxheight, 280);
+        
+        // Build iframe HTML
+        $html = sprintf(
+            '<iframe src="%s" width="%d" height="%d" frameborder="0" allowfullscreen allow="autoplay; encrypted-media" style="border-radius:12px;"></iframe>',
+            esc_url($embed_url),
+            $width,
+            $height
+        );
+        
+        return array(
+            'version' => '1.0',
+            'type' => 'rich',
+            'provider_name' => 'Sleek Audio Player',
+            'provider_url' => home_url(),
+            'title' => $title,
+            'html' => $html,
+            'width' => $width,
+            'height' => $height,
+            'thumbnail_url' => $thumbnail_url,
+            'thumbnail_width' => 300,
+            'thumbnail_height' => 300,
+        );
+    }
+    
+    /**
+     * Add oEmbed discovery link tags to playlist pages
+     */
+    public function add_oembed_discovery() {
+        if (!is_singular('sap_playlist')) {
+            return;
+        }
+        
+        $url = get_permalink();
+        $oembed_url = rest_url('sleek-audio-player/v1/oembed');
+        $oembed_url = add_query_arg('url', urlencode($url), $oembed_url);
+        
+        ?>
+        <!-- Sleek Audio Player - oEmbed Discovery -->
+        <link rel="alternate" type="application/json+oembed" href="<?php echo esc_url($oembed_url); ?>" title="<?php echo esc_attr(get_the_title()); ?>">
         <?php
     }
     

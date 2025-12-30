@@ -23,6 +23,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🎨 **11 unique visualizers** - More than any other free plugin
 * 🌊 **Waveform display** - Professional look with seek functionality
 * 🔬 **Auto Waveform Analysis** - Real waveform data generated automatically
+* 🔗 **oEmbed Support** - Auto-embed on WordPress, Discord, Slack & more
 * 🔒 **Security-first** - Full WordPress coding standards compliance
 * ⚡ **Lightweight** - No jQuery, no frameworks, no bloat
 * 🎯 **SEO optimized** - Schema.org markup & Open Graph tags included
@@ -71,6 +72,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🔗 Links to Spotify, Apple Music & Amazon Music
 * 📊 Umami Analytics integration (track events)
 * 🌐 iFrame embed for external websites
+* 🔗 oEmbed provider (auto-embed on other WordPress sites, Discord, Slack)
 * 🚀 BunnyCDN support for fast delivery
 
 = SEO & Social Sharing =
@@ -209,6 +211,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 = 2.1.2 =
 * 🔬 Auto Waveform Analysis - Real waveform data generated automatically when adding tracks
+* 🔗 oEmbed Provider - Playlist URLs auto-embed on WordPress, Discord, Slack, Notion
 * ⚡ Background processing with queue system (no browser freeze)
 * 🛡️ Race condition protection for bulk imports
 * 🔒 Enhanced security: DoS protection, input validation, MIME type verification
