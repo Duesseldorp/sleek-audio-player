@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.1.0
+ * Version: 2.1.1
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.1.0');
+define('SAP_VERSION', '2.1.1');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -3659,6 +3659,14 @@ class Simple_Audio_Player {
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                         </button>
                         <div class="sap-more-menu">
+                            <button type="button" class="sap-more-item sap-menu-share" data-action="share">
+                                <svg viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
+                                <span><?php echo esc_html__('Share', 'sleek-audio-player'); ?></span>
+                            </button>
+                            <button type="button" class="sap-more-item sap-menu-shuffle" data-action="shuffle" aria-pressed="false">
+                                <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                                <span><?php echo esc_html__('Shuffle', 'sleek-audio-player'); ?></span>
+                            </button>
                             <button type="button" class="sap-more-item sap-download" data-action="download">
                                 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                                 <span>Download</span>

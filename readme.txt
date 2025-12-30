@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.1.0
+Stable tag: 2.1.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -35,6 +35,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 📤 Share button with social media preview
 * 🔗 Embed Code Generator (Wide & Mini layouts)
 * ⋮ More menu (Download, Repeat, Speed, Sleep Timer, Embed)
+* ⋮ Mini Player More menu (Share, Shuffle, Download, Repeat, Sleep Timer, Embed, Streaming Links)
 * 🔁 Repeat mode (Off / All / One)
 * ⏩ Playback speed (1x, 1.25x, 1.5x, 2x)
 * 😴 Sleep Timer (5-60 min or end of track)
@@ -204,6 +205,11 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.1.1 =
+* ⋮ Mini Player now has its own More menu with essential functions
+* 📱 Mini Player menu: Share, Shuffle, Download, Repeat, Sleep Timer, Embed, Streaming Links
+* 🎨 Cleaner Mini Player UI with three-dot menu button
+
 = 2.1.0 =
 * 🔗 Embed Code Generator in player More menu
 * 📱 Mini Layout for compact embeds (80px height)
@@ -314,6 +320,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.1.1 =
+Mini Player now has its own More menu! Access Share, Shuffle, Download, Repeat, Sleep Timer, Embed and Streaming Links directly from the compact player.
 
 = 2.1.0 =
 New Embed Code Generator! Share your player on external websites with Wide or Mini layout. Mini layout is perfect for sidebars and compact spaces.

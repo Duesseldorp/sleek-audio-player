@@ -149,6 +149,8 @@
         const downloadBtn = moreMenu ? moreMenu.querySelector('.sap-download') : null;
         const repeatBtn = moreMenu ? moreMenu.querySelector('.sap-repeat') : null;
         const speedBtn = moreMenu ? moreMenu.querySelector('.sap-speed') : null;
+        const menuShareBtn = moreMenu ? moreMenu.querySelector('.sap-menu-share') : null;
+        const menuShuffleBtn = moreMenu ? moreMenu.querySelector('.sap-menu-shuffle') : null;
         const streamDivider = moreMenu ? moreMenu.querySelector('.sap-stream-divider') : null;
         const streamSpotify = moreMenu ? moreMenu.querySelector('.sap-stream-spotify') : null;
         const streamApple = moreMenu ? moreMenu.querySelector('.sap-stream-apple') : null;
@@ -168,7 +170,7 @@
         [playBtn, prevBtn, nextBtn, shuffleBtn, shareBtn, moreBtn, volumeBtn].forEach(setupPressButton);
         
         // Setup press handlers for more menu items
-        [downloadBtn, repeatBtn, speedBtn, streamSpotify, streamApple, streamAmazon].forEach(setupPressButton);
+        [downloadBtn, repeatBtn, speedBtn, menuShareBtn, menuShuffleBtn, streamSpotify, streamApple, streamAmazon].forEach(setupPressButton);
         
         // Setup touch handlers for streaming links (prevent sticky hover)
         const streamingLinks = playerEl.querySelectorAll('.sap-link');
@@ -1517,6 +1519,33 @@
                 });
             }
             
+            // Menu Share button (for mini player)
+            if (menuShareBtn) {
+                menuShareBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    shareTrack();
+                    moreWrapper.classList.remove('active');
+                    moreBtn.setAttribute('aria-expanded', 'false');
+                });
+            }
+            
+            // Menu Shuffle button (for mini player)
+            if (menuShuffleBtn) {
+                menuShuffleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleShuffle();
+                    // Update button state
+                    this.classList.toggle('active', shuffleActive);
+                    this.setAttribute('aria-pressed', shuffleActive);
+                    const label = this.querySelector('span');
+                    if (label) {
+                        label.textContent = shuffleActive ? 'Shuffle: On' : 'Shuffle';
+                    }
+                });
+            }
+            
             // === Sleep Timer ===
             const sleepTimerBtn = playerEl.querySelector('.sap-sleep-timer');
             const sleepSubmenu = playerEl.querySelector('.sap-sleep-submenu');
@@ -1925,7 +1954,7 @@
             updateEmbedCode('wide', 280, baseUrl);
             
             // Close more menu
-            if (moreMenu) moreMenu.classList.remove('active');
+            if (moreWrapper) moreWrapper.classList.remove('active');
             if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
         }
         

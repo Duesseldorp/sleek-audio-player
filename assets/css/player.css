@@ -413,6 +413,8 @@
     flex-wrap: wrap;
     gap: 12px;
     margin-bottom: 20px;
+    position: relative;
+    z-index: 100;
 }
 
 .sap-btn {
@@ -770,6 +772,11 @@
     position: relative;
     display: flex;
     align-items: center;
+    z-index: 9999;
+}
+
+.sap-more-wrapper.active {
+    z-index: 2147483647;
 }
 
 .sap-more-menu {
@@ -789,7 +796,7 @@
     transform: scale(0.95);
     transform-origin: bottom right;
     transition: opacity 0.15s ease, visibility 0.15s ease, transform 0.15s ease;
-    z-index: 999999;
+    z-index: 2147483647;
 }
 
 .sap-more-menu::-webkit-scrollbar {
@@ -1924,7 +1931,6 @@
 
 .sap-player.sap-mini .sap-meta,
 .sap-player.sap-mini .sap-playlist,
-.sap-player.sap-mini .sap-embed-modal,
 .sap-player.sap-mini .sap-time-row {
     display: none !important;
 }
@@ -1973,8 +1979,31 @@
 
 .sap-player.sap-mini .sap-btn-small,
 .sap-player.sap-mini .sap-volume-wrapper,
-.sap-player.sap-mini .sap-more-wrapper,
 .sap-player.sap-mini .sap-shuffle {
+    display: none !important;
+}
+
+/* Mini Player More Menu - show wrapper but customize content */
+.sap-player.sap-mini .sap-more-wrapper {
+    display: flex !important;
+}
+
+.sap-player.sap-mini .sap-more-btn {
+    display: flex !important;
+    width: 32px;
+    height: 32px;
+}
+
+/* Hide items not needed in mini player */
+.sap-player.sap-mini .sap-speed,
+.sap-player.sap-mini .sap-cover-anim,
+.sap-player.sap-mini .sap-cover-anim-submenu,
+.sap-player.sap-mini .sap-adaptive-color {
+    display: none !important;
+}
+
+/* Hide dividers that would be orphaned */
+.sap-player.sap-mini .sap-more-menu > .sap-more-divider:first-of-type {
     display: none !important;
 }
 
