@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.1.1
+ * Version: 2.1.2
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.1.1');
+define('SAP_VERSION', '2.1.2');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -1740,6 +1740,8 @@ class SAP_Waveform_Manager {
         add_action('wp_ajax_sap_analyze_waveform', array($this, 'ajax_analyze_waveform'));
         add_action('wp_ajax_sap_save_waveform', array($this, 'ajax_save_waveform'));
         add_action('wp_ajax_sap_get_pending_waveforms', array($this, 'ajax_get_pending_waveforms'));
+        add_action('wp_ajax_sap_auto_analyze_waveform', array($this, 'ajax_auto_analyze_waveform'));
+        add_action('wp_ajax_sap_save_auto_waveform', array($this, 'ajax_save_auto_waveform'));
     }
     
     /**
@@ -1920,6 +1922,85 @@ class SAP_Waveform_Manager {
         // For now, return null to trigger client-side analysis
         // Server-side MP3 parsing is complex without FFmpeg
         return null;
+    }
+    
+    /**
+     * AJAX: Auto-analyze waveform from playlist editor
+     * Uses standard admin nonce for easier integration
+     */
+    public function ajax_auto_analyze_waveform() {
+        check_ajax_referer('sap_admin_waveform', 'nonce');
+        
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $attachment_id = isset($_POST['attachment_id']) ? absint($_POST['attachment_id']) : 0;
+        
+        if (!$attachment_id) {
+            wp_send_json_error('Invalid attachment ID');
+        }
+        
+        // Check if waveform already exists
+        $existing = self::get_waveform($attachment_id);
+        if ($existing) {
+            wp_send_json_success(array(
+                'already_analyzed' => true,
+                'peaks' => $existing
+            ));
+            return;
+        }
+        
+        // Return URL for client-side analysis
+        wp_send_json_success(array(
+            'needs_client_analysis' => true,
+            'url' => wp_get_attachment_url($attachment_id),
+            'attachment_id' => $attachment_id
+        ));
+    }
+    
+    /**
+     * AJAX: Save waveform from auto-analysis
+     */
+    public function ajax_save_auto_waveform() {
+        check_ajax_referer('sap_admin_waveform', 'nonce');
+        
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('Unauthorized');
+        }
+        
+        $attachment_id = isset($_POST['attachment_id']) ? absint($_POST['attachment_id']) : 0;
+        $peaks_raw = isset($_POST['peaks']) ? wp_unslash($_POST['peaks']) : '';
+        
+        // Limit JSON size to prevent DoS (max ~5KB for 100 peaks)
+        if (strlen($peaks_raw) > 5000) {
+            wp_send_json_error('Data too large');
+        }
+        
+        $peaks = json_decode($peaks_raw, true);
+        
+        // Validate peaks array
+        if (!$attachment_id || !is_array($peaks) || count($peaks) < 10 || count($peaks) > 200) {
+            wp_send_json_error('Invalid data');
+        }
+        
+        // Verify attachment exists and is audio
+        $mime_type = get_post_mime_type($attachment_id);
+        if (!$mime_type || strpos($mime_type, 'audio/') !== 0) {
+            wp_send_json_error('Invalid attachment type');
+        }
+        
+        // Sanitize peaks: ensure all values are floats between 0 and 1
+        $peaks = array_map(function($p) {
+            $val = floatval($p);
+            return max(0, min(1, $val));
+        }, $peaks);
+        
+        if (self::save_waveform($attachment_id, $peaks)) {
+            wp_send_json_success(array('saved' => true, 'attachment_id' => $attachment_id));
+        } else {
+            wp_send_json_error('Failed to save waveform');
+        }
     }
     
     /**
@@ -3073,6 +3154,14 @@ class Simple_Audio_Player {
             SAP_VERSION,
             true
         );
+        
+        // Localize script for waveform auto-analysis
+        wp_localize_script('sap-admin', 'sapWaveform', array(
+            'ajaxUrl' => admin_url('admin-ajax.php'),
+            'nonce' => wp_create_nonce('sap_admin_waveform'),
+            'autoAnalyze' => true
+        ));
+        
         wp_enqueue_style('thickbox');
         
         wp_enqueue_style(

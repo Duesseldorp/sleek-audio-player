@@ -2026,4 +2026,15 @@
     display: none !important;
 }
 
+/* Share/Shuffle in More menu - only show in Mini layout (already on toolbar in Wide) */
+.sap-menu-share,
+.sap-menu-shuffle {
+    display: none !important;
+}
+
+.sap-player.sap-mini .sap-menu-share,
+.sap-player.sap-mini .sap-menu-shuffle {
+    display: flex !important;
+}
+
 

@@ -23,6 +23,188 @@
         }
     }
 
+    // === Waveform Auto-Analysis ===
+    
+    // Queue to prevent race conditions and browser overload
+    var waveformQueue = [];
+    var isProcessingQueue = false;
+    var analyzedIds = {}; // Prevent duplicate analysis in same session
+    
+    async function analyzeWaveformForTrack(attachmentId, audioUrl) {
+        if (!window.sapWaveform || !sapWaveform.autoAnalyze) {
+            sapLog('Waveform auto-analysis disabled');
+            return;
+        }
+        
+        // Validate inputs
+        if (!attachmentId || attachmentId <= 0) {
+            sapError('Invalid attachment ID:', attachmentId);
+            return;
+        }
+        
+        // Prevent duplicate analysis in same session
+        if (analyzedIds[attachmentId]) {
+            sapLog('Already queued/analyzed in this session:', attachmentId);
+            return;
+        }
+        analyzedIds[attachmentId] = true;
+        
+        // Add to queue instead of immediate processing
+        waveformQueue.push({ id: attachmentId, url: audioUrl });
+        sapLog('Queued for analysis:', attachmentId, '(Queue size:', waveformQueue.length + ')');
+        
+        processWaveformQueue();
+    }
+    
+    async function processWaveformQueue() {
+        if (isProcessingQueue || waveformQueue.length === 0) {
+            return;
+        }
+        
+        isProcessingQueue = true;
+        
+        while (waveformQueue.length > 0) {
+            var item = waveformQueue.shift();
+            await processWaveformItem(item.id, item.url);
+            
+            // Small delay between analyses to prevent browser overload
+            if (waveformQueue.length > 0) {
+                await new Promise(function(r) { setTimeout(r, 200); });
+            }
+        }
+        
+        isProcessingQueue = false;
+    }
+    
+    async function processWaveformItem(attachmentId, audioUrl) {
+        sapLog('Processing waveform for attachment', attachmentId);
+        
+        try {
+            // First check if waveform already exists
+            var checkResponse = await $.post(sapWaveform.ajaxUrl, {
+                action: 'sap_auto_analyze_waveform',
+                nonce: sapWaveform.nonce,
+                attachment_id: attachmentId
+            });
+            
+            if (checkResponse.success && checkResponse.data.already_analyzed) {
+                sapLog('Waveform already exists for', attachmentId);
+                return;
+            }
+            
+            if (checkResponse.success && checkResponse.data.needs_client_analysis) {
+                var urlToAnalyze = checkResponse.data.url || audioUrl;
+                
+                // Validate URL before fetch
+                if (!urlToAnalyze || typeof urlToAnalyze !== 'string') {
+                    sapError('No valid URL for attachment', attachmentId);
+                    return;
+                }
+                
+                // Perform client-side analysis
+                var peaks = await analyzeAudioClient(urlToAnalyze);
+                
+                if (peaks && peaks.length > 0) {
+                    // Save the waveform
+                    await $.post(sapWaveform.ajaxUrl, {
+                        action: 'sap_save_auto_waveform',
+                        nonce: sapWaveform.nonce,
+                        attachment_id: attachmentId,
+                        peaks: JSON.stringify(peaks)
+                    });
+                    sapLog('Waveform saved for attachment', attachmentId);
+                }
+            }
+        } catch (e) {
+            sapError('Waveform analysis failed for ' + attachmentId, e);
+        }
+    }
+    
+    // Client-side audio analysis using Web Audio API
+    async function analyzeAudioClient(url) {
+        return new Promise(function(resolve) {
+            // Check for Web Audio API support
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                sapError('Web Audio API not supported');
+                resolve(null);
+                return;
+            }
+            
+            var audioContext = null;
+            
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                sapError('Failed to create AudioContext', e);
+                resolve(null);
+                return;
+            }
+            
+            // Cleanup helper to prevent memory leaks
+            function cleanup() {
+                if (audioContext && audioContext.state !== 'closed') {
+                    try {
+                        audioContext.close();
+                    } catch (e) {
+                        // Ignore close errors
+                    }
+                }
+            }
+            
+            fetch(url, { credentials: 'same-origin' })
+                .then(function(response) {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.arrayBuffer();
+                })
+                .then(function(arrayBuffer) {
+                    // Check for empty or too small files
+                    if (!arrayBuffer || arrayBuffer.byteLength < 1000) {
+                        throw new Error('File too small or empty');
+                    }
+                    return audioContext.decodeAudioData(arrayBuffer);
+                })
+                .then(function(audioBuffer) {
+                    var channelData = audioBuffer.getChannelData(0);
+                    var peaks = extractPeaks(channelData, 100);
+                    cleanup();
+                    sapLog('Audio analyzed successfully, peaks:', peaks.length);
+                    resolve(peaks);
+                })
+                .catch(function(error) {
+                    sapError('Audio decode failed', error);
+                    cleanup();
+                    resolve(null);
+                });
+        });
+    }
+    
+    // Extract peak values from audio data
+    function extractPeaks(channelData, peakCount) {
+        const peaks = [];
+        const samplesPerPeak = Math.floor(channelData.length / peakCount);
+        
+        for (let i = 0; i < peakCount; i++) {
+            const start = i * samplesPerPeak;
+            const end = Math.min(start + samplesPerPeak, channelData.length);
+            
+            let max = 0;
+            for (let j = start; j < end; j++) {
+                const abs = Math.abs(channelData[j]);
+                if (abs > max) max = abs;
+            }
+            peaks.push(max);
+        }
+        
+        // Normalize to 0-1 range
+        const maxPeak = Math.max(...peaks);
+        if (maxPeak > 0) {
+            return peaks.map(p => Math.round((p / maxPeak) * 1000) / 1000);
+        }
+        return peaks;
+    }
+
     $(document).ready(function() {
         
         // Check if wp.media is available
@@ -72,6 +254,9 @@
                 if (attachment.fileLength) {
                     $row.find('.sap-track-duration').val(attachment.fileLength);
                 }
+                
+                // Auto-analyze waveform in background
+                analyzeWaveformForTrack(attachment.id, attachment.url);
             });
 
             mediaFrame.open();
@@ -135,6 +320,9 @@
                         attachment_id: attachment.id,
                         filename: attachment.filename
                     });
+                    
+                    // Auto-analyze waveform in background
+                    analyzeWaveformForTrack(attachment.id, attachment.url);
                 });
             });
 

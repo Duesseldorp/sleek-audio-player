@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.1.1
+Stable tag: 2.1.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -22,6 +22,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🚀 **Zero configuration** - Works immediately after activation
 * 🎨 **11 unique visualizers** - More than any other free plugin
 * 🌊 **Waveform display** - Professional look with seek functionality
+* 🔬 **Auto Waveform Analysis** - Real waveform data generated automatically
 * 🔒 **Security-first** - Full WordPress coding standards compliance
 * ⚡ **Lightweight** - No jQuery, no frameworks, no bloat
 * 🎯 **SEO optimized** - Schema.org markup & Open Graph tags included
@@ -46,6 +47,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 👆 Double-click cover to cycle visualizers
 * ⏱️ Progress bar with seek functionality
 * 🌊 Waveform display with progress color
+* 🔬 Auto Waveform Analysis (generated when adding tracks)
 * 👆 Click on waveform jumps to position & starts playback
 * 👆 Touch-drag on waveform for precise seeking (swipe to scrub)
 * 🔊 Volume control with popup slider
@@ -205,6 +207,12 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.1.2 =
+* 🔬 Auto Waveform Analysis - Real waveform data generated automatically when adding tracks
+* ⚡ Background processing with queue system (no browser freeze)
+* 🛡️ Race condition protection for bulk imports
+* 🔒 Enhanced security: DoS protection, input validation, MIME type verification
+
 = 2.1.1 =
 * ⋮ Mini Player now has its own More menu with essential functions
 * 📱 Mini Player menu: Share, Shuffle, Download, Repeat, Sleep Timer, Embed, Streaming Links
@@ -320,6 +328,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.1.2 =
+Auto Waveform Analysis! Real waveform data is now generated automatically when you add tracks to a playlist. No more manual analysis needed.
 
 = 2.1.1 =
 Mini Player now has its own More menu! Access Share, Shuffle, Download, Repeat, Sleep Timer, Embed and Streaming Links directly from the compact player.
