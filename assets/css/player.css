@@ -1986,12 +1986,31 @@
 /* Mini Player More Menu - show wrapper but customize content */
 .sap-player.sap-mini .sap-more-wrapper {
     display: flex !important;
+    position: relative;
+    z-index: 99999 !important;
+}
+
+.sap-player.sap-mini .sap-more-wrapper.active {
+    z-index: 2147483647 !important;
 }
 
 .sap-player.sap-mini .sap-more-btn {
     display: flex !important;
     width: 32px;
     height: 32px;
+}
+
+/* Ensure mini player controls don't overlap menu */
+.sap-player.sap-mini .sap-controls {
+    z-index: 1 !important;
+}
+
+.sap-player.sap-mini .sap-content {
+    z-index: 1 !important;
+}
+
+.sap-player.sap-mini .sap-cover-carousel {
+    z-index: 1 !important;
 }
 
 /* Hide items not needed in mini player */
