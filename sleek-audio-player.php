@@ -2988,6 +2988,18 @@ class Simple_Audio_Player {
             'default' => false,
         ));
         
+        register_setting('sap_settings', 'sap_umami_script_url', array(
+            'type' => 'string',
+            'sanitize_callback' => 'esc_url_raw',
+            'default' => '',
+        ));
+        
+        register_setting('sap_settings', 'sap_umami_website_id', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field',
+            'default' => '',
+        ));
+        
         register_setting('sap_settings', 'sap_url_protection', array(
             'type' => 'boolean',
             'sanitize_callback' => 'rest_sanitize_boolean',
@@ -3056,8 +3068,32 @@ class Simple_Audio_Player {
                                 Enable tracking
                             </label>
                             <p class="description">
-                                Sends events to Umami when songs are played, completed, or downloaded.<br>
-                                Umami must already be integrated on your site.
+                                Sends events to Umami when songs are played, completed, or downloaded.
+                            </p>
+                            
+                            <div style="margin-top:12px;">
+                                <label for="sap_umami_script_url"><strong>Script URL:</strong></label><br>
+                                <input type="url" 
+                                       id="sap_umami_script_url" 
+                                       name="sap_umami_script_url" 
+                                       value="<?php echo esc_attr(get_option('sap_umami_script_url', '')); ?>" 
+                                       class="regular-text"
+                                       placeholder="https://stats.example.com/script.js" />
+                            </div>
+                            
+                            <div style="margin-top:8px;">
+                                <label for="sap_umami_website_id"><strong>Website ID:</strong></label><br>
+                                <input type="text" 
+                                       id="sap_umami_website_id" 
+                                       name="sap_umami_website_id" 
+                                       value="<?php echo esc_attr(get_option('sap_umami_website_id', '')); ?>" 
+                                       class="regular-text"
+                                       placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" />
+                            </div>
+                            
+                            <p class="description" style="margin-top:8px;">
+                                Required for tracking in embedded players on external sites.<br>
+                                Leave empty if Umami is already integrated globally on your site.
                             </p>
                         </td>
                     </tr>
