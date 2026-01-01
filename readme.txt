@@ -22,9 +22,9 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🚀 **Zero configuration** - Works immediately after activation
 * 🎨 **11 unique visualizers** - More than any other free plugin
 * 🌊 **Waveform display** - Professional look with seek functionality
-* 🔬 **Auto Waveform Analysis** - Real waveform data generated automatically
+* 🔬 **Auto Waveform Analysis** - Real waveform data generated in the background
 * 🔗 **oEmbed Support** - Auto-embed on WordPress, Discord, Slack & more
-* 🔒 **Security-first** - Full WordPress coding standards compliance
+* 🔒 **Security-focused** - Full WordPress coding standards compliance
 * ⚡ **Lightweight** - No jQuery, no frameworks, no bloat
 * 🎯 **SEO optimized** - Schema.org markup & Open Graph tags included
 * 📱 **Fully responsive** - Looks great on all devices
@@ -104,7 +104,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 * 🎵 Supports MP3, WAV, OGG, M4A, AAC, WebM, FLAC (browser-dependent)
 * ⚡ Vanilla JavaScript - no jQuery, no React, no external dependencies
 * 🎯 Lightweight - minimal impact on page load speed
-* 🔒 WordPress Security Standards compliant (Plugin Check verified)
+* 🔒 WordPress Security Standards compliant
 * 🛡️ Full input sanitization & output escaping
 * ✅ Nonce verification on all forms and AJAX
 * 🎭 Smart playback - only one player plays at a time
@@ -210,7 +210,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 == Changelog ==
 
 = 2.1.2 =
-* 🔬 Auto Waveform Analysis - Real waveform data generated automatically when adding tracks
+* 🔬 Auto Waveform Analysis - Real waveform data generated in the background when adding tracks
 * 🔗 oEmbed Provider - Playlist URLs auto-embed on WordPress, Discord, Slack, Notion
 * ⚡ Background processing with queue system (no browser freeze)
 * 🛡️ Race condition protection for bulk imports
@@ -333,7 +333,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 == Upgrade Notice ==
 
 = 2.1.2 =
-Auto Waveform Analysis! Real waveform data is now generated automatically when you add tracks to a playlist. No more manual analysis needed.
+Auto Waveform Analysis! Real waveform data is now generated in the background when you add tracks to a playlist. No more manual analysis needed.
 
 = 2.1.1 =
 Mini Player now has its own More menu! Access Share, Shuffle, Download, Repeat, Sleep Timer, Embed and Streaming Links directly from the compact player.
