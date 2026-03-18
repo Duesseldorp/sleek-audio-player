@@ -5,6 +5,8 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
+**Current Version:** 2.1.3
+
 ---
 
 ## Why Sleek Audio Player?
@@ -104,6 +106,27 @@ The roadmap is driven by real usage, not feature checklists.
 
 I document the design decisions and use cases behind this plugin openly on my site:  
 👉 https://www.duesseldorp.de/sleek-audio-player/
+
+---
+
+## Changelog
+
+### Version 2.1.3 (2026-03-18)
+
+**Bug Fixes:**
+- Fixed mobile playback issue where player would stop after one song
+- Improved audio readiness detection on mobile browsers
+- Enhanced promise handling for autoplay after track ends
+- Added `canplay` event listener to ensure audio is ready before playback
+- Better error logging for mobile playback debugging
+
+**Technical Details:**
+- Mobile browsers have strict autoplay policies that can block automatic track progression
+- The fix ensures the audio element is fully ready (`readyState >= 3`) before attempting playback
+- Improved handling of the `ended` event to reliably trigger the next track on mobile devices
+
+### Version 2.1.2
+- Previous stable release
 
 ---
 

@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.1.2
+Stable tag: 2.1.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -209,6 +209,13 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.1.3 =
+* 📱 Fixed mobile playback issue where player would stop after one song
+* ⚡ Improved audio readiness detection on mobile browsers
+* 🔧 Enhanced promise handling for autoplay after track ends
+* 🎵 Added canplay event listener to ensure audio is ready before playback
+* 🐛 Better error logging for mobile playback debugging
+
 = 2.1.2 =
 * 🔬 Auto Waveform Analysis - Real waveform data generated in the background when adding tracks
 * 🔗 oEmbed Provider - Playlist URLs auto-embed on WordPress, Discord, Slack, Notion
@@ -331,6 +338,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.1.3 =
+Fixed mobile playback! Player now continues automatically to the next track on mobile devices. Improved audio readiness detection for smoother playback.
 
 = 2.1.2 =
 Auto Waveform Analysis! Real waveform data is now generated in the background when you add tracks to a playlist. No more manual analysis needed.
