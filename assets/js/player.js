@@ -2536,7 +2536,12 @@
             if (repeatMode === 'track') {
                 // Repeat current track
                 audio.currentTime = 0;
-                audio.play().catch(() => {});
+                const repeatPromise = audio.play();
+                if (repeatPromise !== undefined) {
+                    repeatPromise.catch(err => {
+                        sapLog('Repeat play failed', err);
+                    });
+                }
             } else if (repeatMode === 'playlist') {
                 // Play next, loop to start if at end
                 if (currentIndex >= playlist.length - 1) {
@@ -2726,31 +2731,58 @@
             // Update waveform for new track
             updateWaveformForTrack(track);
             
-            // Set new source and play directly
+            // Set new source and load
             audio.src = track.url;
             
-            // Try to play immediately - browser will buffer as needed
-            audio.play().then(() => {
-                isLoading = false;
-                hideLoadingSpinner();
-                preloadNextTrack();
+            // Mobile fix: Wait for audio to be ready before playing
+            // This ensures smooth playback on mobile browsers, especially after track ends
+            const attemptPlay = function() {
+                const playPromise = audio.play();
                 
-                // Track play event in Umami
-                trackEvent('audio-play', {
-                    title: track.title,
-                    artist: track.artist || '',
-                    index: index + 1,
-                    total: playlist.length
-                });
-            }).catch(err => {
-                isLoading = false;
-                hideLoadingSpinner();
-                
-                // If autoplay blocked, wait for user interaction
-                if (err.name === 'NotAllowedError') {
-                    // Autoplay blocked - waiting for user interaction
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        isLoading = false;
+                        hideLoadingSpinner();
+                        preloadNextTrack();
+                        
+                        // Track play event in Umami
+                        trackEvent('audio-play', {
+                            title: track.title,
+                            artist: track.artist || '',
+                            index: index + 1,
+                            total: playlist.length
+                        });
+                    }).catch(err => {
+                        isLoading = false;
+                        hideLoadingSpinner();
+                        
+                        // If autoplay blocked, wait for user interaction
+                        if (err.name === 'NotAllowedError') {
+                            sapLog('Autoplay blocked - waiting for user interaction');
+                        } else {
+                            sapError('Play failed', err);
+                        }
+                    });
+                } else {
+                    isLoading = false;
+                    hideLoadingSpinner();
                 }
-            });
+            };
+            
+            // On mobile, wait for canplay event to ensure audio is ready
+            // This is critical for auto-play after track ends
+            if (audio.readyState >= 3) {
+                // Audio already loaded enough, play immediately
+                attemptPlay();
+            } else {
+                // Wait for audio to be ready
+                const onCanPlay = function() {
+                    audio.removeEventListener('canplay', onCanPlay);
+                    attemptPlay();
+                };
+                audio.addEventListener('canplay', onCanPlay, { once: true });
+                audio.load();
+            }
             
             // Handle load errors with detailed error messages
             audio.onerror = function(e) {
