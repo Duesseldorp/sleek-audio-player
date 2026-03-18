@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.1.3
+**Current Version:** 2.1.4
 
 ---
 
@@ -110,6 +110,21 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.1.4 (2026-03-18)
+
+**Bug Fixes:**
+- Improved mobile autoplay reliability with `loadeddata` event and timeout fallback
+- Fixed race condition in track loading on mobile browsers
+- Added 500ms fallback timeout to ensure playback starts even if events don't fire
+- Switched from `canplay` to `loadeddata` event for better mobile compatibility
+- Prevents duplicate play attempts with flag-based control
+
+**Technical Details:**
+- The `canplay` event was unreliable on mobile browsers during track transitions
+- Now uses `loadeddata` event which fires when the first frame is loaded (more reliable)
+- Timeout fallback ensures playback continues even if the event system fails
+- This combination provides robust autoplay on all mobile devices
 
 ### Version 2.1.3 (2026-03-18)
 

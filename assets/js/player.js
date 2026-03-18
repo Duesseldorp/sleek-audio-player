@@ -2769,20 +2769,38 @@
                 }
             };
             
-            // On mobile, wait for canplay event to ensure audio is ready
-            // This is critical for auto-play after track ends
-            if (audio.readyState >= 3) {
-                // Audio already loaded enough, play immediately
+            // Mobile fix: Use loadeddata event which is more reliable than canplay
+            // Add timeout fallback in case event doesn't fire
+            let playAttempted = false;
+            let playTimeout = null;
+            
+            const tryPlay = function() {
+                if (playAttempted) return;
+                playAttempted = true;
+                
+                if (playTimeout) {
+                    clearTimeout(playTimeout);
+                    playTimeout = null;
+                }
+                
                 attemptPlay();
-            } else {
-                // Wait for audio to be ready
-                const onCanPlay = function() {
-                    audio.removeEventListener('canplay', onCanPlay);
-                    attemptPlay();
-                };
-                audio.addEventListener('canplay', onCanPlay, { once: true });
-                audio.load();
-            }
+            };
+            
+            // Listen for loadeddata event (fires when first frame is loaded)
+            const onLoadedData = function() {
+                audio.removeEventListener('loadeddata', onLoadedData);
+                tryPlay();
+            };
+            audio.addEventListener('loadeddata', onLoadedData, { once: true });
+            
+            // Fallback: Try to play after 500ms even if event doesn't fire
+            playTimeout = setTimeout(function() {
+                sapLog('Fallback play timeout triggered');
+                tryPlay();
+            }, 500);
+            
+            // Start loading
+            audio.load();
             
             // Handle load errors with detailed error messages
             audio.onerror = function(e) {

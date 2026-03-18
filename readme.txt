@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.1.3
+Stable tag: 2.1.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -209,6 +209,12 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.1.4 =
+* 📱 Improved mobile autoplay reliability with loadeddata event and timeout fallback
+* ⚡ Fixed race condition in track loading on mobile browsers
+* 🔧 Added 500ms fallback timeout to ensure playback starts even if events don't fire
+* 🐛 Switched from canplay to loadeddata event for better mobile compatibility
+
 = 2.1.3 =
 * 📱 Fixed mobile playback issue where player would stop after one song
 * ⚡ Improved audio readiness detection on mobile browsers
@@ -338,6 +344,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 * Responsive design
 
 == Upgrade Notice ==
+
+= 2.1.4 =
+Improved mobile autoplay! Fixed race condition and added fallback mechanism to ensure continuous playback on all mobile devices.
 
 = 2.1.3 =
 Fixed mobile playback! Player now continues automatically to the next track on mobile devices. Improved audio readiness detection for smoother playback.
