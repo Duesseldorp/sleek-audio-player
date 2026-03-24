@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.1.5');
+define('SAP_VERSION', '2.2.2');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -51,6 +51,7 @@ function sap_validate_track($track) {
         'spotify' => isset($track['spotify']) ? esc_url_raw($track['spotify']) : '',
         'apple' => isset($track['apple']) ? esc_url_raw($track['apple']) : '',
         'amazon' => isset($track['amazon']) ? esc_url_raw($track['amazon']) : '',
+        'soundcloud' => isset($track['soundcloud']) ? esc_url_raw($track['soundcloud']) : '',
         'downloadable' => !empty($track['downloadable']),
         'duration' => isset($track['duration']) ? sanitize_text_field($track['duration']) : '',
         'waveform' => isset($track['waveform']) && is_array($track['waveform']) ? $track['waveform'] : null,
@@ -3415,6 +3416,9 @@ class Simple_Audio_Player {
                     <input type="url" name="sap_tracks[<?php echo esc_attr( $index ); ?>][amazon]" 
                            class="sap-track-link sap-link-amazon" placeholder="📦 Amazon" 
                            value="<?php echo esc_url($track['amazon'] ?? ''); ?>" />
+                    <input type="url" name="sap_tracks[<?php echo esc_attr( $index ); ?>][soundcloud]" 
+                           class="sap-track-link sap-link-soundcloud" placeholder="☁️ SoundCloud" 
+                           value="<?php echo esc_url($track['soundcloud'] ?? ''); ?>" />
                     <label class="sap-download-label">
                         <input type="checkbox" name="sap_tracks[<?php echo esc_attr( $index ); ?>][downloadable]" 
                                value="1" <?php checked(!empty($track['downloadable'])); ?> />
@@ -3461,6 +3465,7 @@ class Simple_Audio_Player {
         $spotify = get_post_meta($post->ID, '_sap_spotify', true);
         $apple = get_post_meta($post->ID, '_sap_apple', true);
         $amazon = get_post_meta($post->ID, '_sap_amazon', true);
+        $soundcloud = get_post_meta($post->ID, '_sap_soundcloud', true);
         ?>
         <p>
             <label><strong>Spotify:</strong></label>
@@ -3473,6 +3478,10 @@ class Simple_Audio_Player {
         <p>
             <label><strong>Amazon Music:</strong></label>
             <input type="url" name="sap_amazon" value="<?php echo esc_url($amazon); ?>" style="width:100%;" placeholder="https://music.amazon.com/..." />
+        </p>
+        <p>
+            <label><strong>SoundCloud:</strong></label>
+            <input type="url" name="sap_soundcloud" value="<?php echo esc_url($soundcloud); ?>" style="width:100%;" placeholder="https://soundcloud.com/..." />
         </p>
         
         <?php if ($post->post_status === 'publish') : ?>
@@ -3544,22 +3553,12 @@ class Simple_Audio_Player {
                         'spotify' => esc_url_raw($track['spotify'] ?? ''),
                         'apple' => esc_url_raw($track['apple'] ?? ''),
                         'amazon' => esc_url_raw($track['amazon'] ?? ''),
+                        'soundcloud' => esc_url_raw($track['soundcloud'] ?? ''),
                         'downloadable' => !empty($track['downloadable']),
                     );
                 }
             }
             update_post_meta($post_id, '_sap_tracks', $tracks);
-        }
-
-        // Save streaming links
-        if (isset($_POST['sap_spotify'])) {
-            update_post_meta($post_id, '_sap_spotify', esc_url_raw(wp_unslash($_POST['sap_spotify'])));
-        }
-        if (isset($_POST['sap_apple'])) {
-            update_post_meta($post_id, '_sap_apple', esc_url_raw(wp_unslash($_POST['sap_apple'])));
-        }
-        if (isset($_POST['sap_amazon'])) {
-            update_post_meta($post_id, '_sap_amazon', esc_url_raw(wp_unslash($_POST['sap_amazon'])));
         }
     }
 
@@ -3667,25 +3666,6 @@ class Simple_Audio_Player {
             $schema['url'] = esc_url_raw($permalink);
         }
         
-        // Add global streaming links if available (validated URLs only)
-        $spotify = get_post_meta($post_id, '_sap_spotify', true);
-        $apple = get_post_meta($post_id, '_sap_apple', true);
-        $amazon = get_post_meta($post_id, '_sap_amazon', true);
-        
-        $same_as = array();
-        if ($spotify && filter_var($spotify, FILTER_VALIDATE_URL)) {
-            $same_as[] = esc_url_raw($spotify);
-        }
-        if ($apple && filter_var($apple, FILTER_VALIDATE_URL)) {
-            $same_as[] = esc_url_raw($apple);
-        }
-        if ($amazon && filter_var($amazon, FILTER_VALIDATE_URL)) {
-            $same_as[] = esc_url_raw($amazon);
-        }
-        if (!empty($same_as)) {
-            $schema['sameAs'] = $same_as;
-        }
-        
         // wp_json_encode handles escaping for JSON context
         return '<script type="application/ld+json">' . wp_json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>' . "\n";
     }
@@ -3783,9 +3763,6 @@ class Simple_Audio_Player {
 
         $cover = self::cdn_url(get_the_post_thumbnail_url($post_id, 'large'));
         $title = get_the_title($post_id);
-        $spotify = get_post_meta($post_id, '_sap_spotify', true);
-        $apple = get_post_meta($post_id, '_sap_apple', true);
-        $amazon = get_post_meta($post_id, '_sap_amazon', true);
 
         // Calculate total duration
         $total_seconds = 0;
@@ -3954,6 +3931,9 @@ class Simple_Audio_Player {
                             </a>
                             <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-amazon" style="display:none;">
                                 <span>Amazon Music</span>
+                            </a>
+                            <a href="#" target="_blank" rel="noopener" class="sap-more-item sap-stream-link sap-stream-soundcloud" style="display:none;">
+                                <span>SoundCloud</span>
                             </a>
                         </div>
                     </div>

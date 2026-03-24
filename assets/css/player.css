@@ -823,7 +823,7 @@
     align-items: center;
     gap: 12px;
     width: 100%;
-    padding: 10px 16px;
+    padding: 8px 16px;
     margin: 0;
     background: none;
     border: none;
@@ -903,11 +903,12 @@
     color: var(--sap-accent);
 }
 
-.sap-sleep-submenu {
+.sap-sleep-submenu,
+.sap-cover-anim-submenu {
     padding: 0;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 4px;
-    margin: 4px 8px;
+    margin: 2px 8px;
     overflow: hidden;
 }
 
@@ -967,6 +968,11 @@
 .sap-stream-amazon:hover {
     background: rgba(0, 168, 225, 0.15);
     color: #00A8E1;
+}
+
+.sap-stream-soundcloud:hover {
+    background: rgba(255, 85, 0, 0.15);
+    color: #FF5500;
 }
 
 /* Skip Buttons (Prev/Next) - simple behavior, no persistent focus */

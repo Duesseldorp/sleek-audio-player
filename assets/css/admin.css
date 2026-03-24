@@ -80,9 +80,12 @@
 /* ===== Track Card ===== */
 .sap-track-row {
     display: grid;
-    grid-template-columns: auto 56px auto 1fr auto auto auto auto auto auto auto auto;
-    grid-template-areas: "handle cover coverbtn title artist filename audio links1 links2 links3 download remove";
-    align-items: center;
+    grid-template-columns: auto 56px auto 1fr 1fr auto auto auto;
+    grid-template-rows: auto auto;
+    grid-template-areas: 
+        "handle cover coverbtn title artist audio download remove"
+        "handle cover . links1 links2 links3 links4 .";
+    align-items: start;
     gap: 12px;
     padding: 16px 20px;
     background: var(--sap-admin-bg);
@@ -117,18 +120,18 @@
 }
 
 /* ===== Grid Areas ===== */
-.sap-track-row > .sap-track-handle { grid-area: handle; }
-.sap-track-row > .sap-track-cover-preview { grid-area: cover; }
-.sap-track-row > .sap-select-cover { grid-area: coverbtn; }
-.sap-track-row > input.sap-track-title { grid-area: title; }
-.sap-track-row > input.sap-track-artist { grid-area: artist; }
-.sap-track-row > .sap-track-filename { grid-area: filename; }
-.sap-track-row > .sap-select-audio { grid-area: audio; }
+.sap-track-row > .sap-track-handle { grid-area: handle; align-self: center; }
+.sap-track-row > .sap-track-cover-preview { grid-area: cover; align-self: center; }
+.sap-track-row > .sap-select-cover { grid-area: coverbtn; align-self: center; }
+.sap-track-row > input.sap-track-title { grid-area: title; align-self: center; }
+.sap-track-row > input.sap-track-artist { grid-area: artist; align-self: center; }
+.sap-track-row > .sap-select-audio { grid-area: audio; align-self: center; }
 .sap-track-row > .sap-link-spotify { grid-area: links1; }
 .sap-track-row > .sap-link-apple { grid-area: links2; }
 .sap-track-row > .sap-link-amazon { grid-area: links3; }
-.sap-track-row > .sap-download-label { grid-area: download; }
-.sap-track-row > .sap-remove-track { grid-area: remove; }
+.sap-track-row > .sap-link-soundcloud { grid-area: links4; }
+.sap-track-row > .sap-download-label { grid-area: download; align-self: center; }
+.sap-track-row > .sap-remove-track { grid-area: remove; align-self: center; }
 
 /* ===== Drag Handle ===== */
 .sap-track-handle {
@@ -225,9 +228,15 @@ input.sap-track-artist {
 }
 
 input.sap-track-link {
-    width: 120px;
-    min-width: 100px;
+    width: 100%;
+    min-width: 140px;
     font-size: 12px !important;
+    padding: 8px 12px !important;
+    border: 1px solid var(--sap-admin-border) !important;
+    border-radius: var(--sap-admin-radius-sm) !important;
+    background: var(--sap-admin-input-bg) !important;
+    color: var(--sap-admin-text) !important;
+    transition: all 0.2s !important;
 }
 
 /* ===== Filename Display ===== */
@@ -409,11 +418,12 @@ input.sap-track-link {
 /* ===== Responsive: Tablet ===== */
 @media screen and (max-width: 1400px) {
     .sap-track-row {
-        grid-template-columns: auto 48px auto 1fr 120px auto;
+        grid-template-columns: auto 48px auto 1fr auto;
         grid-template-areas: 
-            "handle cover coverbtn title artist remove"
-            "handle filename audio links1 links2 links3"
-            "handle . . . download download";
+            "handle cover coverbtn title remove"
+            "handle artist audio links1 links2"
+            "handle . . links3 links4"
+            "handle . . download download";
         gap: 10px;
         padding: 16px;
     }
@@ -430,8 +440,8 @@ input.sap-track-link {
         grid-template-areas: 
             "handle cover title remove"
             "handle cover artist artist"
-            "coverbtn audio filename filename"
-            "links1 links2 links3 download";
+            "coverbtn audio links1 links2"
+            "links3 links4 download download";
         gap: 10px;
         padding: 14px;
     }

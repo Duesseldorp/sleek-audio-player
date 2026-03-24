@@ -155,6 +155,7 @@
         const streamSpotify = moreMenu ? moreMenu.querySelector('.sap-stream-spotify') : null;
         const streamApple = moreMenu ? moreMenu.querySelector('.sap-stream-apple') : null;
         const streamAmazon = moreMenu ? moreMenu.querySelector('.sap-stream-amazon') : null;
+        const streamSoundcloud = moreMenu ? moreMenu.querySelector('.sap-stream-soundcloud') : null;
         const volumeWrapper = playerEl.querySelector('.sap-volume-wrapper');
         const volumeBtn = playerEl.querySelector('.sap-volume-btn');
         const volumeSlider = playerEl.querySelector('.sap-volume-slider');
@@ -170,7 +171,7 @@
         [playBtn, prevBtn, nextBtn, shuffleBtn, shareBtn, moreBtn, volumeBtn].forEach(setupPressButton);
         
         // Setup press handlers for more menu items
-        [downloadBtn, repeatBtn, speedBtn, menuShareBtn, menuShuffleBtn, streamSpotify, streamApple, streamAmazon].forEach(setupPressButton);
+        [downloadBtn, repeatBtn, speedBtn, menuShareBtn, menuShuffleBtn, streamSpotify, streamApple, streamAmazon, streamSoundcloud].forEach(setupPressButton);
         
         // Setup touch handlers for streaming links (prevent sticky hover)
         const streamingLinks = playerEl.querySelectorAll('.sap-link');
@@ -272,7 +273,7 @@
         function updateStreamingLinks(track) {
             if (!moreMenu) return;
             
-            const hasAnyLink = track.spotify || track.apple || track.amazon;
+            const hasAnyLink = track.spotify || track.apple || track.amazon || track.soundcloud;
             
             if (streamDivider) {
                 streamDivider.style.display = hasAnyLink ? '' : 'none';
@@ -288,6 +289,10 @@
             if (streamAmazon) {
                 streamAmazon.style.display = track.amazon ? '' : 'none';
                 if (track.amazon) streamAmazon.href = track.amazon;
+            }
+            if (streamSoundcloud) {
+                streamSoundcloud.style.display = track.soundcloud ? '' : 'none';
+                if (track.soundcloud) streamSoundcloud.href = track.soundcloud;
             }
         }
         
