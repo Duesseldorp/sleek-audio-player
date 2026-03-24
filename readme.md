@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.1.4
+**Current Version:** 2.3.2
 
 ---
 
@@ -31,8 +31,14 @@ This plugin focuses on **clarity, performance and distribution** instead of visu
 - **Playlist & Track Support**  
   Use single tracks or playlists without additional configuration.
 
+- **Streaming Service Integration**  
+  Add links to Spotify, Apple Music, Amazon Music and SoundCloud for each track. Links appear in the player's "More" menu.
+
 - **Shareable Audio**  
   Track specific Open Graph and Twitter Card support so shared links show the correct title, cover and metadata.
+
+- **Autoplay Support**  
+  Optional autoplay parameter for shortcodes to start playback automatically on page load.
 
 - **SEO for Audio Content**  
   Structured data (JSON-LD) for `MusicRecording` and `MusicPlaylist` to help search engines understand your content.
@@ -76,6 +82,37 @@ Every technical decision aims to keep the plugin:
 3. Activate **Sleek Audio Player** in the WordPress admin panel
 4. Insert the player via block or shortcode
 
+## Usage
+
+### Basic Shortcode
+```
+[sleek_player id="123"]
+```
+
+### Wide Layout
+```
+[sleek_player id="123" layout="wide"]
+```
+
+### With Autoplay
+```
+[sleek_player id="123" autoplay="true"]
+```
+
+### Combined Parameters
+```
+[sleek_player id="123" layout="wide" autoplay="true"]
+```
+
+### Adding Streaming Links
+In the WordPress backend, edit your playlist and add streaming service URLs for each track:
+- 🎵 Spotify
+- 🍎 Apple Music
+- 📦 Amazon Music
+- ☁️ SoundCloud
+
+These links will appear in the player's "More" menu for each track.
+
 Detailed usage examples are documented on the product page.
 
 ---
@@ -110,6 +147,58 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.3.2 (2026-03-24)
+
+**Bug Fixes:**
+- Fixed "Tap to Play" overlay not disappearing when starting playback from playlist
+- Overlay now automatically removes when audio starts playing via any method (play button, track selection, or overlay click)
+
+### Version 2.3.1 (2026-03-24)
+
+**Bug Fixes:**
+- Fixed autoplay not working when `autoplay="true"` parameter is set in shortcode
+- Added autoplay logic for normal page loads (not just shared links)
+- Autoplay now triggers after audio metadata loads for better reliability
+
+### Version 2.3.0 (2026-03-24)
+
+**New Features:**
+- Added `autoplay` parameter to shortcode: `[sleek_player id="123" autoplay="true"]`
+- Enables automatic playback on page load (subject to browser autoplay policies)
+- Shows "Tap to Play" overlay if browser blocks autoplay
+- Works with all shortcode parameters (layout, etc.)
+
+### Version 2.2.2 (2026-03-24)
+
+**UI Improvements:**
+- Fixed track list alignment issues in backend
+- All cover images now perfectly aligned at same height
+- Improved grid layout with consistent spacing
+- Elements in first row are vertically centered
+- Streaming links properly aligned in second row
+
+### Version 2.2.1 (2026-03-24)
+
+**UI Improvements:**
+- Optimized backend track list layout for better visual consistency
+- Streaming link input fields now display in a clean second row
+- All four streaming services (Spotify, Apple Music, Amazon, SoundCloud) appear side-by-side
+- Improved responsive behavior for tablet and mobile screens
+
+### Version 2.2.0 (2026-03-24)
+
+**New Features:**
+- Added SoundCloud integration alongside existing streaming services
+- Backend: SoundCloud link field in track list for each track
+- Frontend: SoundCloud link appears in player's "More" menu
+- CSS: Orange hover effect matching SoundCloud brand colors
+- Schema markup extended to include SoundCloud links
+
+**Technical Changes:**
+- Removed global streaming links in favor of track-specific links only
+- Cleaned up meta data storage for better performance
+- Updated grid layout to accommodate four streaming services
 
 ### Version 2.1.4 (2026-03-18)
 
