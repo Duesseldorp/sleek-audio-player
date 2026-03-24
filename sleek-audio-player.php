@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.2.2');
+define('SAP_VERSION', '2.3.2');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -3671,12 +3671,13 @@ class Simple_Audio_Player {
     }
     
     /**
-     * Shortcode: [sleek_player id="123" layout="wide"]
+     * Shortcode: [sleek_player id="123" layout="wide" autoplay="true"]
      */
     public function render_player($atts) {
         $atts = shortcode_atts(array(
             'id' => 0,
             'layout' => '', // 'wide' for horizontal layout
+            'autoplay' => '', // 'true' or '1' to enable autoplay
         ), $atts);
 
         $post_id = intval($atts['id']);
@@ -3795,12 +3796,13 @@ class Simple_Audio_Player {
         $is_wide = ($layout === 'wide');
         $is_mini = ($layout === 'mini');
         $layout_class = $is_wide ? ' sap-wide' : ($is_mini ? ' sap-mini' : '');
+        $autoplay = in_array(strtolower(trim($atts['autoplay'])), array('true', '1', 'yes'), true);
         
         // Inline styles for wide layout (cache-proof)
         // Note: No !important here so CSS media queries can override on mobile
         $wide_style = $is_wide ? 'display:grid;grid-template-columns:auto 1fr;max-width:100%;width:100%;' : '';
         ?>
-        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="' . esc_attr( $wide_style ) . '"'; ?> data-playlist='<?php echo esc_attr(wp_json_encode($tracks)); ?>' data-playlist-id='<?php echo esc_attr($post_id); ?>' data-default-cover='<?php echo esc_url($cover); ?>' role="region" aria-label="Audio Player">
+        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="' . esc_attr( $wide_style ) . '"'; ?> data-playlist='<?php echo esc_attr(wp_json_encode($tracks)); ?>' data-playlist-id='<?php echo esc_attr($post_id); ?>' data-default-cover='<?php echo esc_url($cover); ?>' <?php if($autoplay) echo 'data-autoplay="true"'; ?> role="region" aria-label="Audio Player">
             
             <!-- Cover Carousel -->
             <div class="sap-cover-carousel" <?php if($is_wide) echo 'style="' . esc_attr('height:100%;flex-shrink:0;') . '"'; ?>>

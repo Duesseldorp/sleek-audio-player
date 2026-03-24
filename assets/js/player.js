@@ -127,6 +127,12 @@
             // Pause other players when this one starts
             audio.addEventListener('play', function() {
                 pauseAllExcept(audio);
+                
+                // Remove play overlay when playback starts
+                const overlay = playerEl.querySelector('.sap-play-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
             });
         }
         const playlist = safeJsonParse(playerEl.dataset.playlist, []);
@@ -1262,10 +1268,11 @@
             updateCarousel();
             updateStreamingLinks(firstTrack);
             
-            // Check for share parameters in URL (?track=X&play=1)
+            // Check for share parameters in URL (?track=X&play=1) or data-autoplay attribute
             const urlParams = new URLSearchParams(window.location.search);
             const sharedTrack = parseInt(urlParams.get('track'));
-            const shouldAutoplay = urlParams.get('play') === '1';
+            const dataAutoplay = playerEl.dataset.autoplay === 'true';
+            const shouldAutoplay = urlParams.get('play') === '1' || dataAutoplay;
             
             // Check for saved progress (only if no URL parameters)
             const savedProgress = loadProgress();
@@ -1331,6 +1338,20 @@
                         });
                     }
                 }
+            }
+            
+            // Autoplay if data-autoplay is set (and no shared track)
+            if (shouldAutoplay && !hasUrlParams && !sharedTrack) {
+                audio.addEventListener('loadedmetadata', function autoplayOnLoad() {
+                    const playPromise = audio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(() => {
+                            // Autoplay blocked - show big play overlay
+                            showPlayOverlay();
+                        });
+                    }
+                    audio.removeEventListener('loadedmetadata', autoplayOnLoad);
+                }, { once: true });
             }
             
             // Show download button in menu if track is downloadable
