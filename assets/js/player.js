@@ -1405,12 +1405,22 @@
         if (moreBtn && moreWrapper && moreMenu) {
             // Position menu dynamically to ensure full visibility
             function positionMenu() {
+                // Make menu temporarily visible to measure it
+                moreMenu.style.visibility = 'hidden';
+                moreMenu.style.opacity = '1';
+                moreMenu.style.display = 'block';
+                
                 const btnRect = moreBtn.getBoundingClientRect();
-                const menuHeight = moreMenu.offsetHeight || 300;
+                const menuHeight = moreMenu.scrollHeight;
                 const menuWidth = moreMenu.offsetWidth || 180;
                 const viewportHeight = window.innerHeight;
                 const viewportWidth = window.innerWidth;
                 const padding = 10;
+                
+                // Reset temporary styles
+                moreMenu.style.display = '';
+                moreMenu.style.visibility = '';
+                moreMenu.style.opacity = '';
                 
                 // Calculate best position
                 let top, left;
@@ -1433,9 +1443,9 @@
                 if (left + menuWidth > viewportWidth - padding) {
                     left = viewportWidth - menuWidth - padding;
                 }
-                if (top < padding) top = padding;
-                if (top + menuHeight > viewportHeight - padding) {
-                    top = viewportHeight - menuHeight - padding;
+                if (top < 0) top = 0;
+                if (top + menuHeight > viewportHeight) {
+                    top = Math.max(0, viewportHeight - menuHeight);
                 }
                 
                 moreMenu.style.top = top + 'px';

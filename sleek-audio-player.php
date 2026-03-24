@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.1.4');
+define('SAP_VERSION', '2.1.5');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**

@@ -888,11 +888,6 @@
     margin: 4px 0;
 }
 
-/* Streaming divider has more space */
-.sap-stream-divider {
-    margin: 8px 0;
-}
-
 /* Sleep Timer */
 .sap-sleep-timer {
     display: flex;
