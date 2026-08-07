@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.1.4
+Stable tag: 2.4.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -208,6 +208,10 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.4.5 =
+* 🐛 Fixed More menu appearing in the wrong position inside transformed/animated theme sections (e.g. page builder homepages)
+* 🎨 Hardened More menu item CSS against theme style overrides (spacing/offset issues)
 
 = 2.1.4 =
 * 📱 Improved mobile autoplay reliability with loadeddata event and timeout fallback

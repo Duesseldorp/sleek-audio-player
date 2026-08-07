@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.1.4
+ * Version: 2.4.5
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.3.2');
+define('SAP_VERSION', '2.4.5');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -3251,11 +3251,14 @@ class Simple_Audio_Player {
      * Assets laden
      */
     public function enqueue_assets() {
+        $css_file = SAP_PLUGIN_DIR . 'assets/css/player.css';
+        $version = file_exists($css_file) ? filemtime($css_file) : SAP_VERSION;
+        
         wp_enqueue_style(
             'sleek-audio-player',
             SAP_PLUGIN_URL . 'assets/css/player.css',
             array(),
-            SAP_VERSION
+            $version
         );
         
         // Inject active theme CSS
@@ -3850,9 +3853,6 @@ class Simple_Audio_Player {
 
                 <!-- Controls -->
                 <div class="sap-controls" role="group" aria-label="Audio controls">
-                    <button class="sap-btn sap-btn-small sap-shuffle" title="Shuffle" aria-label="Shuffle playback" aria-pressed="false">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
-                    </button>
                     <button class="sap-btn sap-prev" title="Previous" aria-label="Previous track">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                     </button>
@@ -3862,9 +3862,6 @@ class Simple_Audio_Player {
                     </button>
                     <button class="sap-btn sap-next" title="Next" aria-label="Next track">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-                    </button>
-                    <button class="sap-btn sap-btn-small sap-share" title="Share" aria-label="Share this track">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg>
                     </button>
                     <div class="sap-more-wrapper">
                         <button class="sap-btn sap-btn-small sap-more-btn" title="More options" aria-label="More options" aria-expanded="false">
@@ -3883,16 +3880,16 @@ class Simple_Audio_Player {
                                 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
                                 <span>Download</span>
                             </button>
-                            <button type="button" class="sap-more-item sap-repeat" data-action="repeat" data-mode="off">
+                            <button type="button" class="sap-more-item sap-repeat" data-action="repeat" data-mode="off" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
                                 <span>Repeat: Off</span>
                             </button>
-                            <button type="button" class="sap-more-item sap-speed" data-action="speed">
+                            <button type="button" class="sap-more-item sap-speed" data-action="speed" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44z"/><path d="M10.59 15.41a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg>
                                 <span class="sap-speed-label">Speed: 1x</span>
                             </button>
                             <div class="sap-more-divider"></div>
-                            <button type="button" class="sap-more-item sap-sleep-timer" data-action="sleep">
+                            <button type="button" class="sap-more-item sap-sleep-timer" data-action="sleep" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
                                 <span class="sap-sleep-label"><?php echo esc_html__('Sleep Timer', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
                             </button>
@@ -3906,7 +3903,7 @@ class Simple_Audio_Player {
                                 <button type="button" class="sap-more-item sap-sleep-option" data-minutes="60"><?php echo esc_html__('1 Hour', 'sleek-audio-player'); ?></button>
                                 <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0" data-end-of-track="true"><?php echo esc_html__('End of Track', 'sleek-audio-player'); ?></button>
                             </div>
-                            <button type="button" class="sap-more-item sap-cover-anim" data-action="cover-anim">
+                            <button type="button" class="sap-more-item sap-cover-anim" data-action="cover-anim" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9.41 15.95L12 12.36l2.59 3.59L17 13l4 5H3l4-4z"/></svg>
                                 <span class="sap-cover-anim-label"><?php echo esc_html__('Cover', 'sleek-audio-player'); ?>: Ken Burns</span>
                             </button>
@@ -3915,7 +3912,7 @@ class Simple_Audio_Player {
                                 <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="kenburns">Ken Burns</button>
                                 <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="vinyl">Vinyl</button>
                             </div>
-                            <button type="button" class="sap-more-item sap-adaptive-color" data-action="adaptive-color">
+                            <button type="button" class="sap-more-item sap-adaptive-color" data-action="adaptive-color" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
                                 <span class="sap-adaptive-color-label"><?php echo esc_html__('Adaptive Colors', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
                             </button>

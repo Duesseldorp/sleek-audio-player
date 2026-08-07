@@ -148,6 +148,12 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 ## Changelog
 
+### Version 2.4.5 (2026-08-07)
+
+**Bug Fixes:**
+- Fixed More menu appearing in the wrong position when the player is placed inside transformed/animated theme sections (e.g. page builder homepages) - `position: fixed` coordinates are now converted to the correct containing block
+- Hardened More menu item CSS against theme style overrides that caused offset entries with excessive spacing
+
 ### Version 2.3.2 (2026-03-24)
 
 **Bug Fixes:**

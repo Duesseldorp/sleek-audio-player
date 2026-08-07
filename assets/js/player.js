@@ -147,8 +147,6 @@
         const playBtn = playerEl.querySelector('.sap-play');
         const prevBtn = playerEl.querySelector('.sap-prev');
         const nextBtn = playerEl.querySelector('.sap-next');
-        const shuffleBtn = playerEl.querySelector('.sap-shuffle');
-        const shareBtn = playerEl.querySelector('.sap-share');
         const moreWrapper = playerEl.querySelector('.sap-more-wrapper');
         const moreBtn = playerEl.querySelector('.sap-more-btn');
         const moreMenu = playerEl.querySelector('.sap-more-menu');
@@ -174,7 +172,7 @@
                 const visualizerCanvas = playerEl.querySelector('.sap-visualizer');
         
         // Setup press handlers for all control buttons (unified desktop + mobile)
-        [playBtn, prevBtn, nextBtn, shuffleBtn, shareBtn, moreBtn, volumeBtn].forEach(setupPressButton);
+        [playBtn, prevBtn, nextBtn, moreBtn, volumeBtn].forEach(setupPressButton);
         
         // Setup press handlers for more menu items
         [downloadBtn, repeatBtn, speedBtn, menuShareBtn, menuShuffleBtn, streamSpotify, streamApple, streamAmazon, streamSoundcloud].forEach(setupPressButton);
@@ -219,6 +217,7 @@
         const playbackSpeeds = [1, 1.25, 1.5, 2];
         let currentSpeedIndex = 0;
         let showRemainingTime = localStorage.getItem('sap_show_remaining') === 'true';
+        let userHasInteracted = false;
         
         // Sleep Timer State
         let sleepTimeout = null;
@@ -1417,18 +1416,32 @@
             playNext();
             blurButton(this);
         });
-        if (shuffleBtn) shuffleBtn.addEventListener('click', function() {
-            toggleShuffle();
-            blurButton(this);
-        });
-        // === Share Function ===
-        if (shareBtn) shareBtn.addEventListener('click', function() {
-            shareTrack();
-            blurButton(this);
-        });
         
         // === More Menu ===
         if (moreBtn && moreWrapper && moreMenu) {
+            // Find ancestor that creates a containing block for position:fixed
+            // (transform, filter, perspective, will-change, backdrop-filter, contain)
+            // Without this, the fixed menu is mispositioned inside animated/transformed
+            // theme sections (e.g. page builder entrance animations on the homepage)
+            function getFixedContainingBlock(el) {
+                let p = el.parentElement;
+                while (p && p !== document.documentElement) {
+                    const s = window.getComputedStyle(p);
+                    if (
+                        (s.transform && s.transform !== 'none') ||
+                        (s.perspective && s.perspective !== 'none') ||
+                        (s.filter && s.filter !== 'none') ||
+                        (s.backdropFilter && s.backdropFilter !== 'none') ||
+                        (s.willChange && /transform|perspective|filter/.test(s.willChange)) ||
+                        (s.contain && /paint|layout|strict|content/.test(s.contain))
+                    ) {
+                        return p;
+                    }
+                    p = p.parentElement;
+                }
+                return null;
+            }
+            
             // Position menu dynamically to ensure full visibility
             function positionMenu() {
                 // Make menu temporarily visible to measure it
@@ -1472,6 +1485,16 @@
                 if (top < 0) top = 0;
                 if (top + menuHeight > viewportHeight) {
                     top = Math.max(0, viewportHeight - menuHeight);
+                }
+                
+                // If an ancestor creates a containing block for position:fixed,
+                // convert viewport coordinates to that ancestor's coordinate space
+                const containingBlock = getFixedContainingBlock(moreMenu);
+                if (containingBlock) {
+                    const cbRect = containingBlock.getBoundingClientRect();
+                    const cbStyle = window.getComputedStyle(containingBlock);
+                    top -= cbRect.top + (parseFloat(cbStyle.borderTopWidth) || 0);
+                    left -= cbRect.left + (parseFloat(cbStyle.borderLeftWidth) || 0);
                 }
                 
                 moreMenu.style.top = top + 'px';
@@ -1550,35 +1573,9 @@
                     // Update menu label
                     const label = this.querySelector('.sap-speed-label');
                     if (label) {
-                        label.textContent = 'Speed: ' + audio.playbackRate + 'x';
+                        label.textContent = 'Speed: ' + playbackSpeeds[currentSpeedIndex] + 'x';
                     }
-                });
-            }
-            
-            // Menu Share button (for mini player)
-            if (menuShareBtn) {
-                menuShareBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    shareTrack();
-                    moreWrapper.classList.remove('active');
-                    moreBtn.setAttribute('aria-expanded', 'false');
-                });
-            }
-            
-            // Menu Shuffle button (for mini player)
-            if (menuShuffleBtn) {
-                menuShuffleBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    toggleShuffle();
-                    // Update button state
-                    this.classList.toggle('active', shuffleActive);
-                    this.setAttribute('aria-pressed', shuffleActive);
-                    const label = this.querySelector('span');
-                    if (label) {
-                        label.textContent = shuffleActive ? 'Shuffle: On' : 'Shuffle';
-                    }
+                    this.classList.toggle('active', playbackSpeeds[currentSpeedIndex] !== 1);
                 });
             }
             
@@ -1594,6 +1591,7 @@
                 if (sleepEndOfTrack) {
                     label.textContent = 'Sleep: End of Track';
                     sleepTimerBtn.classList.add('active');
+                    sleepTimerBtn.setAttribute('aria-pressed', 'true');
                 } else if (sleepEndTime) {
                     const remainingMs = Math.max(0, sleepEndTime - Date.now());
                     const remainingMin = Math.floor(remainingMs / 60000);
@@ -1605,9 +1603,11 @@
                         label.textContent = 'Sleep: ' + remainingSec + 's';
                     }
                     sleepTimerBtn.classList.add('active');
+                    sleepTimerBtn.setAttribute('aria-pressed', 'true');
                 } else {
                     label.textContent = 'Sleep Timer: Off';
                     sleepTimerBtn.classList.remove('active');
+                    sleepTimerBtn.setAttribute('aria-pressed', 'false');
                 }
             }
             
@@ -1708,11 +1708,14 @@
                 }
                 // kenburns is default (no extra class needed)
                 
-                // Update label
+                // Update label and aria-pressed
                 const label = coverAnimBtn ? coverAnimBtn.querySelector('.sap-cover-anim-label') : null;
                 if (label) {
                     const modeNames = { none: 'Off', kenburns: 'Ken Burns', vinyl: 'Vinyl' };
                     label.textContent = 'Cover: ' + (modeNames[mode] || mode);
+                }
+                if (coverAnimBtn) {
+                    coverAnimBtn.setAttribute('aria-pressed', mode !== 'none');
                 }
                 
                 // Mark active option
@@ -1768,6 +1771,7 @@
                 }
                 if (adaptiveColorBtn) {
                     adaptiveColorBtn.classList.toggle('active', adaptiveColorsEnabled);
+                    adaptiveColorBtn.setAttribute('aria-pressed', adaptiveColorsEnabled);
                 }
             }
             
@@ -1958,6 +1962,34 @@
             };
             
             playerEl.extractAdaptiveColor = extractColorFromCurrentCover;
+            
+            // Menu Share button
+            if (menuShareBtn) {
+                menuShareBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    shareTrack();
+                    closeMoreMenu();
+                    blurButton(this);
+                });
+            }
+            
+            // Menu Shuffle button
+            if (menuShuffleBtn) {
+                menuShuffleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleShuffle();
+                    blurButton(this);
+                });
+            }
+        }
+        
+        function closeMoreMenu() {
+            if (moreWrapper) {
+                moreWrapper.classList.remove('active');
+                if (moreBtn) moreBtn.setAttribute('aria-expanded', 'false');
+            }
         }
         
         // === Embed Modal ===
@@ -2563,7 +2595,10 @@
                 const sleepLabel = playerEl.querySelector('.sap-sleep-label');
                 const sleepBtn = playerEl.querySelector('.sap-sleep-timer');
                 if (sleepLabel) sleepLabel.textContent = 'Sleep Timer: Off';
-                if (sleepBtn) sleepBtn.classList.remove('active');
+                if (sleepBtn) {
+                    sleepBtn.classList.remove('active');
+                    sleepBtn.setAttribute('aria-pressed', 'false');
+                }
                 // Don't play next track - just stop
                 return;
             }
@@ -2576,21 +2611,25 @@
                 if (repeatPromise !== undefined) {
                     repeatPromise.catch(err => {
                         sapLog('Repeat play failed', err);
+                        showPlayOverlay();
                     });
                 }
             } else if (repeatMode === 'playlist') {
                 // Play next, loop to start if at end
+                sapLog('Playlist repeat mode - playing next track');
                 if (currentIndex >= playlist.length - 1) {
-                    playTrack(0);
+                    playTrack(0, true);
                 } else {
-                    playNext();
+                    playNext(true);
                 }
             } else {
                 // No repeat - play next unless at end
                 if (currentIndex < playlist.length - 1) {
-                    playNext();
+                    sapLog('Auto-playing next track after ended event');
+                    playNext(true);
                 } else {
                     // Playlist finished - clear saved progress
+                    sapLog('Playlist finished');
                     clearProgress();
                 }
             }
@@ -2602,6 +2641,7 @@
             track.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
+                userHasInteracted = true;
                 playTrack(index);
             });
             
@@ -2724,7 +2764,7 @@
             }
         }
         
-        function playTrack(index) {
+        function playTrack(index, isAutoplay = false) {
             
             // Clear any pending timeout
             if (loadingTimeout) {
@@ -2780,6 +2820,7 @@
                         isLoading = false;
                         hideLoadingSpinner();
                         preloadNextTrack();
+                        userHasInteracted = true;
                         
                         // Track play event in Umami
                         trackEvent('audio-play', {
@@ -2792,11 +2833,18 @@
                         isLoading = false;
                         hideLoadingSpinner();
                         
-                        // If autoplay blocked, wait for user interaction
+                        // If autoplay blocked, show overlay only if not already playing
                         if (err.name === 'NotAllowedError') {
                             sapLog('Autoplay blocked - waiting for user interaction');
+                            // Only show overlay if this is the first track or user hasn't interacted yet
+                            if (!userHasInteracted && !isAutoplay) {
+                                showPlayOverlay();
+                            } else if (isAutoplay) {
+                                sapLog('Mobile autoplay blocked during track transition - this is expected on some devices');
+                            }
                         } else {
                             sapError('Play failed', err);
+                            showErrorFeedback('Playback failed');
                         }
                     });
                 } else {
@@ -2822,18 +2870,36 @@
                 attemptPlay();
             };
             
-            // Listen for loadeddata event (fires when first frame is loaded)
-            const onLoadedData = function() {
-                audio.removeEventListener('loadeddata', onLoadedData);
-                tryPlay();
+            // Clean up any existing listeners before adding new ones
+            const cleanupListeners = function() {
+                if (playTimeout) {
+                    clearTimeout(playTimeout);
+                    playTimeout = null;
+                }
             };
-            audio.addEventListener('loadeddata', onLoadedData, { once: true });
             
-            // Fallback: Try to play after 500ms even if event doesn't fire
+            // Listen for loadeddata event (fires when first frame is loaded)
+            audio.addEventListener('loadeddata', function onLoadedData() {
+                cleanupListeners();
+                tryPlay();
+            }, { once: true });
+            
+            // For autoplay on mobile, also listen to canplaythrough for better reliability
+            if (isAutoplay) {
+                audio.addEventListener('canplaythrough', function onCanPlayThrough() {
+                    sapLog('canplaythrough event fired for autoplay');
+                    cleanupListeners();
+                    tryPlay();
+                }, { once: true });
+            }
+            
+            // Fallback: Try to play after timeout even if event doesn't fire
+            // For autoplay (track transitions), use shorter timeout for faster response
+            const timeout = isAutoplay ? 200 : 500;
             playTimeout = setTimeout(function() {
                 sapLog('Fallback play timeout triggered');
                 tryPlay();
-            }, 500);
+            }, timeout);
             
             // Start loading
             audio.load();
@@ -2881,6 +2947,7 @@
             if (isLoading) return;
             
             if (audio.paused) {
+                userHasInteracted = true;
                 if (!audio.src && playlist.length > 0) {
                     playTrack(0);
                 } else {
@@ -2919,7 +2986,7 @@
             playTrack(newIndex);
         }
 
-        function playNext() {
+        function playNext(isAutoplay = false) {
             if (isLoading) return;
             
             let newIndex;
@@ -2930,12 +2997,15 @@
             } else {
                 newIndex = currentIndex < playlist.length - 1 ? currentIndex + 1 : 0;
             }
-            playTrack(newIndex);
+            playTrack(newIndex, isAutoplay);
         }
 
         function toggleShuffle() {
             isShuffled = !isShuffled;
-            shuffleBtn.classList.toggle('active', isShuffled);
+            if (menuShuffleBtn) {
+                menuShuffleBtn.classList.toggle('active', isShuffled);
+                menuShuffleBtn.setAttribute('aria-pressed', isShuffled);
+            }
             
             if (isShuffled) {
                 // Create shuffled order
@@ -2955,6 +3025,7 @@
             if (repeatBtn) {
                 repeatBtn.dataset.mode = repeatMode;
                 repeatBtn.classList.toggle('active', repeatMode !== 'off');
+                repeatBtn.setAttribute('aria-pressed', repeatMode !== 'off');
                 
                 // Show/hide the "1" badge for single track repeat
                 const badge = repeatBtn.querySelector('.sap-repeat-badge');
@@ -2979,6 +3050,7 @@
                     label.textContent = speed + 'x';
                 }
                 speedBtn.classList.toggle('active', speed !== 1);
+                speedBtn.setAttribute('aria-pressed', speed !== 1);
             }
         }
 
@@ -3183,9 +3255,9 @@
                         handled = true;
                         break;
                     case 'KeyS':
-                        const shuffleBtn = targetPlayer.querySelector('.sap-shuffle');
-                        flashButton(shuffleBtn);
-                        if (shuffleBtn) shuffleBtn.click();
+                        const menuShuffleBtn = targetPlayer.querySelector('.sap-menu-shuffle');
+                        flashButton(menuShuffleBtn);
+                        if (menuShuffleBtn) menuShuffleBtn.click();
                         handled = true;
                         break;
                     case 'KeyR':

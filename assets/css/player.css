@@ -786,7 +786,7 @@
     max-height: calc(100vh - 40px);
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 4px 0;
+    padding: 2px 0;
     background: var(--sap-card);
     border: 1px solid var(--sap-border);
     border-radius: var(--sap-radius-sm);
@@ -821,20 +821,37 @@
 .sap-more-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    width: 100%;
-    padding: 8px 16px;
-    margin: 0;
+    gap: 6px !important;
+    width: 100% !important;
+    padding: 2px 10px !important;
+    margin: 0 !important;
     background: none;
-    border: none;
+    border: none !important;
     color: var(--sap-gray-200);
     font-family: inherit;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.4;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.1 !important;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
+    min-height: 22px !important;
+    height: auto !important;
+    /* Defend against theme CSS (e.g. global a/button rules on the homepage) */
+    float: none !important;
+    text-align: left !important;
+    text-indent: 0 !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    text-decoration: none !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+}
+
+/* Force flex layout for visible items with higher specificity than theme rules.
+   Excludes items hidden via inline style="display:none" (stream links/dividers) */
+.sap-player .sap-more-menu .sap-more-item:not([style*="none"]) {
+    display: flex !important;
 }
 
 /* Hover effect for menu items on desktop */
@@ -867,33 +884,76 @@
 }
 
 .sap-more-item svg {
-    width: 18px;
-    height: 18px;
+    width: 16px !important;
+    height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     fill: currentColor;
     flex-shrink: 0;
+    display: inline-block !important;
+}
+
+/* Defend inner label spans against theme CSS (e.g. global span/a span rules) */
+.sap-player .sap-more-menu .sap-more-item span {
+    display: inline !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    line-height: 1.1 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    background: none !important;
+    border: none !important;
+    min-height: 0 !important;
+    height: auto !important;
 }
 
 .sap-more-item.sap-download {
-    display: none;
+    position: absolute !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
 }
 
 .sap-more-item.sap-download.visible {
-    display: flex;
+    position: static !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    display: flex !important;
+    height: auto !important;
+    width: 100% !important;
+    padding: 2px 10px !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
 }
 
 /* More Menu Divider */
 .sap-more-divider {
     height: 1px;
     background: var(--sap-border);
-    margin: 4px 0;
+    margin: 1px 0 !important;
 }
 
-/* Sleep Timer */
-.sap-sleep-timer {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* Hidden dividers take no space */
+.sap-more-divider[style*="display:none"],
+.sap-more-divider[style*="display: none"] {
+    position: absolute !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    pointer-events: none !important;
 }
+
+/* Sleep Timer - uses default .sap-more-item styling */
 
 .sap-sleep-timer.active svg {
     fill: var(--sap-accent);
@@ -908,15 +968,30 @@
     padding: 0;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 4px;
-    margin: 2px 8px;
+    margin: 1px 6px;
     overflow: hidden;
+}
+
+/* Hidden submenus take no space */
+.sap-sleep-submenu[style*="display:none"],
+.sap-sleep-submenu[style*="display: none"],
+.sap-cover-anim-submenu[style*="display:none"],
+.sap-cover-anim-submenu[style*="display: none"] {
+    position: absolute !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
 }
 
 .sap-sleep-submenu .sap-sleep-option {
     display: flex;
     align-items: center;
     width: 100%;
-    padding: 8px 16px;
+    padding: 2px 10px !important;
     margin: 0;
     background: none;
     border: none;
@@ -924,9 +999,10 @@
     font-family: inherit;
     font-size: 13px;
     font-weight: 400;
-    line-height: 1.4;
+    line-height: 1.1 !important;
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
+    min-height: 22px !important;
     text-align: left;
     box-sizing: border-box;
 }
@@ -949,10 +1025,41 @@
 
 /* Streaming Links in More Menu */
 .sap-stream-link {
+    display: flex;
+    align-items: center;
     text-decoration: none;
     font-family: inherit;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 400;
+    padding: 2px 10px !important;
+    line-height: 1.1 !important;
+    width: 100%;
+    margin: 0;
+    background: none;
+    border: none;
+    color: var(--sap-gray-200);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    box-sizing: border-box;
+    min-height: 22px !important;
+}
+
+/* Hidden streaming links take no space */
+.sap-stream-link[style*="display:none"],
+.sap-stream-link[style*="display: none"] {
+    position: absolute !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    pointer-events: none !important;
+}
+
+.sap-stream-link br {
+    display: none;
 }
 
 .sap-stream-spotify:hover {
@@ -1979,20 +2086,14 @@
 }
 
 .sap-player.sap-mini .sap-btn-small,
-.sap-player.sap-mini .sap-volume-wrapper,
-.sap-player.sap-mini .sap-shuffle {
+.sap-player.sap-mini .sap-volume-wrapper {
     display: none !important;
 }
 
-/* Mini Player More Menu - show wrapper but customize content */
+/* ===== Mini Player More Menu Customization ===== */
+/* Show More button in mini player (hidden by default with other small buttons) */
 .sap-player.sap-mini .sap-more-wrapper {
     display: flex !important;
-    position: relative;
-    z-index: 99999 !important;
-}
-
-.sap-player.sap-mini .sap-more-wrapper.active {
-    z-index: 2147483647 !important;
 }
 
 .sap-player.sap-mini .sap-more-btn {
@@ -2002,39 +2103,17 @@
 }
 
 /* Ensure mini player controls don't overlap menu */
-.sap-player.sap-mini .sap-controls {
-    z-index: 1 !important;
-}
-
-.sap-player.sap-mini .sap-content {
-    z-index: 1 !important;
-}
-
+.sap-player.sap-mini .sap-controls,
+.sap-player.sap-mini .sap-content,
 .sap-player.sap-mini .sap-cover-carousel {
     z-index: 1 !important;
 }
 
-/* Hide items not needed in mini player */
-.sap-player.sap-mini .sap-speed,
-.sap-player.sap-mini .sap-cover-anim,
-.sap-player.sap-mini .sap-cover-anim-submenu,
-.sap-player.sap-mini .sap-adaptive-color {
-    display: none !important;
-}
+/* Mini Player: All menu items identical to standard player */
 
-/* Hide dividers that would be orphaned */
-.sap-player.sap-mini .sap-more-menu > .sap-more-divider:first-of-type {
-    display: none !important;
-}
-
-/* Share/Shuffle in More menu - only show in Mini layout (already on toolbar in Wide) */
+/* Share/Shuffle buttons: Always visible in menu for all layouts */
 .sap-menu-share,
 .sap-menu-shuffle {
-    display: none !important;
-}
-
-.sap-player.sap-mini .sap-menu-share,
-.sap-player.sap-mini .sap-menu-shuffle {
     display: flex !important;
 }
 
