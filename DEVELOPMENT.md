@@ -148,6 +148,26 @@ Test every change there first. **Never test against the production site**
 (https://www.duesseldorp.de/) — it runs the released, minified build.
 If the test site is unreachable, start the site in the LocalWP app first.
 
+## WordPress.org submission
+
+The plugin was submitted to the wordpress.org plugin directory on 2025-12-28
+(slug `sleek-audio-player`, wordpress.org account: `d0211` — must stay listed
+as Contributor in readme.txt). The review runs as an **email thread** with
+plugins@wordpress.org:
+
+- **Never resubmit the plugin** via the submission form — always reply to the
+  existing email thread with an updated ZIP attached (rule from the team;
+  the thread stays open "even years")
+- Build the ZIP with `python tools/minify.py && python tools/build-zip.py`
+  → `dist/sleek-audio-player-<version>.zip` (whitelist-based, no dev files)
+- Reply promptly to reviewer emails — 90 days without progress triggers an
+  automatic rejection (happened once in March 2026; resolved by replying to
+  the rejection email with the 2.5.2 ZIP on 2026-08-09)
+- Directory guidelines already implemented and to be preserved: unique global
+  prefixes (`sleekaudio_` / `SleekAudio_` / `SLEEKAUDIO_`), prepared SQL /
+  documented table-name escaping, "External Services" section in readme.txt,
+  `Tested up to:` never above the released WP version
+
 ## Git workflow
 
 - `main` is the released state; work happens on branches
