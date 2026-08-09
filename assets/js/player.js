@@ -218,6 +218,7 @@
         let currentSpeedIndex = 0;
         let showRemainingTime = localStorage.getItem('sap_show_remaining') === 'true';
         let userHasInteracted = false;
+        let autoplayBlockedByPolicy = false; // true while an auto-advance play() was rejected (e.g. locked screen / backgrounded tab) and is waiting to be resumed
         
         // Sleep Timer State
         let sleepTimeout = null;
@@ -1378,7 +1379,9 @@
             
             const overlay = document.createElement('div');
             overlay.className = 'sap-play-overlay';
-            overlay.innerHTML = '<div class="sap-play-overlay-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="sap-play-overlay-text">Tap to Play</div>';
+            const tapToPlayLabel = (typeof sapSettings !== 'undefined' && sapSettings.i18n && sapSettings.i18n.tapToPlay) || 'Tap to Play';
+            overlay.innerHTML = '<div class="sap-play-overlay-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="sap-play-overlay-text"></div>';
+            overlay.querySelector('.sap-play-overlay-text').textContent = tapToPlayLabel;
             overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,17,24,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;cursor:pointer;overflow:hidden;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
             
             const btn = overlay.querySelector('.sap-play-overlay-btn');
@@ -1397,10 +1400,31 @@
                 
                 overlay.addEventListener('click', function() {
                     overlay.remove();
+                    autoplayBlockedByPolicy = false;
+                    userHasInteracted = true;
                     audio.play().catch(() => {});
                 });
             }
         }
+
+        // If an auto-advance play() got rejected (e.g. screen was locked / tab was
+        // backgrounded when the previous track ended), retry playback as soon as the
+        // page becomes visible/foreground again instead of leaving the player stuck.
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState !== 'visible') return;
+            if (!autoplayBlockedByPolicy) return;
+
+            const resumePromise = audio.play();
+            if (resumePromise !== undefined) {
+                resumePromise.then(() => {
+                    autoplayBlockedByPolicy = false;
+                    const overlay = playerEl.querySelector('.sap-play-overlay');
+                    if (overlay) overlay.remove();
+                }).catch(() => {
+                    sapLog('Resume after visibility change still blocked - waiting for tap');
+                });
+            }
+        });
 
         // --- Event Listeners ---
 
@@ -2821,7 +2845,8 @@
                         hideLoadingSpinner();
                         preloadNextTrack();
                         userHasInteracted = true;
-                        
+                        autoplayBlockedByPolicy = false;
+
                         // Track play event in Umami
                         trackEvent('audio-play', {
                             title: track.title,
@@ -2832,16 +2857,17 @@
                     }).catch(err => {
                         isLoading = false;
                         hideLoadingSpinner();
-                        
-                        // If autoplay blocked, show overlay only if not already playing
+
                         if (err.name === 'NotAllowedError') {
-                            sapLog('Autoplay blocked - waiting for user interaction');
-                            // Only show overlay if this is the first track or user hasn't interacted yet
-                            if (!userHasInteracted && !isAutoplay) {
-                                showPlayOverlay();
-                            } else if (isAutoplay) {
-                                sapLog('Mobile autoplay blocked during track transition - this is expected on some devices');
-                            }
+                            // Browser refused to auto-advance to the next track - typically happens
+                            // when the tab was backgrounded or the screen was locked while the
+                            // previous track finished. Surface the "Tap to Play" overlay so the
+                            // player doesn't just silently stop, and try to resume on our own as
+                            // soon as the page is visible/foreground again (see visibilitychange
+                            // handler below).
+                            sapLog('Autoplay blocked - showing resume overlay', { isAutoplay });
+                            autoplayBlockedByPolicy = isAutoplay;
+                            showPlayOverlay();
                         } else {
                             sapError('Play failed', err);
                             showErrorFeedback('Playback failed');

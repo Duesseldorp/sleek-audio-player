@@ -270,3 +270,7 @@ msgstr "1 Stunde"
 #: sleek-audio-player.php
 msgid "End of Track"
 msgstr "Am Ende des Tracks"
+
+#: sleek-audio-player.php
+msgid "Tap to Play"
+msgstr "Zum Abspielen tippen"

@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.3.2
+**Current Version:** 2.4.6
 
 ---
 
@@ -148,6 +148,20 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 ## Changelog
 
+### Version 2.4.6 (2026-08-09)
+
+**Bug Fixes:**
+- Fixed player silently stopping between tracks when the browser blocks the automatic transition (e.g. locked screen or backgrounded tab on Android Chrome) - the "Tap to Play" overlay now always appears and playback resumes automatically once the page is visible again
+- Fixed track durations being deleted when saving a playlist - the duration field is now persisted in the editor form
+- Added missing SoundCloud field to newly added track rows in the playlist editor
+- Added SoundCloud links to JSON-LD schema markup (`sameAs`), as documented since 2.2.0
+
+**Maintenance:**
+- Fixed translations never loading: `load_plugin_textdomain` was missing and no compiled `.mo` file was shipped - the German translation now actually works
+- "Tap to Play" overlay text is now translatable
+- Uninstall now also removes the Umami script URL / website ID options and stored waveform data
+- Corrected license statement in readme.md (GPL v2 or later, matching the plugin header)
+
 ### Version 2.4.5 (2026-08-07)
 
 **Bug Fixes:**
@@ -242,4 +256,4 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 ## License
 
-MIT License
+GPL v2 or later

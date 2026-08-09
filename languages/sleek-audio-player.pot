@@ -269,3 +269,7 @@ msgstr ""
 #: sleek-audio-player.php
 msgid "End of Track"
 msgstr ""
+
+#: sleek-audio-player.php
+msgid "Tap to Play"
+msgstr ""

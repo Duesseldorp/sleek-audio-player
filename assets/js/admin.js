@@ -354,6 +354,8 @@
                     'class="sap-track-url" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][attachment_id]" ' +
                     'class="sap-track-id" value="" />' +
+                '<input type="hidden" name="sap_tracks[' + trackIndex + '][duration]" ' +
+                    'class="sap-track-duration" value="" />' +
                 '<span class="sap-track-filename">No file</span>' +
                 '<button type="button" class="button sap-select-audio">🎵 Audio</button>' +
                 '<input type="url" name="sap_tracks[' + trackIndex + '][spotify]" ' +
@@ -362,6 +364,8 @@
                     'class="sap-track-link sap-link-apple" placeholder="🍎 Apple Music" value="" />' +
                 '<input type="url" name="sap_tracks[' + trackIndex + '][amazon]" ' +
                     'class="sap-track-link sap-link-amazon" placeholder="📦 Amazon" value="" />' +
+                '<input type="url" name="sap_tracks[' + trackIndex + '][soundcloud]" ' +
+                    'class="sap-track-link sap-link-soundcloud" placeholder="☁️ SoundCloud" value="" />' +
                 '<label class="sap-download-label">' +
                     '<input type="checkbox" name="sap_tracks[' + trackIndex + '][downloadable]" value="1" /> DL' +
                 '</label>' +

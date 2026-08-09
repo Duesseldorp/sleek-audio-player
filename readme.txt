@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.4.5
+Stable tag: 2.4.6
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -209,9 +209,38 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
+= 2.4.6 =
+* 🐛 Fixed player silently stopping between tracks when the browser blocks the automatic transition (e.g. locked screen or backgrounded tab on Android Chrome) - the "Tap to Play" overlay now always appears and playback resumes automatically once the page is visible again
+* 🐛 Fixed track durations being deleted when saving a playlist
+* ☁️ Added missing SoundCloud field to newly added track rows in the playlist editor
+* 🔍 Added SoundCloud links to JSON-LD schema markup (sameAs)
+* 🌍 Fixed translations never loading (missing load_plugin_textdomain and compiled .mo file) - German translation now works
+* 🌍 "Tap to Play" overlay text is now translatable
+* 🧹 Uninstall now also removes Umami options and stored waveform data
+
 = 2.4.5 =
 * 🐛 Fixed More menu appearing in the wrong position inside transformed/animated theme sections (e.g. page builder homepages)
 * 🎨 Hardened More menu item CSS against theme style overrides (spacing/offset issues)
+
+= 2.3.2 =
+* 🐛 Fixed "Tap to Play" overlay not disappearing when starting playback from playlist
+
+= 2.3.1 =
+* 🐛 Fixed autoplay not working when autoplay="true" parameter is set in shortcode
+
+= 2.3.0 =
+* ✨ Added autoplay parameter to shortcode: [sleek_player id="123" autoplay="true"]
+* 📱 Shows "Tap to Play" overlay if browser blocks autoplay
+
+= 2.2.2 =
+* 🎨 Fixed track list alignment issues in backend
+
+= 2.2.1 =
+* 🎨 Optimized backend track list layout for better visual consistency
+
+= 2.2.0 =
+* ☁️ Added SoundCloud integration alongside existing streaming services
+* 🔧 Removed global streaming links in favor of track-specific links only
 
 = 2.1.4 =
 * 📱 Improved mobile autoplay reliability with loadeddata event and timeout fallback

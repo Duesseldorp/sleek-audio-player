@@ -26,10 +26,16 @@ $wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
 delete_option('sap_active_theme_id');
 delete_option('sap_cdn_url');
 delete_option('sap_umami_tracking');
+delete_option('sap_umami_script_url');
+delete_option('sap_umami_website_id');
 delete_option('sap_url_protection');
 delete_option('sap_cover_click_play');
 delete_option('sap_remember_position');
 delete_option('sap_visualizer_type');
+
+// Delete waveform data stored on audio attachments (regenerable, plugin-specific)
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = %s", '_sap_waveform' ) );
 
 // Optional: Delete all playlist post meta (uncomment if desired)
 // $wpdb->query("DELETE FROM {$wpdb->postmeta} WHERE meta_key LIKE '_sap_%'");

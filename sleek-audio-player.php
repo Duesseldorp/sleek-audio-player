@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.4.5
+ * Version: 2.4.6
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.4.5');
+define('SAP_VERSION', '2.4.6');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -2353,6 +2353,7 @@ class Simple_Audio_Player {
     }
 
     private function __construct() {
+        add_action('init', array($this, 'load_textdomain'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_shortcode('sleek_player', array($this, 'render_player'));
@@ -2378,6 +2379,13 @@ class Simple_Audio_Player {
         add_action('wp_head', array($this, 'add_oembed_discovery'));
     }
     
+    /**
+     * Load translations from the plugin's languages/ folder
+     */
+    public function load_textdomain() {
+        load_plugin_textdomain('sleek-audio-player', false, dirname(plugin_basename(__FILE__)) . '/languages');
+    }
+
     /**
      * Auto-display player on playlist single pages
      */
@@ -3281,6 +3289,9 @@ class Simple_Audio_Player {
             'coverClickPlay' => (bool) get_option('sap_cover_click_play', true),
             'rememberPosition' => (bool) get_option('sap_remember_position', false),
             'visualizerType' => get_option('sap_visualizer_type', 'bars'),
+            'i18n' => array(
+                'tapToPlay' => __('Tap to Play', 'sleek-audio-player'),
+            ),
         ));
     }
 
@@ -3406,8 +3417,10 @@ class Simple_Audio_Player {
                            value="<?php echo esc_attr($track['artist'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][url]" 
                            class="sap-track-url" value="<?php echo esc_url($track['url'] ?? ''); ?>" />
-                    <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][attachment_id]" 
+                    <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][attachment_id]"
                            class="sap-track-id" value="<?php echo esc_attr($track['attachment_id'] ?? ''); ?>" />
+                    <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][duration]"
+                           class="sap-track-duration" value="<?php echo esc_attr($track['duration'] ?? ''); ?>" />
                     <span class="sap-track-filename"><?php echo esc_html(basename($track['url'] ?? 'No file')); ?></span>
                     <button type="button" class="button sap-select-audio">🎵 Audio</button>
                     <input type="url" name="sap_tracks[<?php echo esc_attr( $index ); ?>][spotify]" 
@@ -3558,6 +3571,7 @@ class Simple_Audio_Player {
                         'amazon' => esc_url_raw($track['amazon'] ?? ''),
                         'soundcloud' => esc_url_raw($track['soundcloud'] ?? ''),
                         'downloadable' => !empty($track['downloadable']),
+                        'duration' => sanitize_text_field($track['duration'] ?? ''),
                     );
                 }
             }
@@ -3632,6 +3646,9 @@ class Simple_Audio_Player {
             }
             if (!empty($track['amazon']) && filter_var($track['amazon'], FILTER_VALIDATE_URL)) {
                 $same_as[] = esc_url_raw($track['amazon']);
+            }
+            if (!empty($track['soundcloud']) && filter_var($track['soundcloud'], FILTER_VALIDATE_URL)) {
+                $same_as[] = esc_url_raw($track['soundcloud']);
             }
             if (!empty($same_as)) {
                 $track_schema['sameAs'] = $same_as;
