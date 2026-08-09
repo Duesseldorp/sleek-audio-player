@@ -1,0 +1,49 @@
+# Sleek Audio Player — rules for AI assistants
+
+Read DEVELOPMENT.md before making changes. It is the single source of truth
+for conventions; the rules below are the hard constraints you must never skip.
+
+## Generated files — never edit by hand
+- assets/js/player.min.js and assets/css/player.min.css are BUILT files.
+  After ANY change to assets/js/player.js or assets/css/player.css you MUST run:
+    python tools/minify.py
+  and commit the regenerated .min files together with the source change.
+- languages/*.mo are BUILT files. After ANY change to a .po file run:
+    python tools/po2mo.py
+  New translatable strings also go into the .pot and the de_DE.po.
+
+## Versioning — four places must always match
+1. sleek-audio-player.php header: " * Version: X.Y.Z"
+2. sleek-audio-player.php: define('SAP_VERSION', 'X.Y.Z')
+3. readme.txt: "Stable tag: X.Y.Z"
+4. readme.md: "**Current Version:** X.Y.Z"
+Every user-facing change needs a changelog entry in BOTH readme.md and
+readme.txt. A code change without a version bump never reaches cached sites
+(SAP_VERSION is the asset cache-buster).
+
+## Architecture constraints
+- Frontend assets load ONLY on pages that render a player
+  (register_assets / maybe_enqueue_assets / late enqueue in render_player).
+  Never add an unconditional wp_enqueue_* for frontend assets.
+- Player markup must never contain <br> or <p> and must never rely on
+  whitespace between tags (render_player strips it; page builders run
+  wpautop over the output).
+- A track meta field exists in FOUR places; change all of them together:
+  PHP meta box form, addTrackRow() in assets/js/admin.js,
+  save_meta() whitelist, sap_validate_track() defaults.
+  Missing one silently destroys saved data.
+- Every AJAX handler needs check_ajax_referer AND current_user_can.
+  Every output is escaped, every saved field individually sanitized.
+- No user-facing hardcoded strings in player.js — pass them via the
+  sapSettings.i18n array (wp_localize_script) with an English fallback.
+- PHP must stay compatible with PHP 7.4 / WordPress 5.0.
+- player.js stays dependency-free (no jQuery, no frameworks, no CDNs).
+- The legacy [simple_player] shortcode alias must keep working.
+
+## Testing before commit (no automated tests yet)
+1. Page with player via shortcode (early enqueue path)
+2. Page-builder page with player (late enqueue + wpautop path)
+3. Page WITHOUT player — page source must contain no plugin assets
+4. Playback changes: test a full track-to-track transition
+Never test against the production site; use a local WordPress with
+SCRIPT_DEBUG enabled.
