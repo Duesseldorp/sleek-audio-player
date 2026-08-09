@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.4.6
+**Current Version:** 2.5.0
 
 ---
 
@@ -148,7 +148,11 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 ## Changelog
 
-### Version 2.4.6 (2026-08-09)
+### Version 2.5.0 (2026-08-09)
+
+**Performance:**
+- Player assets (JS/CSS) now load **only on pages that actually contain a player** - previously ~200 KB were loaded on every page of the site. Detection covers shortcodes, the Gutenberg block, playlist pages, and page-builder/widget rendering (late enqueue with inline stylesheet printing to avoid unstyled flashes)
+- Minified builds are now shipped and served by default (player.js 141 KB → 72 KB, player.css 48 KB → 34 KB); set `SCRIPT_DEBUG` to serve the readable sources. Build via `python tools/minify.py`
 
 **Bug Fixes:**
 - Fixed player silently stopping between tracks when the browser blocks the automatic transition (e.g. locked screen or backgrounded tab on Android Chrome) - the "Tap to Play" overlay now always appears and playback resumes automatically once the page is visible again

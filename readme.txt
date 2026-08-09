@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.4.6
+Stable tag: 2.5.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -209,7 +209,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 == Changelog ==
 
-= 2.4.6 =
+= 2.5.0 =
+* ⚡ Player assets now load only on pages that actually contain a player (previously ~200 KB on every page of the site)
+* ⚡ Minified JS/CSS builds shipped and served by default (player.js 141 KB → 72 KB, player.css 48 KB → 34 KB); SCRIPT_DEBUG serves the readable sources
 * 🐛 Fixed player silently stopping between tracks when the browser blocks the automatic transition (e.g. locked screen or backgrounded tab on Android Chrome) - the "Tap to Play" overlay now always appears and playback resumes automatically once the page is visible again
 * 🐛 Fixed More menu rendering with excessive spacing when page builders run wpautop over the shortcode output (stray br/p elements injected into the player markup)
 * 🐛 Fixed track durations being deleted when saving a playlist

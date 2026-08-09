@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.4.6
+ * Version: 2.5.0
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.4.6');
+define('SAP_VERSION', '2.5.0');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -2354,7 +2354,7 @@ class Simple_Audio_Player {
 
     private function __construct() {
         add_action('init', array($this, 'load_textdomain'));
-        add_action('wp_enqueue_scripts', array($this, 'enqueue_assets'));
+        add_action('wp_enqueue_scripts', array($this, 'maybe_enqueue_assets'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_shortcode('sleek_player', array($this, 'render_player'));
         add_shortcode('simple_player', array($this, 'render_player')); // Legacy alias for backwards compatibility
@@ -3256,33 +3256,42 @@ class Simple_Audio_Player {
     }
 
     /**
-     * Assets laden
+     * Register frontend assets without enqueueing them.
+     * Enqueued only when a player actually renders (see maybe_enqueue_assets /
+     * enqueue_assets), so pages without a player load zero plugin assets.
      */
-    public function enqueue_assets() {
-        $css_file = SAP_PLUGIN_DIR . 'assets/css/player.css';
-        $version = file_exists($css_file) ? filemtime($css_file) : SAP_VERSION;
-        
-        wp_enqueue_style(
+    public function register_assets() {
+        if (wp_script_is('sleek-audio-player', 'registered')) {
+            return;
+        }
+
+        // Serve minified builds (tools/minify.py) unless SCRIPT_DEBUG is set;
+        // fall back to the unminified sources if a .min file is missing
+        $suffix = (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG) ? '' : '.min';
+        $css = file_exists(SAP_PLUGIN_DIR . "assets/css/player{$suffix}.css") ? "player{$suffix}.css" : 'player.css';
+        $js = file_exists(SAP_PLUGIN_DIR . "assets/js/player{$suffix}.js") ? "player{$suffix}.js" : 'player.js';
+
+        wp_register_style(
             'sleek-audio-player',
-            SAP_PLUGIN_URL . 'assets/css/player.css',
+            SAP_PLUGIN_URL . 'assets/css/' . $css,
             array(),
-            $version
+            SAP_VERSION
         );
-        
+
         // Inject active theme CSS
         $theme_manager = SAP_Theme_Manager::get_instance();
         $active_theme = $theme_manager->get_active_theme();
         $theme_css = $theme_manager->generate_theme_css($active_theme);
         wp_add_inline_style('sleek-audio-player', $theme_css);
 
-        wp_enqueue_script(
+        wp_register_script(
             'sleek-audio-player',
-            SAP_PLUGIN_URL . 'assets/js/player.js',
+            SAP_PLUGIN_URL . 'assets/js/' . $js,
             array(),
             SAP_VERSION,
             true
         );
-        
+
         // Pass settings to JavaScript
         wp_localize_script('sleek-audio-player', 'sapSettings', array(
             'umamiTracking' => (bool) get_option('sap_umami_tracking', false),
@@ -3293,6 +3302,39 @@ class Simple_Audio_Player {
                 'tapToPlay' => __('Tap to Play', 'sleek-audio-player'),
             ),
         ));
+    }
+
+    /**
+     * Enqueue the registered player assets. Safe to call multiple times.
+     */
+    public function enqueue_assets() {
+        $this->register_assets();
+        wp_enqueue_style('sleek-audio-player');
+        wp_enqueue_script('sleek-audio-player');
+    }
+
+    /**
+     * wp_enqueue_scripts hook: enqueue early (in <head>) when a player is
+     * detectable up front. Players rendered outside post content (page
+     * builders, widgets, templates) are covered by the late enqueue in
+     * render_player() instead.
+     */
+    public function maybe_enqueue_assets() {
+        $this->register_assets();
+
+        if (is_singular('sap_playlist')) {
+            $this->enqueue_assets();
+            return;
+        }
+
+        $post = get_post();
+        if ($post && (
+            has_shortcode($post->post_content, 'sleek_player')
+            || has_shortcode($post->post_content, 'simple_player')
+            || (function_exists('has_block') && has_block('sleek-audio-player/player', $post))
+        )) {
+            $this->enqueue_assets();
+        }
     }
 
     /**
@@ -3782,6 +3824,11 @@ class Simple_Audio_Player {
             return '<p>' . __('No playable tracks found.', 'sleek-audio-player') . '</p>';
         }
 
+        // Late enqueue: catches players rendered outside detectable post content
+        // (page builders, widgets, templates). The script loads in the footer;
+        // no-op if maybe_enqueue_assets() already enqueued in <head>.
+        $this->enqueue_assets();
+
         $cover = self::cdn_url(get_the_post_thumbnail_url($post_id, 'large'));
         $title = get_the_title($post_id);
 
@@ -3802,7 +3849,13 @@ class Simple_Audio_Player {
         $total_duration = sprintf('%d:%02d', $total_mins, $total_secs);
 
         ob_start();
-        
+
+        // If wp_head already ran without our stylesheet (late enqueue case),
+        // print the <link> right here so the player never renders unstyled
+        if (did_action('wp_head') && !wp_style_is('sleek-audio-player', 'done')) {
+            wp_print_styles('sleek-audio-player');
+        }
+
         // Generate JSON-LD Schema for SEO
         $schema = $this->generate_schema_markup($post_id, $tracks, $title, $cover, $total_seconds);
         ?>
