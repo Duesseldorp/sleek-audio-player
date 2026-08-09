@@ -41,9 +41,17 @@ readme.txt. A code change without a version bump never reaches cached sites
 - The legacy [simple_player] shortcode alias must keep working.
 
 ## Testing before commit (no automated tests yet)
+A local test environment EXISTS: https://duesseldorp-test.local/ (LocalWP).
+This repo is junction-linked into its plugins folder — every edit is live
+there immediately, and SCRIPT_DEBUG serves the unminified sources, so you
+can verify JS/CSS changes without rebuilding (still run minify before
+committing). Plugin debug output lands in the test site's
+wp-content/debug.log. If the site is unreachable, ask the user to start
+it in the LocalWP app.
+
+Check at minimum:
 1. Page with player via shortcode (early enqueue path)
 2. Page-builder page with player (late enqueue + wpautop path)
 3. Page WITHOUT player — page source must contain no plugin assets
 4. Playback changes: test a full track-to-track transition
-Never test against the production site; use a local WordPress with
-SCRIPT_DEBUG enabled.
+Never test against the production site (https://www.duesseldorp.de/).

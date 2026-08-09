@@ -130,9 +130,22 @@ There is no automated test suite yet, so before committing test at minimum:
    autoplay path (browser autoplay policies differ; see the
    `visibilitychange` resume handling in `player.js`)
 
-A local WordPress (e.g. LocalWP on Windows) with this folder symlinked into
-`wp-content/plugins/` and `SCRIPT_DEBUG` enabled is the recommended setup —
-do not test changes against the production site.
+### Local test environment (exists — use it)
+
+A LocalWP site is set up on the development machine at
+**https://duesseldorp-test.local/** with:
+
+- this repo **junction-linked** into `wp-content/plugins/sleek-audio-player`
+  — every edit in the repo is live on the test site immediately, no copying
+- `SCRIPT_DEBUG` enabled — the site serves the readable `player.js`/`player.css`
+  sources, so you can test JS/CSS changes **without** running the minify build
+  (the build is still required before committing)
+- `WP_DEBUG` + `WP_DEBUG_LOG` enabled — plugin debug output (`sap_log`) lands in
+  `wp-content/debug.log` of the test site
+
+Test every change there first. **Never test against the production site**
+(https://www.duesseldorp.de/) — it runs the released, minified build.
+If the test site is unreachable, start the site in the LocalWP app first.
 
 ## Git workflow
 

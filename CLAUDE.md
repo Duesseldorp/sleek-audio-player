@@ -26,3 +26,5 @@ Hard constraints (details in DEVELOPMENT.md):
   `[simple_player]` shortcode must keep working.
 - Test on: a shortcode page, a page-builder page, and a page without a
   player (must load zero plugin assets). Never test against production.
+  Local test site exists at https://duesseldorp-test.local/ (LocalWP,
+  repo junction-linked, SCRIPT_DEBUG on — edits are live instantly).
