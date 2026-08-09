@@ -69,7 +69,7 @@ A sleek, modern audio player for WordPress - perfect for musicians, podcasters, 
 
 = Streaming & Integration =
 
-* 🔗 Links to Spotify, Apple Music & Amazon Music
+* 🔗 Links to Spotify, Apple Music, Amazon Music & SoundCloud
 * 📊 Umami Analytics integration (track events)
 * 🌐 iFrame embed for external websites
 * 🔗 oEmbed provider (auto-embed on other WordPress sites, Discord, Slack)
@@ -134,7 +134,8 @@ Legacy shortcode (still supported):
 | Parameter | Values | Default | Description |
 |-----------|--------|---------|-------------|
 | `id` | number | required | Playlist ID |
-| `layout` | `wide`, `mini` | wide | Layout variant |
+| `layout` | `wide`, `mini` | standard | Layout variant |
+| `autoplay` | `true`, `1` | off | Start playback on page load (subject to browser autoplay policies) |
 
 = Examples =
 
@@ -153,7 +154,7 @@ Mini Layout (compact embed):
    - Audio file from Media Library
    - Cover image (optional, otherwise Featured Image)
    - Allow download (optional)
-4. Enter streaming links (Spotify, Apple, Amazon)
+4. Enter streaming links (Spotify, Apple Music, Amazon, SoundCloud)
 5. Set Featured Image as default cover
 6. Publish
 
