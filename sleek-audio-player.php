@@ -4029,7 +4029,13 @@ class Simple_Audio_Player {
             </div>
         </div>
         <?php
-        return ob_get_clean();
+        $output = ob_get_clean();
+        // Strip whitespace between tags: page builders sometimes run wpautop over the
+        // already-rendered shortcode output, turning our template newlines into stray
+        // <br>/<p> elements inside the player (broken More menu spacing on such pages).
+        // The player markup contains no whitespace-sensitive content (the embed
+        // textarea is empty and filled via JS), so this is safe.
+        return preg_replace('/>\s+</', '><', $output);
     }
 }
 

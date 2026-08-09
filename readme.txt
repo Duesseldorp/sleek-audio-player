@@ -211,6 +211,7 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 
 = 2.4.6 =
 * 🐛 Fixed player silently stopping between tracks when the browser blocks the automatic transition (e.g. locked screen or backgrounded tab on Android Chrome) - the "Tap to Play" overlay now always appears and playback resumes automatically once the page is visible again
+* 🐛 Fixed More menu rendering with excessive spacing when page builders run wpautop over the shortcode output (stray br/p elements injected into the player markup)
 * 🐛 Fixed track durations being deleted when saving a playlist
 * ☁️ Added missing SoundCloud field to newly added track rows in the playlist editor
 * 🔍 Added SoundCloud links to JSON-LD schema markup (sameAs)

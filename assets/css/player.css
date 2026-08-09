@@ -953,6 +953,20 @@
     pointer-events: none !important;
 }
 
+/* wpautop defense: page builders may run wpautop over the shortcode output and
+   inject <br>/<p> into the player markup (excessive More menu spacing). The
+   player itself never uses <br> or <p>, so these can only be foreign elements. */
+.sap-player br,
+.sap-more-menu br {
+    display: none !important;
+}
+.sap-more-menu p {
+    display: contents !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 0 !important;
+}
+
 /* Sleep Timer - uses default .sap-more-item styling */
 
 .sap-sleep-timer.active svg {

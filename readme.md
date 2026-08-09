@@ -152,6 +152,7 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 **Bug Fixes:**
 - Fixed player silently stopping between tracks when the browser blocks the automatic transition (e.g. locked screen or backgrounded tab on Android Chrome) - the "Tap to Play" overlay now always appears and playback resumes automatically once the page is visible again
+- Fixed More menu rendering with excessive spacing on pages where the page builder runs `wpautop` over the shortcode output (e.g. homepage) - the player markup is now emitted without inter-tag whitespace so `wpautop` cannot inject stray `<br>`/`<p>` elements, plus a CSS safety net hides any that still appear
 - Fixed track durations being deleted when saving a playlist - the duration field is now persisted in the editor form
 - Added missing SoundCloud field to newly added track rows in the playlist editor
 - Added SoundCloud links to JSON-LD schema markup (`sameAs`), as documented since 2.2.0
