@@ -8,7 +8,7 @@ change a convention, change it in this file first.
 
 | Path | Purpose |
 |---|---|
-| `sleek-audio-player.php` | Entire PHP backend: `SAP_Theme_Manager`, `SAP_Waveform_Manager`, `Simple_Audio_Player` (shortcode, block, REST, meta boxes, embed, SEO) |
+| `sleek-audio-player.php` | Entire PHP backend: `SleekAudio_Theme_Manager`, `SleekAudio_Waveform_Manager`, `SleekAudio_Player` (shortcode, block, REST, meta boxes, embed, SEO) |
 | `assets/js/player.js` | Frontend player (vanilla JS, no dependencies) |
 | `assets/js/player.min.js` | **Generated** — never edit by hand |
 | `assets/css/player.css` | Frontend styles |
@@ -18,6 +18,7 @@ change a convention, change it in this file first.
 | `languages/` | `.pot` template, `.po` translations, **generated** `.mo` binaries |
 | `tools/minify.py` | Builds the `.min` assets (`pip install rjsmin rcssmin`) |
 | `tools/po2mo.py` | Compiles `.po` → `.mo` (stdlib only) |
+| `tools/build-zip.py` | Builds the distribution ZIP (`dist/`) for wordpress.org — whitelist-based, dev files can never leak in |
 
 ## Build steps (the two rules you must not forget)
 
@@ -43,7 +44,7 @@ change a convention, change it in this file first.
 Version lives in **four places** — all must match:
 
 1. `sleek-audio-player.php` plugin header → ` * Version: X.Y.Z`
-2. `sleek-audio-player.php` → `define('SAP_VERSION', 'X.Y.Z');`
+2. `sleek-audio-player.php` → `define('SLEEKAUDIO_VERSION', 'X.Y.Z');`
 3. `readme.txt` → `Stable tag: X.Y.Z`
 4. `readme.md` → `**Current Version:** X.Y.Z`
 
@@ -51,7 +52,7 @@ Then:
 
 5. Changelog entry in **both** `readme.md` (detailed) and `readme.txt` (bullet style)
 6. Run both build steps above if sources changed
-7. `SAP_VERSION` is the cache-buster for enqueued assets — shipping a code
+7. `SLEEKAUDIO_VERSION` is the cache-buster for enqueued assets — shipping a code
    change without a version bump means cached sites never receive it
 
 Versioning: patch for fixes, minor for new features **or behavior changes**
@@ -91,7 +92,7 @@ as happened with `duration`):
 1. PHP meta box form in `render_meta_box` (hidden/text input per track)
 2. `addTrackRow()` template in `assets/js/admin.js`
 3. `save_meta()` sanitization whitelist
-4. `sap_validate_track()` defaults
+4. `sleekaudio_validate_track()` defaults
 
 ### Security (non-negotiable)
 
@@ -140,7 +141,7 @@ A LocalWP site is set up on the development machine at
 - `SCRIPT_DEBUG` enabled — the site serves the readable `player.js`/`player.css`
   sources, so you can test JS/CSS changes **without** running the minify build
   (the build is still required before committing)
-- `WP_DEBUG` + `WP_DEBUG_LOG` enabled — plugin debug output (`sap_log`) lands in
+- `WP_DEBUG` + `WP_DEBUG_LOG` enabled — plugin debug output (`sleekaudio_log`) lands in
   `wp-content/debug.log` of the test site
 
 Test every change there first. **Never test against the production site**

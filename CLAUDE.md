@@ -11,7 +11,7 @@ Hard constraints (details in DEVELOPMENT.md):
   After changing `player.js`/`player.css` run `python tools/minify.py`;
   after changing `.po` files run `python tools/po2mo.py`. Commit build
   outputs together with the sources.
-- Version must match in four places (plugin header, `SAP_VERSION`,
+- Version must match in four places (plugin header, `SLEEKAUDIO_VERSION`,
   readme.txt Stable tag, readme.md Current Version) and every user-facing
   change gets a changelog entry in both readme.md and readme.txt.
 - Frontend assets load only on pages that render a player — never add an
@@ -19,7 +19,7 @@ Hard constraints (details in DEVELOPMENT.md):
 - Player markup: no `<br>`/`<p>`, no whitespace-dependent layout
   (`render_player` strips inter-tag whitespace as wpautop defense).
 - Track meta fields exist in four places (meta box form, `addTrackRow()`,
-  `save_meta()`, `sap_validate_track()`) — always change all four.
+  `save_meta()`, `sleekaudio_validate_track()`) — always change all four.
 - AJAX: nonce + capability check. All output escaped, all input sanitized.
 - No hardcoded user-facing strings in `player.js` — use `sapSettings.i18n`.
 - PHP 7.4 / WP 5.0 compatible; `player.js` dependency-free; legacy

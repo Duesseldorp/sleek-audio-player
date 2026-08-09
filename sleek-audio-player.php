@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.5.1
+ * Version: 2.5.2
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,14 +15,14 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.5.1');
-define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
+define('SLEEKAUDIO_VERSION', '2.5.2');
+define('SLEEKAUDIO_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
  * Logging helper for debugging
  */
-function sap_log($message, $data = null) {
-    if (!SAP_DEBUG) return;
+function sleekaudio_log($message, $data = null) {
+    if (!SLEEKAUDIO_DEBUG) return;
     
     $log_message = '[SAP] ' . $message;
     if ($data !== null) {
@@ -36,7 +36,7 @@ function sap_log($message, $data = null) {
  * @param array $track Track data
  * @return array Sanitized track data with defaults
  */
-function sap_validate_track($track) {
+function sleekaudio_validate_track($track) {
     if (!is_array($track)) {
         return null;
     }
@@ -63,14 +63,14 @@ function sap_validate_track($track) {
  * @param mixed $tracks Tracks data from post meta
  * @return array Validated tracks array
  */
-function sap_validate_tracks($tracks) {
+function sleekaudio_validate_tracks($tracks) {
     if (!is_array($tracks)) {
         return array();
     }
     
     $validated = array();
     foreach ($tracks as $track) {
-        $valid_track = sap_validate_track($track);
+        $valid_track = sleekaudio_validate_track($track);
         if ($valid_track && !empty($valid_track['url'])) {
             $validated[] = $valid_track;
         }
@@ -85,7 +85,7 @@ function sap_validate_tracks($tracks) {
  * @param mixed ...$args Query arguments
  * @return mixed Query result or false on error
  */
-function sap_db_query($query, ...$args) {
+function sleekaudio_db_query($query, ...$args) {
     global $wpdb;
     
     try {
@@ -112,19 +112,19 @@ function sap_db_query($query, ...$args) {
         }
         return $query;
     } catch (Exception $e) {
-        sap_log('Database query error', $e->getMessage());
+        sleekaudio_log('Database query error', $e->getMessage());
         return false;
     }
 }
-define('SAP_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('SAP_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('SLEEKAUDIO_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('SLEEKAUDIO_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 // Text domain is loaded automatically by WordPress 4.6+ for plugins hosted on WordPress.org
 
 /**
  * Theme Manager Class
  */
-class SAP_Theme_Manager {
+class SleekAudio_Theme_Manager {
     
     private static $instance = null;
     private $table_name;
@@ -193,7 +193,7 @@ class SAP_Theme_Manager {
         global $wpdb;
         
         // Check if table exists
-        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$this->table_name}'") === $this->table_name;
+        $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
         
         if (!$table_exists) {
             self::create_table();
@@ -224,12 +224,13 @@ class SAP_Theme_Manager {
         try {
             dbDelta($sql);
         } catch (Exception $e) {
-            sap_log('Failed to create themes table', $e->getMessage());
+            sleekaudio_log('Failed to create themes table', $e->getMessage());
             return false;
         }
         
-        // Insert default theme if not exists - use esc_sql for table name (compatible with all WP versions)
+        // Insert default theme if not exists
         try {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); the %i placeholder requires WP 6.2+ but this plugin supports 5.0+
             $existing = $wpdb->get_var("SELECT COUNT(*) FROM `" . esc_sql($table_name) . "` WHERE is_default = 1");
             if (!$existing) {
                 $result = $wpdb->insert($table_name, array(
@@ -239,11 +240,11 @@ class SAP_Theme_Manager {
                     'is_default' => 1,
                 ));
                 if ($result === false) {
-                    sap_log('Failed to insert default theme', $wpdb->last_error);
+                    sleekaudio_log('Failed to insert default theme', $wpdb->last_error);
                 }
             }
         } catch (Exception $e) {
-            sap_log('Error checking/inserting default theme', $e->getMessage());
+            sleekaudio_log('Error checking/inserting default theme', $e->getMessage());
         }
         
         return true;
@@ -281,14 +282,14 @@ class SAP_Theme_Manager {
         global $wpdb;
         
         try {
-            // Use esc_sql for table name (compatible with all WP versions)
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
             $results = $wpdb->get_results(
                 "SELECT * FROM `" . esc_sql($this->table_name) . "` ORDER BY is_default DESC, name ASC",
                 ARRAY_A
             );
             
             if ($results === null) {
-                sap_log('Failed to get themes', $wpdb->last_error);
+                sleekaudio_log('Failed to get themes', $wpdb->last_error);
                 return array();
             }
             
@@ -299,7 +300,7 @@ class SAP_Theme_Manager {
             
             return $results;
         } catch (Exception $e) {
-            sap_log('Exception getting themes', $e->getMessage());
+            sleekaudio_log('Exception getting themes', $e->getMessage());
             return array();
         }
     }
@@ -315,6 +316,7 @@ class SAP_Theme_Manager {
         }
         
         try {
+            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); value is prepared with %d
             $theme = $wpdb->get_row(
                 $wpdb->prepare("SELECT * FROM `" . esc_sql($this->table_name) . "` WHERE id = %d", absint($id)),
                 ARRAY_A
@@ -327,7 +329,7 @@ class SAP_Theme_Manager {
             
             return $theme;
         } catch (Exception $e) {
-            sap_log('Exception getting theme', $e->getMessage());
+            sleekaudio_log('Exception getting theme', $e->getMessage());
             return null;
         }
     }
@@ -347,6 +349,7 @@ class SAP_Theme_Manager {
         
         // Return default theme
         global $wpdb;
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
         $theme = $wpdb->get_row(
             "SELECT * FROM `" . esc_sql($this->table_name) . "` WHERE is_default = 1",
             ARRAY_A
@@ -1715,16 +1718,16 @@ class SAP_Theme_Manager {
 }
 
 // Initialize theme manager
-SAP_Theme_Manager::get_instance();
+SleekAudio_Theme_Manager::get_instance();
 
 // Activation hook for creating table
-register_activation_hook(__FILE__, array('SAP_Theme_Manager', 'create_table'));
+register_activation_hook(__FILE__, array('SleekAudio_Theme_Manager', 'create_table'));
 
 /**
  * Waveform Manager Class
  * Generates and stores real waveform data for audio files
  */
-class SAP_Waveform_Manager {
+class SleekAudio_Waveform_Manager {
     
     private static $instance = null;
     const PEAKS_COUNT = 100;
@@ -2307,9 +2310,9 @@ class SAP_Waveform_Manager {
 }
 
 // Initialize waveform manager
-SAP_Waveform_Manager::get_instance();
+SleekAudio_Waveform_Manager::get_instance();
 
-class Simple_Audio_Player {
+class SleekAudio_Player {
 
     private static $instance = null;
 
@@ -2666,9 +2669,9 @@ class Simple_Audio_Player {
         // Block-Script registrieren
         wp_register_script(
             'sap-block-editor',
-            SAP_PLUGIN_URL . 'assets/js/block.js',
+            SLEEKAUDIO_PLUGIN_URL . 'assets/js/block.js',
             array('wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor', 'wp-i18n', 'wp-api-fetch'),
-            SAP_VERSION,
+            SLEEKAUDIO_VERSION,
             true
         );
         
@@ -3268,27 +3271,27 @@ class Simple_Audio_Player {
         // Serve minified builds (tools/minify.py) unless SCRIPT_DEBUG is set;
         // fall back to the unminified sources if a .min file is missing
         $suffix = (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG) ? '' : '.min';
-        $css = file_exists(SAP_PLUGIN_DIR . "assets/css/player{$suffix}.css") ? "player{$suffix}.css" : 'player.css';
-        $js = file_exists(SAP_PLUGIN_DIR . "assets/js/player{$suffix}.js") ? "player{$suffix}.js" : 'player.js';
+        $css = file_exists(SLEEKAUDIO_PLUGIN_DIR . "assets/css/player{$suffix}.css") ? "player{$suffix}.css" : 'player.css';
+        $js = file_exists(SLEEKAUDIO_PLUGIN_DIR . "assets/js/player{$suffix}.js") ? "player{$suffix}.js" : 'player.js';
 
         wp_register_style(
             'sleek-audio-player',
-            SAP_PLUGIN_URL . 'assets/css/' . $css,
+            SLEEKAUDIO_PLUGIN_URL . 'assets/css/' . $css,
             array(),
-            SAP_VERSION
+            SLEEKAUDIO_VERSION
         );
 
         // Inject active theme CSS
-        $theme_manager = SAP_Theme_Manager::get_instance();
+        $theme_manager = SleekAudio_Theme_Manager::get_instance();
         $active_theme = $theme_manager->get_active_theme();
         $theme_css = $theme_manager->generate_theme_css($active_theme);
         wp_add_inline_style('sleek-audio-player', $theme_css);
 
         wp_register_script(
             'sleek-audio-player',
-            SAP_PLUGIN_URL . 'assets/js/' . $js,
+            SLEEKAUDIO_PLUGIN_URL . 'assets/js/' . $js,
             array(),
-            SAP_VERSION,
+            SLEEKAUDIO_VERSION,
             true
         );
 
@@ -3350,9 +3353,9 @@ class Simple_Audio_Player {
         wp_enqueue_media();
         wp_enqueue_script(
             'sap-admin',
-            SAP_PLUGIN_URL . 'assets/js/admin.js',
+            SLEEKAUDIO_PLUGIN_URL . 'assets/js/admin.js',
             array('jquery', 'media-upload', 'thickbox'),
-            SAP_VERSION,
+            SLEEKAUDIO_VERSION,
             true
         );
         
@@ -3367,9 +3370,9 @@ class Simple_Audio_Player {
         
         wp_enqueue_style(
             'sap-admin',
-            SAP_PLUGIN_URL . 'assets/css/admin.css',
+            SLEEKAUDIO_PLUGIN_URL . 'assets/css/admin.css',
             array(),
-            SAP_VERSION
+            SLEEKAUDIO_VERSION
         );
     }
 
@@ -3750,10 +3753,10 @@ class Simple_Audio_Player {
         $tracks = get_post_meta($post_id, '_sap_tracks', true);
         
         // Validate and sanitize tracks using helper function
-        $tracks = sap_validate_tracks($tracks);
+        $tracks = sleekaudio_validate_tracks($tracks);
         
         if (empty($tracks)) {
-            sap_log('No valid tracks found for playlist', $post_id);
+            sleekaudio_log('No valid tracks found for playlist', $post_id);
             return '<p>' . __('No tracks found.', 'sleek-audio-player') . '</p>';
         }
         
@@ -3764,7 +3767,7 @@ class Simple_Audio_Player {
         foreach ($tracks as $track) {
             // Skip tracks without valid URL
             if (empty($track['url'])) {
-                sap_log('Skipping track without URL', $track['title']);
+                sleekaudio_log('Skipping track without URL', $track['title']);
                 continue;
             }
             
@@ -3772,7 +3775,7 @@ class Simple_Audio_Player {
             if (!empty($track['attachment_id'])) {
                 $attachment = get_post($track['attachment_id']);
                 if (!$attachment || $attachment->post_type !== 'attachment') {
-                    sap_log('Attachment not found, using stored URL', $track['attachment_id']);
+                    sleekaudio_log('Attachment not found, using stored URL', $track['attachment_id']);
                     // Keep the stored URL as fallback
                 }
             }
@@ -3797,7 +3800,7 @@ class Simple_Audio_Player {
                         $track['cover_url'] = self::cdn_url($cover_from_id);
                     }
                 } else {
-                    sap_log('Cover attachment not found', $track['cover_id']);
+                    sleekaudio_log('Cover attachment not found', $track['cover_id']);
                 }
             } elseif (!empty($track['cover_url'])) {
                 // Fallback to stored URL if no cover_id
@@ -3806,7 +3809,7 @@ class Simple_Audio_Player {
             
             // Add waveform data if available
             if (!empty($track['attachment_id'])) {
-                $waveform = SAP_Waveform_Manager::get_waveform($track['attachment_id']);
+                $waveform = SleekAudio_Waveform_Manager::get_waveform($track['attachment_id']);
                 if ($waveform) {
                     $track['waveform'] = $waveform;
                 }
@@ -3820,7 +3823,7 @@ class Simple_Audio_Player {
         
         // Final check - ensure we have at least one playable track
         if (empty($tracks)) {
-            sap_log('No playable tracks after validation', $post_id);
+            sleekaudio_log('No playable tracks after validation', $post_id);
             return '<p>' . __('No playable tracks found.', 'sleek-audio-player') . '</p>';
         }
 
@@ -4093,4 +4096,4 @@ class Simple_Audio_Player {
 }
 
 // Initialize plugin
-Simple_Audio_Player::get_instance();
+SleekAudio_Player::get_instance();

@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.5.1
+Stable tag: 2.5.2
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -183,6 +183,18 @@ After publishing, the following appear in playlist editing:
 
 In the player's More menu, use "Embed Player" to generate embed codes with live layout selection.
 
+== External Services ==
+
+This plugin does not connect to any external service by default. Two **optional, opt-in** integrations exist; both are disabled until a site administrator actively configures them:
+
+**Umami Analytics** (optional)
+If the administrator enables "Umami Analytics" in the plugin settings and enters the URL of an Umami instance (self-hosted or Umami Cloud) plus a website ID, the player sends playback events (play, complete, download - containing track title, artist, and track position, no visitor-identifying data added by this plugin) to that Umami instance from the visitor's browser. No data is sent as long as the feature is disabled (default).
+Umami is an open-source, privacy-focused analytics tool: https://umami.is/ - Privacy policy: https://umami.is/privacy - Terms: https://umami.is/terms
+If a self-hosted Umami instance is configured, data goes only to the administrator's own server.
+
+**CDN URL rewriting** (optional)
+If the administrator enters a CDN base URL (e.g. BunnyCDN) in the plugin settings, audio file and cover image URLs are rewritten so that the visitor's browser loads these assets from the configured CDN instead of the WordPress server. The plugin itself sends no data to the CDN; which CDN provider is used (and its terms/privacy policy) is the administrator's choice. No rewriting happens as long as the field is empty (default).
+
 == Frequently Asked Questions ==
 
 = How do I activate keyboard shortcuts? =
@@ -212,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.5.2 =
+* 🔧 Renamed all global PHP symbols to unique prefixes (sleekaudio_*/SleekAudio_*/SLEEKAUDIO_*) per plugin directory guidelines - no functional changes, stored data unchanged
+* 🔒 SQL hardening: table-existence check via $wpdb->prepare(); remaining table-name interpolations documented
+* 📝 Added External Services disclosure section (Umami Analytics, CDN URL rewriting - both opt-in)
 
 = 2.5.1 =
 * 📝 Documented that the audio visualizer requires audio served over the same origin/protocol as the page (or a trusted CDN); HTTP audio on an HTTPS page is blocked as mixed content and disables the visualizer – use https:// for Site/Home URL and stored media URLs

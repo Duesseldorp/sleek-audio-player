@@ -14,12 +14,12 @@ for conventions; the rules below are the hard constraints you must never skip.
 
 ## Versioning — four places must always match
 1. sleek-audio-player.php header: " * Version: X.Y.Z"
-2. sleek-audio-player.php: define('SAP_VERSION', 'X.Y.Z')
+2. sleek-audio-player.php: define('SLEEKAUDIO_VERSION', 'X.Y.Z')
 3. readme.txt: "Stable tag: X.Y.Z"
 4. readme.md: "**Current Version:** X.Y.Z"
 Every user-facing change needs a changelog entry in BOTH readme.md and
 readme.txt. A code change without a version bump never reaches cached sites
-(SAP_VERSION is the asset cache-buster).
+(SLEEKAUDIO_VERSION is the asset cache-buster).
 
 ## Architecture constraints
 - Frontend assets load ONLY on pages that render a player
@@ -30,7 +30,7 @@ readme.txt. A code change without a version bump never reaches cached sites
   wpautop over the output).
 - A track meta field exists in FOUR places; change all of them together:
   PHP meta box form, addTrackRow() in assets/js/admin.js,
-  save_meta() whitelist, sap_validate_track() defaults.
+  save_meta() whitelist, sleekaudio_validate_track() defaults.
   Missing one silently destroys saved data.
 - Every AJAX handler needs check_ajax_referer AND current_user_can.
   Every output is escaped, every saved field individually sanitized.

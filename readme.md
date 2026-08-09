@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.1
+**Current Version:** 2.5.2
 
 ---
 
@@ -160,6 +160,14 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.2 (2026-08-09)
+
+**WordPress.org compliance (internal, no functional changes):**
+- Renamed all global PHP symbols to unique prefixes (`sleekaudio_*` functions, `SleekAudio_*` classes, `SLEEKAUDIO_*` constants) per plugin directory guidelines; stored data (options, post type, meta keys) is unchanged, so updating is seamless
+- Hardened SQL: table-existence check now uses `$wpdb->prepare()`; remaining table-name interpolations documented (safe: names derive from `$wpdb->prefix`)
+- Added the required "External Services" disclosure section (Umami Analytics, CDN URL rewriting - both opt-in) to readme.txt
+- New `tools/build-zip.py` builds a clean distribution ZIP without development files
 
 ### Version 2.5.1 (2026-08-09)
 

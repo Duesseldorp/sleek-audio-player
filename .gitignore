@@ -24,3 +24,6 @@ desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# Build output (tools/build-zip.py)
+dist/
