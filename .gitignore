@@ -1,0 +1,26 @@
+# WordPress files that must never leave the local environment
+wp-config.php
+debug.log
+*.sql
+*.sql.gz
+
+# Secrets / environment
+.env
+.env.*
+
+# Packaged builds & backups
+*.zip
+*.tar.gz
+*.bak
+
+# Python (tools/)
+__pycache__/
+*.pyc
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
