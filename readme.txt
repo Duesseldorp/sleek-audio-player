@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.5.0
+Stable tag: 2.5.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -200,6 +200,9 @@ Yes, the player is fully compatible with caching plugins.
 = How do the SEO features work? =
 Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema and Open Graph tags are generated automatically. After updating, save Settings > Permalinks once!
 
+= The visualizer doesn't show – why? =
+The audio visualizer uses the Web Audio API, which requires the audio to be served from the same origin as the page (or a trusted CDN) over the same protocol. If your site loads over HTTPS but an audio file is referenced over HTTP, the browser blocks it as mixed content and the visualizer stays disabled (playback may still work, but no animation appears). Make sure your WordPress Site/Home URL and all stored media URLs use https://.
+
 == Screenshots ==
 
 1. Player in wide layout (default)
@@ -209,6 +212,9 @@ Each playlist automatically gets a public URL at /playlist/name/. JSON-LD Schema
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.5.1 =
+* 📝 Documented that the audio visualizer requires audio served over the same origin/protocol as the page (or a trusted CDN); HTTP audio on an HTTPS page is blocked as mixed content and disables the visualizer – use https:// for Site/Home URL and stored media URLs
 
 = 2.5.0 =
 * ⚡ Player assets now load only on pages that actually contain a player (previously ~200 KB on every page of the site)

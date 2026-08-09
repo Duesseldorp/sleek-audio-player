@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.0
+**Current Version:** 2.5.1
 
 ---
 
@@ -117,6 +117,19 @@ Detailed usage examples are documented on the product page.
 
 ---
 
+## Requirements
+
+- WordPress 5.0+ and PHP 7.4+
+- **Serve your site and its audio files over HTTPS.** The audio visualizer uses
+  the Web Audio API, which only works when the audio is served from the **same
+  origin** as the page (or from a trusted CDN) over the **same protocol**.
+  If your page loads over HTTPS but an audio file is referenced over HTTP
+  (mixed content), the browser blocks it and the visualizer stays disabled
+  – playback may still work, but no bars/waveform animation appears.
+  Make sure WordPress Site/Home URL and all stored media URLs use `https://`.
+
+---
+
 ## Security & Privacy
 
 - No external tracking
@@ -147,6 +160,11 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.1 (2026-08-09)
+
+**Documentation:**
+- Documented that the audio visualizer requires audio to be served over the same origin/protocol as the page (or a trusted CDN). On an HTTPS page, audio referenced over HTTP is blocked as mixed content and the visualizer stays disabled – ensure Site/Home URL and stored media URLs use `https://`
 
 ### Version 2.5.0 (2026-08-09)
 

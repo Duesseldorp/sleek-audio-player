@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.5.0
+ * Version: 2.5.1
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SAP_VERSION', '2.5.0');
+define('SAP_VERSION', '2.5.1');
 define('SAP_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
