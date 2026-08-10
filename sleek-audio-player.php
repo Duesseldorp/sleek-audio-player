@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.5.2
+ * Version: 2.5.3
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
@@ -15,7 +15,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SLEEKAUDIO_VERSION', '2.5.2');
+define('SLEEKAUDIO_VERSION', '2.5.3');
 define('SLEEKAUDIO_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -28,6 +28,7 @@ function sleekaudio_log($message, $data = null) {
     if ($data !== null) {
         $log_message .= ' | Data: ' . (is_array($data) || is_object($data) ? wp_json_encode($data) : $data);
     }
+    // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Only reachable when WP_DEBUG is enabled (see SLEEKAUDIO_DEBUG above); silent in production
     error_log($log_message);
 }
 
@@ -193,6 +194,7 @@ class SleekAudio_Theme_Manager {
         global $wpdb;
         
         // Check if table exists
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- one-time schema existence check for the plugin's custom table; not a data query
         $table_exists = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $this->table_name)) === $this->table_name;
         
         if (!$table_exists) {
@@ -230,9 +232,10 @@ class SleekAudio_Theme_Manager {
         
         // Insert default theme if not exists
         try {
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); the %i placeholder requires WP 6.2+ but this plugin supports 5.0+
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- one-time activation seed of the plugin's custom table; table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
             $existing = $wpdb->get_var("SELECT COUNT(*) FROM `" . esc_sql($table_name) . "` WHERE is_default = 1");
             if (!$existing) {
+                // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- one-time activation seed of the plugin's custom table
                 $result = $wpdb->insert($table_name, array(
                     'name' => 'Standard',
                     'colors' => wp_json_encode(self::$default_theme['colors']),
@@ -276,28 +279,47 @@ class SleekAudio_Theme_Manager {
     }
     
     /**
+     * Clear theme caches (call after any write to the themes table).
+     * Deletes individual keys because wp_cache_flush_group() needs WP 6.1+.
+     */
+    private function flush_theme_cache($id = 0) {
+        wp_cache_delete('all_themes', 'sleekaudio_themes');
+        wp_cache_delete('active_theme', 'sleekaudio_themes');
+        if ($id) {
+            wp_cache_delete('theme_' . absint($id), 'sleekaudio_themes');
+        }
+    }
+
+    /**
      * Get all themes
      */
     public function get_all_themes() {
         global $wpdb;
-        
+
+        $cached = wp_cache_get('all_themes', 'sleekaudio_themes');
+        if (false !== $cached) {
+            return $cached;
+        }
+
         try {
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table (no WP API); result cached via wp_cache below; table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
             $results = $wpdb->get_results(
                 "SELECT * FROM `" . esc_sql($this->table_name) . "` ORDER BY is_default DESC, name ASC",
                 ARRAY_A
             );
-            
+
             if ($results === null) {
                 sleekaudio_log('Failed to get themes', $wpdb->last_error);
                 return array();
             }
-            
+
             foreach ($results as &$theme) {
                 $theme['colors'] = json_decode($theme['colors'], true) ?: array();
                 $theme['settings'] = json_decode($theme['settings'], true) ?: array();
             }
-            
+            unset($theme);
+
+            wp_cache_set('all_themes', $results, 'sleekaudio_themes', HOUR_IN_SECONDS);
             return $results;
         } catch (Exception $e) {
             sleekaudio_log('Exception getting themes', $e->getMessage());
@@ -314,19 +336,25 @@ class SleekAudio_Theme_Manager {
         if (!$id || !is_numeric($id)) {
             return null;
         }
-        
+
+        $cached = wp_cache_get('theme_' . absint($id), 'sleekaudio_themes');
+        if (false !== $cached) {
+            return $cached;
+        }
+
         try {
-            // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); value is prepared with %d
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table (no WP API); result cached via wp_cache below; table name from $wpdb->prefix, escaped with esc_sql(); value prepared with %d
             $theme = $wpdb->get_row(
                 $wpdb->prepare("SELECT * FROM `" . esc_sql($this->table_name) . "` WHERE id = %d", absint($id)),
                 ARRAY_A
             );
-            
+
             if ($theme) {
                 $theme['colors'] = json_decode($theme['colors'], true) ?: array();
                 $theme['settings'] = json_decode($theme['settings'], true) ?: array();
+                wp_cache_set('theme_' . absint($id), $theme, 'sleekaudio_themes', HOUR_IN_SECONDS);
             }
-            
+
             return $theme;
         } catch (Exception $e) {
             sleekaudio_log('Exception getting theme', $e->getMessage());
@@ -349,15 +377,22 @@ class SleekAudio_Theme_Manager {
         
         // Return default theme
         global $wpdb;
-        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
+
+        $cached = wp_cache_get('active_theme', 'sleekaudio_themes');
+        if (false !== $cached) {
+            return $cached;
+        }
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- custom table (no WP API); result cached via wp_cache below; table name from $wpdb->prefix, escaped with esc_sql(); %i requires WP 6.2+ (plugin supports 5.0+)
         $theme = $wpdb->get_row(
             "SELECT * FROM `" . esc_sql($this->table_name) . "` WHERE is_default = 1",
             ARRAY_A
         );
-        
+
         if ($theme) {
             $theme['colors'] = json_decode($theme['colors'], true);
             $theme['settings'] = json_decode($theme['settings'], true);
+            wp_cache_set('active_theme', $theme, 'sleekaudio_themes', HOUR_IN_SECONDS);
             return $theme;
         }
         
@@ -384,16 +419,18 @@ class SleekAudio_Theme_Manager {
         );
         
         if (!empty($data['id'])) {
-            // Update existing
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom table write (no WP API); caches invalidated below
             $wpdb->update(
                 $this->table_name,
                 $theme_data,
                 array('id' => absint($data['id']))
             );
+            $this->flush_theme_cache(absint($data['id']));
             return absint($data['id']);
         } else {
-            // Insert new
+            // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom table write (no WP API); caches invalidated below
             $wpdb->insert($this->table_name, $theme_data);
+            $this->flush_theme_cache();
             return $wpdb->insert_id;
         }
     }
@@ -414,7 +451,9 @@ class SleekAudio_Theme_Manager {
         if (get_option('sap_active_theme_id') == $id) {
             delete_option('sap_active_theme_id');
         }
-        
+
+        $this->flush_theme_cache($id);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom table write (no WP API); caches invalidated above
         return $wpdb->delete($this->table_name, array('id' => $id));
     }
     
@@ -423,7 +462,9 @@ class SleekAudio_Theme_Manager {
      */
     public function reset_to_default($id) {
         global $wpdb;
-        
+
+        $this->flush_theme_cache($id);
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- custom table write (no WP API); caches invalidated above
         return $wpdb->update(
             $this->table_name,
             array(
@@ -487,6 +528,7 @@ class SleekAudio_Theme_Manager {
         
         // Parse colors - support both array and JSON string
         if (!empty($_POST['colors'])) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON payload; decoded below and every key/value individually sanitized (sanitize_key / sanitize_text_field)
             $colors_raw = wp_unslash($_POST['colors']);
             if (is_string($colors_raw)) {
                 $colors = json_decode($colors_raw, true);
@@ -502,6 +544,7 @@ class SleekAudio_Theme_Manager {
         
         // Parse settings - support both array and JSON string
         if (!empty($_POST['settings'])) {
+            // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON payload; decoded below and every key/value individually sanitized (sanitize_key / sanitize_text_field)
             $settings_raw = wp_unslash($_POST['settings']);
             if (is_string($settings_raw)) {
                 $settings = json_decode($settings_raw, true);
@@ -1866,11 +1909,14 @@ class SleekAudio_Waveform_Manager {
         }
         
         $attachment_id = isset($_POST['attachment_id']) ? absint($_POST['attachment_id']) : 0;
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON payload; decoded and every element cast to float below
         $peaks = isset($_POST['peaks']) ? json_decode(wp_unslash($_POST['peaks']), true) : array();
-        
+
         if (!$attachment_id || !is_array($peaks)) {
             wp_send_json_error('Invalid data');
         }
+
+        $peaks = array_map('floatval', $peaks);
         
         if (self::save_waveform($attachment_id, $peaks)) {
             wp_send_json_success('Waveform saved');
@@ -1974,8 +2020,9 @@ class SleekAudio_Waveform_Manager {
         }
         
         $attachment_id = isset($_POST['attachment_id']) ? absint($_POST['attachment_id']) : 0;
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON payload; size-limited, decoded, validated and every element clamped to a 0-1 float below
         $peaks_raw = isset($_POST['peaks']) ? wp_unslash($_POST['peaks']) : '';
-        
+
         // Limit JSON size to prevent DoS (max ~5KB for 100 peaks)
         if (strlen($peaks_raw) > 5000) {
             wp_send_json_error('Data too large');
@@ -2386,6 +2433,7 @@ class SleekAudio_Player {
      * Load translations from the plugin's languages/ folder
      */
     public function load_textdomain() {
+        // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- required for installs distributed outside wordpress.org (GitHub); bundled translations in /languages don't load without it on WP < 4.6-language-pack coverage
         load_plugin_textdomain('sleek-audio-player', false, dirname(plugin_basename(__FILE__)) . '/languages');
     }
 
@@ -2431,8 +2479,10 @@ class SleekAudio_Player {
         }
         
         // Check if sharing a specific track via URL parameters
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public read-only share URLs (?playlist=X&track=Y); no state change, nonces don't apply to unauthenticated GET views
         $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;
         $shared_playlist = isset($_GET['playlist']) ? absint($_GET['playlist']) : 0;
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
         
         // If no playlist ID in URL, try to get from current post (if it's a playlist page)
         global $post;
@@ -2470,6 +2520,7 @@ class SleekAudio_Player {
         $track_count = is_array($tracks) ? count($tracks) : 0;
         
         // Check if a specific track is being shared
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public read-only share URL parameter, absint-sanitized
         $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;
         $title = $playlist_title;
         
@@ -2835,8 +2886,9 @@ class SleekAudio_Player {
      * Handle audio streaming requests
      */
     public function handle_audio_stream() {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public streaming endpoint; access is authorized by the signed, time-limited HMAC token below, which is stronger than a nonce
         if (!isset($_GET['sap_stream'])) return;
-        
+
         $token = sanitize_text_field(wp_unslash($_GET['sap_stream']));
         $attachment_id = self::verify_stream_token($token);
         
@@ -2879,6 +2931,7 @@ class SleekAudio_Player {
         } else {
             status_header(200);
         }
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
         
         $length = $end - $start + 1;
         
@@ -2898,10 +2951,9 @@ class SleekAudio_Player {
         $buffer_size = 8192;
         $bytes_remaining = $length;
         
-        // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.Security.EscapeOutput.OutputNotEscaped -- Binary audio data
         while ($bytes_remaining > 0 && !feof($fp)) {
             $read_size = min($buffer_size, $bytes_remaining);
-            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Raw binary audio output
+            // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_fread, WordPress.Security.EscapeOutput.OutputNotEscaped -- Streaming raw binary audio with byte-range support; WP_Filesystem cannot stream chunks
             echo fread($fp, $read_size);
             $bytes_remaining -= $read_size;
             flush();
@@ -2916,6 +2968,7 @@ class SleekAudio_Player {
      * Handle Embed View
      */
     public function handle_embed() {
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public read-only embed view (?embed=1); no state change, nonces don't apply to unauthenticated GET views
         if (!isset($_GET['embed']) || sanitize_text_field(wp_unslash($_GET['embed'])) !== '1') {
             return;
         }
@@ -2930,6 +2983,7 @@ class SleekAudio_Player {
         $this->enqueue_assets();
         
         // Get layout parameter
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public read-only embed view parameter, whitelisted against $valid_layouts below
         $layout = isset($_GET['layout']) ? sanitize_text_field(wp_unslash($_GET['layout'])) : '';
         $valid_layouts = array('wide', 'mini');
         $layout_attr = in_array($layout, $valid_layouts, true) ? ' layout="' . esc_attr($layout) . '"' : '';

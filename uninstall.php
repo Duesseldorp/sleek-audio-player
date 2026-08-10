@@ -18,9 +18,9 @@ if (!defined('WP_UNINSTALL_PLUGIN')) {
 global $wpdb;
 
 // Delete themes table
-// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-$table_name = esc_sql( $wpdb->prefix . 'sap_themes' );
-$wpdb->query( "DROP TABLE IF EXISTS `{$table_name}`" );
+$sleekaudio_table_name = esc_sql( $wpdb->prefix . 'sap_themes' );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- uninstall must drop the plugin's own custom table; identifier from $wpdb->prefix, escaped with esc_sql() (%i requires WP 6.2+, plugin supports 5.0+)
+$wpdb->query( "DROP TABLE IF EXISTS `{$sleekaudio_table_name}`" );
 
 // Delete options
 delete_option('sap_active_theme_id');

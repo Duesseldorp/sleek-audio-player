@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 6.9
-Stable tag: 2.5.2
+Stable tag: 2.5.3
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.5.3 =
+* ⚡ Theme queries now use the WordPress object cache with proper invalidation on writes
+* 🛡️ Waveform peak data is element-wise cast to floats before saving (defense in depth)
+* 🔧 All remaining Plugin Check warnings carry inline justifications at the exact line
 
 = 2.5.2 =
 * 🔧 Renamed all global PHP symbols to unique prefixes (sleekaudio_*/SleekAudio_*/SLEEKAUDIO_*) per plugin directory guidelines - no functional changes, stored data unchanged

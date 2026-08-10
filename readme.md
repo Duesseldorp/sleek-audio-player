@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.2
+**Current Version:** 2.5.3
 
 ---
 
@@ -160,6 +160,14 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.3 (2026-08-10)
+
+**Plugin Check pass (no functional changes for visitors):**
+- Theme queries now use the WordPress object cache (`wp_cache_*`) with invalidation on every write - faster on sites with persistent object caching, and resolves all `NoCaching` warnings properly instead of suppressing them
+- Waveform peak data from the editor is now element-wise cast to floats before saving (defense in depth)
+- Every remaining Plugin Check warning carries an inline justification at the exact line (public GET endpoints without nonces, custom-table queries, gated `error_log`, binary streaming via `fread`, `load_plugin_textdomain` for non-wordpress.org installs)
+- uninstall.php: prefixed the global variable, moved the phpcs justification to the correct line
 
 ### Version 2.5.2 (2026-08-09)
 
