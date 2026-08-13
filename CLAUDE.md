@@ -14,6 +14,9 @@ Hard constraints (details in DEVELOPMENT.md):
 - Version must match in four places (plugin header, `SLEEKAUDIO_VERSION`,
   readme.txt Stable tag, readme.md Current Version) and every user-facing
   change gets a changelog entry in both readme.md and readme.txt.
+- Releases are automated: `git tag vX.Y.Z && git push origin vX.Y.Z` — the
+  workflow verifies builds and publishes the GitHub Release. Never create
+  releases or release ZIPs by hand.
 - Frontend assets load only on pages that render a player — never add an
   unconditional `wp_enqueue_*` for them.
 - Player markup: no `<br>`/`<p>`, no whitespace-dependent layout

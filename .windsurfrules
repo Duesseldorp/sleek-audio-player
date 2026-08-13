@@ -21,6 +21,13 @@ Every user-facing change needs a changelog entry in BOTH readme.md and
 readme.txt. A code change without a version bump never reaches cached sites
 (SLEEKAUDIO_VERSION is the asset cache-buster).
 
+## Releases are automated - never build them by hand
+To publish a release: git tag vX.Y.Z && git push origin vX.Y.Z
+The workflow .github/workflows/release.yml then verifies .min/.mo sync and
+tag==plugin version, builds the ZIP, and publishes the GitHub Release with
+changelog notes. Do not create GitHub Releases manually and do not attach
+hand-built ZIPs.
+
 ## Architecture constraints
 - Frontend assets load ONLY on pages that render a player
   (register_assets / maybe_enqueue_assets / late enqueue in render_player).
