@@ -1410,8 +1410,7 @@
         // If an auto-advance play() got rejected (e.g. screen was locked / tab was
         // backgrounded when the previous track ended), retry playback as soon as the
         // page becomes visible/foreground again instead of leaving the player stuck.
-        document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState !== 'visible') return;
+        function resumeIfBlocked() {
             if (!autoplayBlockedByPolicy) return;
 
             const resumePromise = audio.play();
@@ -1421,10 +1420,26 @@
                     const overlay = playerEl.querySelector('.sap-play-overlay');
                     if (overlay) overlay.remove();
                 }).catch(() => {
-                    sapLog('Resume after visibility change still blocked - waiting for tap');
+                    sapLog('Resume still blocked - waiting for user gesture');
                 });
             }
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible') resumeIfBlocked();
         });
+
+        // bfcache restores (back/forward navigation) don't fire visibilitychange
+        window.addEventListener('pageshow', resumeIfBlocked);
+
+        // Resume on the FIRST touch/click anywhere on the page - a real user
+        // gesture always satisfies autoplay policies, so the visitor doesn't
+        // have to find and hit the overlay button specifically.
+        function armGestureResume() {
+            document.addEventListener('pointerdown', function onFirstGesture() {
+                resumeIfBlocked();
+            }, { once: true, capture: true });
+        }
 
         // --- Event Listeners ---
 
@@ -2836,9 +2851,9 @@
             
             // Mobile fix: Wait for audio to be ready before playing
             // This ensures smooth playback on mobile browsers, especially after track ends
-            const attemptPlay = function() {
+            const attemptPlay = function(isImmediate) {
                 const playPromise = audio.play();
-                
+
                 if (playPromise !== undefined) {
                     playPromise.then(() => {
                         isLoading = false;
@@ -2855,20 +2870,29 @@
                             total: playlist.length
                         });
                     }).catch(err => {
-                        isLoading = false;
-                        hideLoadingSpinner();
-
                         if (err.name === 'NotAllowedError') {
+                            isLoading = false;
+                            hideLoadingSpinner();
                             // Browser refused to auto-advance to the next track - typically happens
                             // when the tab was backgrounded or the screen was locked while the
                             // previous track finished. Surface the "Tap to Play" overlay so the
-                            // player doesn't just silently stop, and try to resume on our own as
-                            // soon as the page is visible/foreground again (see visibilitychange
-                            // handler below).
+                            // player doesn't just silently stop, and resume on our own as soon as
+                            // the page becomes visible again or the user touches the page (see
+                            // resumeIfBlocked / armGestureResume).
                             sapLog('Autoplay blocked - showing resume overlay', { isAutoplay });
                             autoplayBlockedByPolicy = isAutoplay;
                             showPlayOverlay();
+                            if (isAutoplay) armGestureResume();
+                        } else if (isImmediate) {
+                            // Element wasn't ready for the immediate attempt (legacy mobile
+                            // quirks, aborted load) - re-arm the loadeddata/timeout fallback
+                            sapLog('Immediate play failed - re-arming fallback', err.name);
+                            playAttempted = false;
+                            if (playTimeout) clearTimeout(playTimeout);
+                            playTimeout = setTimeout(function() { tryPlay(); }, 250);
                         } else {
+                            isLoading = false;
+                            hideLoadingSpinner();
                             sapError('Play failed', err);
                             showErrorFeedback('Playback failed');
                         }
@@ -2887,13 +2911,13 @@
             const tryPlay = function() {
                 if (playAttempted) return;
                 playAttempted = true;
-                
+
                 if (playTimeout) {
                     clearTimeout(playTimeout);
                     playTimeout = null;
                 }
-                
-                attemptPlay();
+
+                attemptPlay(false);
             };
             
             // Clean up any existing listeners before adding new ones
@@ -2929,7 +2953,17 @@
             
             // Start loading
             audio.load();
-            
+
+            // Attempt playback right away, in the same task chain as the 'ended'
+            // event. This is what makes track transitions survive a locked screen:
+            // on hidden pages browsers throttle timers, and a play() deferred via
+            // loadeddata/timeout loses its autoplay allowance from the ended-event
+            // chain - the player then just stopped (observed on Android Chrome).
+            // play() waits for data internally per spec; if it fails for a
+            // non-policy reason, the loadeddata/timeout fallback below retries.
+            playAttempted = true;
+            attemptPlay(true);
+
             // Handle load errors with detailed error messages
             audio.onerror = function(e) {
                 isLoading = false;

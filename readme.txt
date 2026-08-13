@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.5.3
+Stable tag: 2.5.4
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,10 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.5.4 =
+* 🐛 Fixed playback stopping between tracks on locked screens / backgrounded tabs: play() now runs immediately in the ended-event chain instead of via throttled timers
+* 📱 Blocked playback also resumes on the first touch anywhere on the page and on back/forward navigation restores
 
 = 2.5.3 =
 * ⚡ Theme queries now use the WordPress object cache with proper invalidation on writes

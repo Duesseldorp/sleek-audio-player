@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.3
+**Current Version:** 2.5.4
 
 ---
 
@@ -160,6 +160,12 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.4 (2026-08-13)
+
+**Bug Fixes:**
+- Fixed playback stopping between tracks on locked screens / backgrounded tabs (reported on Android Chrome after ~2 songs): `play()` is now called immediately in the same task chain as the `ended` event instead of being deferred via `loadeddata`/timeouts - deferred timers are throttled on hidden pages and the delayed call lost its autoplay allowance. The event/timeout machinery remains as a fallback for legacy mobile quirks
+- Blocked playback now also resumes on the **first touch anywhere on the page** and on bfcache restores (`pageshow`), not just via the overlay button or a visibility change
 
 ### Version 2.5.3 (2026-08-10)
 
