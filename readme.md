@@ -5,7 +5,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.4
+**Current Version:** 2.5.5
 
 ---
 
@@ -160,6 +160,14 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.5 (2026-08-13)
+
+**Translations (German now complete for the visitor-facing UI):**
+- Several player strings were already wrapped for translation in the code but were **missing from the translation catalog**, so German visitors saw English: the "More" menu (Share, Shuffle, Sleep Timer and its presets, Cover, Adaptive Colors, Embed Player) and the embed dialog (Layout, Embed Code, Copy Code, Preview, Close). These are now translated
+- Added the missing post-type labels (`Add New`, `All Playlists`) and the `No playable tracks found.` notice
+- Rebuilt `sleek-audio-player.pot` and `sleek-audio-player-de_DE.po` to reflect the code exactly: removed ~35 catalog entries that were never actually wrapped in translation functions (hardcoded admin-area strings) plus a duplicate `Tap to Play`, and recompiled the `.mo`
+- No code behavior change beyond the now-correct translations; the admin settings/theme/waveform pages remain English (their strings are not translatable yet)
 
 ### Version 2.5.4 (2026-08-13)
 

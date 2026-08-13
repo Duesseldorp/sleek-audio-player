@@ -1,12 +1,12 @@
 # German translation for Sleek Audio Player
-# Copyright (C) 2024 Martin Gräbing
+# Copyright (C) 2026 Martin Gräbing
 # This file is distributed under the GPL v2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Sleek Audio Player 2.0.2\n"
+"Project-Id-Version: Sleek Audio Player 2.5.5\n"
 "Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
-"POT-Creation-Date: 2024-12-19 16:00+0000\n"
-"PO-Revision-Date: 2024-12-19 16:30+0100\n"
+"POT-Creation-Date: 2026-08-13 16:00+0000\n"
+"PO-Revision-Date: 2026-08-13 16:30+0100\n"
 "Last-Translator: Martin Gräbing <info@duesseldorp.de>\n"
 "Language-Team: German <info@duesseldorp.de>\n"
 "Language: de_DE\n"
@@ -28,12 +28,20 @@ msgid "No tracks found."
 msgstr "Keine Tracks gefunden."
 
 #: sleek-audio-player.php
+msgid "No playable tracks found."
+msgstr "Keine abspielbaren Tracks gefunden."
+
+#: sleek-audio-player.php
 msgid "Playlists"
 msgstr "Playlists"
 
 #: sleek-audio-player.php
 msgid "Playlist"
 msgstr "Playlist"
+
+#: sleek-audio-player.php
+msgid "Add New"
+msgstr "Neu hinzufügen"
 
 #: sleek-audio-player.php
 msgid "Add New Playlist"
@@ -48,196 +56,28 @@ msgid "View Playlist"
 msgstr "Playlist ansehen"
 
 #: sleek-audio-player.php
-msgid "Search Playlists"
-msgstr "Playlists durchsuchen"
-
-#: sleek-audio-player.php
-msgid "Settings"
-msgstr "Einstellungen"
-
-#: sleek-audio-player.php
-msgid "Themes"
-msgstr "Themes"
-
-#: sleek-audio-player.php
-msgid "Waveforms"
-msgstr "Wellenformen"
-
-#: sleek-audio-player.php
-msgid "BunnyCDN URL"
-msgstr "BunnyCDN URL"
-
-#: sleek-audio-player.php
-msgid "Enable Umami Analytics"
-msgstr "Umami Analytics aktivieren"
-
-#: sleek-audio-player.php
-msgid "Enable URL Protection"
-msgstr "URL-Schutz aktivieren"
-
-#: sleek-audio-player.php
-msgid "Title"
-msgstr "Titel"
-
-#: sleek-audio-player.php
-msgid "Artist"
-msgstr "Künstler"
-
-#: sleek-audio-player.php
-msgid "Select Audio"
-msgstr "Audio auswählen"
-
-#: sleek-audio-player.php
-msgid "Allow Download"
-msgstr "Download erlauben"
-
-#: sleek-audio-player.php
-msgid "Add Track"
-msgstr "Track hinzufügen"
-
-#: sleek-audio-player.php
-msgid "Remove"
-msgstr "Entfernen"
+msgid "All Playlists"
+msgstr "Alle Playlists"
 
 #: sleek-audio-player.php
 msgid "Tracks"
 msgstr "Tracks"
 
 #: sleek-audio-player.php
-msgid "Track"
-msgstr "Track"
-
-#: sleek-audio-player.php
-msgid "Streaming Links"
-msgstr "Streaming-Links"
-
-#: sleek-audio-player.php
-msgid "Spotify URL"
-msgstr "Spotify URL"
-
-#: sleek-audio-player.php
-msgid "Apple Music URL"
-msgstr "Apple Music URL"
-
-#: sleek-audio-player.php
-msgid "Amazon Music URL"
-msgstr "Amazon Music URL"
-
-#: sleek-audio-player.php
-msgid "Embed Shortcode"
-msgstr "Einbettungscode"
-
-#: sleek-audio-player.php
-msgid "Standard"
-msgstr "Standard"
-
-#: sleek-audio-player.php
-msgid "Wide Layout"
-msgstr "Breites Layout"
-
-#: sleek-audio-player.php
-msgid "iFrame Embed"
-msgstr "iFrame-Einbettung"
-
-#: sleek-audio-player.php
-msgid "Save Settings"
-msgstr "Einstellungen speichern"
-
-#: sleek-audio-player.php
-msgid "Create Theme"
-msgstr "Theme erstellen"
-
-#: sleek-audio-player.php
-msgid "Delete Theme"
-msgstr "Theme löschen"
-
-#: sleek-audio-player.php
-msgid "Activate"
-msgstr "Aktivieren"
-
-#: sleek-audio-player.php
-msgid "Active"
-msgstr "Aktiv"
-
-#: sleek-audio-player.php
-msgid "Background Colors"
-msgstr "Hintergrundfarben"
-
-#: sleek-audio-player.php
-msgid "Accent Colors"
-msgstr "Akzentfarben"
-
-#: sleek-audio-player.php
-msgid "Text Colors"
-msgstr "Textfarben"
-
-#: sleek-audio-player.php
-msgid "Effects"
-msgstr "Effekte"
-
-#: sleek-audio-player.php
-msgid "Analyze All"
-msgstr "Alle analysieren"
-
-#: sleek-audio-player.php
-msgid "Analyzed"
-msgstr "Analysiert"
-
-#: sleek-audio-player.php
-msgid "Pending"
-msgstr "Ausstehend"
+msgid "Tap to Play"
+msgstr "Zum Abspielen tippen"
 
 #: sleek-audio-player.php
 msgid "Share"
 msgstr "Teilen"
 
 #: sleek-audio-player.php
-msgid "Download"
-msgstr "Herunterladen"
-
-#: sleek-audio-player.php
-msgid "Repeat"
-msgstr "Wiederholen"
-
-#: sleek-audio-player.php
-msgid "Speed"
-msgstr "Geschwindigkeit"
-
-#: sleek-audio-player.php
 msgid "Shuffle"
 msgstr "Zufällig"
 
 #: sleek-audio-player.php
-msgid "Previous"
-msgstr "Zurück"
-
-#: sleek-audio-player.php
-msgid "Next"
-msgstr "Weiter"
-
-#: sleek-audio-player.php
-msgid "Play"
-msgstr "Abspielen"
-
-#: sleek-audio-player.php
-msgid "Pause"
-msgstr "Pause"
-
-#: sleek-audio-player.php
-msgid "Volume"
-msgstr "Lautstärke"
-
-#: sleek-audio-player.php
-msgid "Mute"
-msgstr "Stumm"
-
-#: sleek-audio-player.php
-msgid "Tap to Play"
-msgstr "Tippen zum Abspielen"
-
-#: sleek-audio-player.php
 msgid "Sleep Timer"
-msgstr "Sleep Timer"
+msgstr "Sleep-Timer"
 
 #: sleek-audio-player.php
 msgid "Off"
@@ -272,5 +112,33 @@ msgid "End of Track"
 msgstr "Am Ende des Tracks"
 
 #: sleek-audio-player.php
-msgid "Tap to Play"
-msgstr "Zum Abspielen tippen"
+msgid "Cover"
+msgstr "Cover"
+
+#: sleek-audio-player.php
+msgid "Adaptive Colors"
+msgstr "Adaptive Farben"
+
+#: sleek-audio-player.php
+msgid "Embed Player"
+msgstr "Player einbetten"
+
+#: sleek-audio-player.php
+msgid "Close"
+msgstr "Schließen"
+
+#: sleek-audio-player.php
+msgid "Layout"
+msgstr "Layout"
+
+#: sleek-audio-player.php
+msgid "Embed Code"
+msgstr "Einbettungscode"
+
+#: sleek-audio-player.php
+msgid "Copy Code"
+msgstr "Code kopieren"
+
+#: sleek-audio-player.php
+msgid "Preview"
+msgstr "Vorschau"

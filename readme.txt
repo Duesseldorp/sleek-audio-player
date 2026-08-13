@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.5.4
+Stable tag: 2.5.5
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.5.5 =
+* 🌐 German translation now covers the whole player UI: the "More" menu (Share, Shuffle, Sleep Timer + presets, Cover, Adaptive Colors, Embed Player) and the embed dialog (Layout, Embed Code, Copy Code, Preview, Close) were translatable in code but missing from the catalog and showed English - now translated
+* 🌐 Added the remaining post-type labels (Add New, All Playlists) and the "No playable tracks found." notice
+* 🧹 Rebuilt the .pot/.po to match the code exactly: removed ~35 entries that were never wrapped for translation (hardcoded admin UI) and the duplicate "Tap to Play"
 
 = 2.5.4 =
 * 🐛 Fixed playback stopping between tracks on locked screens / backgrounded tabs: play() now runs immediately in the ended-event chain instead of via throttled timers
