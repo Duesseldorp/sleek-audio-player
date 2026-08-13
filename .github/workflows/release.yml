@@ -1,0 +1,72 @@
+name: Release
+
+# Push a version tag (e.g. v2.5.4) and this workflow builds the
+# distribution ZIP and publishes a GitHub Release with it attached.
+# Local flow:  git tag v2.5.4 && git push origin v2.5.4
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install rjsmin==1.2.5 rcssmin==1.2.2
+
+      - name: Verify minified assets are in sync with sources
+        run: |
+          python tools/minify.py
+          if ! git diff --exit-code -- assets/js/player.min.js assets/css/player.min.css; then
+            echo "::error::player.min.js / player.min.css are out of sync with their sources. Run 'python tools/minify.py' and commit the result."
+            exit 1
+          fi
+
+      - name: Verify compiled translations are in sync
+        run: |
+          python tools/po2mo.py
+          if ! git diff --exit-code -- languages/; then
+            echo "::error::.mo files are out of sync with the .po sources. Run 'python tools/po2mo.py' and commit the result."
+            exit 1
+          fi
+
+      - name: Verify tag matches plugin version
+        run: |
+          PLUGIN_VERSION=$(grep -oP '^\s*\*\s*Version:\s*\K[\d.]+' sleek-audio-player.php)
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [ "$PLUGIN_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match plugin version $PLUGIN_VERSION"
+            exit 1
+          fi
+
+      - name: Build distribution ZIP
+        run: python tools/build-zip.py
+
+      - name: Extract changelog for this version
+        run: |
+          python - <<'EOF'
+          import os, re
+          version = os.environ["GITHUB_REF_NAME"].lstrip("v")
+          text = open("readme.txt", encoding="utf-8").read()
+          m = re.search(rf"^= {re.escape(version)} =\n(.*?)(?=^= [\d.]+ =|\Z)", text, re.M | re.S)
+          notes = m.group(1).strip() if m else "See readme.txt for details."
+          open("release-notes.md", "w", encoding="utf-8").write(notes + "\n")
+          EOF
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/sleek-audio-player-*.zip
+          body_path: release-notes.md
+          name: "Sleek Audio Player ${{ github.ref_name }}"

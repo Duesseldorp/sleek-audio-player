@@ -54,6 +54,11 @@ Then:
 6. Run both build steps above if sources changed
 7. `SLEEKAUDIO_VERSION` is the cache-buster for enqueued assets — shipping a code
    change without a version bump means cached sites never receive it
+8. **Publish the GitHub Release:** `git tag vX.Y.Z && git push origin vX.Y.Z` —
+   the Release workflow (`.github/workflows/release.yml`) then verifies that
+   `.min`/`.mo` files are in sync and the tag matches the plugin version,
+   builds the distribution ZIP, and publishes the Release with changelog
+   notes automatically. Never build release ZIPs by hand for GitHub.
 
 Versioning: patch for fixes, minor for new features **or behavior changes**
 (e.g. 2.5.0 because asset loading changed site-wide).
