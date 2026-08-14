@@ -17,6 +17,10 @@ Hard constraints (details in DEVELOPMENT.md):
 - Releases are automated: `git tag vX.Y.Z && git push origin vX.Y.Z` — the
   workflow verifies builds and publishes the GitHub Release. Never create
   releases or release ZIPs by hand.
+- Refactoring: never change structure and behaviour in the same commit; keep
+  the public surface (options, post type, meta keys, shortcodes, CSS classes,
+  AJAX actions) frozen; **a step is only done once it is released** (bump,
+  changelog, green CI, tag). Details in DEVELOPMENT.md.
 - Frontend assets load only on pages that render a player — never add an
   unconditional `wp_enqueue_*` for them.
 - Player markup: no `<br>`/`<p>`, no whitespace-dependent layout

@@ -247,6 +247,36 @@ Test every change there first. **Never test against the production site**
 (https://www.duesseldorp.de/) — it runs the released, minified build.
 If the test site is unreachable, start the site in the LocalWP app first.
 
+## Refactoring
+
+The plugin is being restructured incrementally. The method is deliberate —
+follow it, or the test suite stops being a safety net:
+
+1. **Never change structure and behaviour in the same commit.** A commit either
+   moves code verbatim *or* changes what it does. If a test fails after a pure
+   move, the move is wrong — you never have to wonder which of two causes it was.
+2. **Extend the tests for an area *before* touching it**, not after. See the
+   characterization tests in `tests/e2e/characterization.spec.js`; they exist to
+   make a pure move provably harmless.
+3. **The public surface stays frozen**: option names, the `sap_playlist` post
+   type, meta keys (`_sap_tracks`, `_sap_waveform`), shortcode names, CSS
+   classes and AJAX actions are the contract with existing installs. Internal
+   PHP symbols may be renamed, stored data may not.
+4. **A step is not finished until it is released.** Version bump in all four
+   places, changelog entry in both readmes (say plainly when there is no
+   functional change), CI green, then `git tag vX.Y.Z && git push origin vX.Y.Z`.
+   That is what makes the previous state one ZIP away if something surfaces
+   later. CI cannot check this for you — it is on whoever does the step.
+5. **Add hooks at the seams while extracting**, not afterwards. Pulling a method
+   into its own class is the natural moment for an `apply_filters` around its
+   return value.
+
+Done so far: the three classes moved from the main file into `includes/`
+(2.5.7). Next: split `SleekAudio_Player` into Assets / Renderer / Admin / SEO /
+Streaming, one class per release. The JavaScript split is deliberately deferred
+— `player.js` is a single closure with shared state, so the risk is high and the
+gain small compared to the PHP side.
+
 ## WordPress.org submission
 
 The plugin was submitted to the wordpress.org plugin directory on 2025-12-28

@@ -21,6 +21,14 @@ Every user-facing change needs a changelog entry in BOTH readme.md and
 readme.txt. A code change without a version bump never reaches cached sites
 (SLEEKAUDIO_VERSION is the asset cache-buster).
 
+## Refactoring: a step is not done until it is released
+Never change structure and behaviour in the same commit. Extend the tests for
+an area BEFORE touching it. Keep the public surface frozen (option names,
+sap_playlist post type, meta keys, shortcodes, CSS classes, AJAX actions) -
+internal PHP symbols may be renamed, stored data may not. Finish every step
+with version bump + changelog + green CI + tag, so the previous state stays
+one ZIP away. Details in DEVELOPMENT.md.
+
 ## Releases are automated - never build them by hand
 To publish a release: git tag vX.Y.Z && git push origin vX.Y.Z
 The workflow .github/workflows/release.yml then verifies .min/.mo sync and
