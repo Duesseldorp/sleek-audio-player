@@ -47,7 +47,9 @@ test.describe("Characterization: rendered markup", () => {
       ".sap-more-wrapper",
       ".sap-more-btn",
       ".sap-more-menu",
-      ".sap-volume",
+      ".sap-volume-wrapper",
+      ".sap-volume-btn",
+      ".sap-volume-slider",
       ".sap-tracklist",
       "audio.sap-audio",
     ]) {
