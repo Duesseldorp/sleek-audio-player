@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.7
+**Current Version:** 2.5.8
 
 ---
 
@@ -166,6 +166,12 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.8 (2026-08-14)
+
+**Attribution (no functional change):**
+- Every shipped file now carries a copyright and licence notice. The `includes/` classes had none, and the minified assets carried none either — minifiers strip all comments, so the very files visitors load were unattributed. `tools/minify.py` now prepends a banner with version, holder, licence and repository URL
+- The main plugin file gained the full GPL notice (holder, redistribution terms, warranty disclaimer) beyond the plugin-header lines
 
 ### Version 2.5.7 (2026-08-14)
 
