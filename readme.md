@@ -137,7 +137,7 @@ Detailed usage examples are documented on the product page.
 - Audio files stay on your server or your configured storage
 - No user data collected by the plugin itself
 
-Security issues can be reported privately. See `SECURITY.md`.
+Security issues can be reported privately. See [SECURITY.md](SECURITY.md).
 
 ---
 

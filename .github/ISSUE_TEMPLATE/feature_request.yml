@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest an idea for the plugin
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This plugin deliberately stays lightweight — not every idea will make it
+        in, and that's not personal. Describing the underlying problem helps a
+        lot, because sometimes there's a simpler solution than the feature you
+        had in mind.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: |
+        As a podcaster I'd like listeners to jump to a specific chapter,
+        because my episodes are 90 minutes long and people look for topics.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: How could it work?
+      placeholder: Your idea for a solution — rough is fine.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Workarounds you've tried
+      description: Optional — what are you doing today instead?
+
+  - type: dropdown
+    id: audience
+    attributes:
+      label: Who would benefit?
+      options:
+        - Musicians / bands
+        - Podcasters
+        - Developers integrating the plugin
+        - Site owners in general
+        - Mostly my specific use case
+    validations:
+      required: true
