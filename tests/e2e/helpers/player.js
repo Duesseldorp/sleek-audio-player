@@ -122,8 +122,15 @@ export class Player {
  */
 export function watchForErrors(page) {
   const errors = [];
+  // A bare test site has no favicon; that 404 is noise, not a plugin problem.
+  const ignore = [/favicon\.ico/i, /apple-touch-icon/i];
   page.on("console", (msg) => {
-    if (msg.type() === "error") errors.push(`console: ${msg.text()}`);
+    if (msg.type() !== "error") return;
+    const text = msg.text();
+    if (ignore.some((re) => re.test(text)) || ignore.some((re) => re.test(msg.location()?.url || ""))) {
+      return;
+    }
+    errors.push(`console: ${text}`);
   });
   page.on("pageerror", (err) => errors.push(`pageerror: ${err.message}`));
   return errors;

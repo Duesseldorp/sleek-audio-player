@@ -18,6 +18,14 @@
 
 defined('ABSPATH') || exit;
 
+// A fresh WordPress uses plain permalinks (?p=123), so /player-page/ and
+// /playlist/<slug>/ would 404 and the tests would see a 404 page instead of
+// a player. Pretty permalinks are also what the plugin's public playlist
+// URLs and SEO output assume.
+if (get_option('permalink_structure') !== '/%postname%/') {
+    update_option('permalink_structure', '/%postname%/');
+}
+
 $uploads_url = content_url('/uploads/sap-test');
 
 $tracks = array(
@@ -103,12 +111,14 @@ $no_player = sleekaudio_e2e_upsert(
     "This page contains no player at all.\n\nIt must not load any plugin assets."
 );
 
-flush_rewrite_rules();
+// Hard flush so the rewrite rules (and .htaccess) are actually written
+flush_rewrite_rules(true);
 
 WP_CLI::success(sprintf(
-    'Seeded: playlist #%d, /player-page/ #%d, /player-mini/ #%d, /no-player-page/ #%d',
+    'Seeded: playlist #%d, /player-page/ #%d, /player-mini/ #%d, /no-player-page/ #%d (permalinks: %s)',
     $playlist_id,
     $player_page,
     $mini_page,
-    $no_player
+    $no_player,
+    get_option('permalink_structure')
 ));

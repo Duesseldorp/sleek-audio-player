@@ -133,7 +133,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm ci || npm install
+        run: npm install --no-audit --no-fund
 
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
@@ -146,6 +146,29 @@ jobs:
 
       - name: Seed test content
         run: npm run seed
+
+      # Fail in seconds with a clear message if the environment is wrong,
+      # instead of burning ~16 minutes on timing-out browser tests.
+      - name: Verify the test environment serves a player
+        run: |
+          for url in /player-page/ /player-mini/ /playlist/e2e-playlist/; do
+            body=$(curl -sS -w "\n%{http_code}" "http://localhost:8888$url")
+            code=$(echo "$body" | tail -n1)
+            if [ "$code" != "200" ]; then
+              echo "::error::$url returned HTTP $code - permalinks or seeding are broken"
+              exit 1
+            fi
+            if ! echo "$body" | grep -q "sap-player"; then
+              echo "::error::$url returned 200 but contains no player markup"
+              exit 1
+            fi
+            echo "ok: $url"
+          done
+          if curl -sS "http://localhost:8888/no-player-page/" | grep -q "sleek-audio-player"; then
+            echo "::error::/no-player-page/ loads plugin assets - conditional loading is broken"
+            exit 1
+          fi
+          echo "ok: /no-player-page/ loads no plugin assets"
 
       - name: Run end-to-end tests
         run: npm run test:e2e
