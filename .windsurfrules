@@ -47,7 +47,14 @@ hand-built ZIPs.
 - player.js stays dependency-free (no jQuery, no frameworks, no CDNs).
 - The legacy [simple_player] shortcode alias must keep working.
 
-## Testing before commit (no automated tests yet)
+## CI runs on every push
+.github/workflows/ci.yml checks PHP 7.4+8.3 syntax, JS syntax, .min/.mo
+sync, ZIP cleanliness, version consistency across all four locations, and
+WordPress Plugin Check. A red run blocks nothing technically but must be
+fixed before the next release. CI does NOT test behaviour - playback still
+needs manual testing.
+
+## Testing before commit (browser behaviour is not automated)
 A local test environment EXISTS: https://duesseldorp-test.local/ (LocalWP).
 This repo is junction-linked into its plugins folder — every edit is live
 there immediately, and SCRIPT_DEBUG serves the unminified sources, so you

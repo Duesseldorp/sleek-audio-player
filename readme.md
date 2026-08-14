@@ -1,5 +1,11 @@
 # Sleek Audio Player
 
+[![CI](https://github.com/Duesseldorp/sleek-audio-player/actions/workflows/ci.yml/badge.svg)](https://github.com/Duesseldorp/sleek-audio-player/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/Duesseldorp/sleek-audio-player)](https://github.com/Duesseldorp/sleek-audio-player/releases/latest)
+[![License: GPL v2](https://img.shields.io/badge/license-GPLv2-blue.svg)](LICENSE)
+![WordPress](https://img.shields.io/badge/WordPress-5.0%2B-21759b)
+![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4)
+
 A modern, fast and shareable audio player for WordPress.  
 Built for music, podcasts and playlists – with strong UX, clean SEO and reliable performance.
 

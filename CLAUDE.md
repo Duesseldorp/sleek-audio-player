@@ -27,6 +27,9 @@ Hard constraints (details in DEVELOPMENT.md):
 - No hardcoded user-facing strings in `player.js` — use `sapSettings.i18n`.
 - PHP 7.4 / WP 5.0 compatible; `player.js` dependency-free; legacy
   `[simple_player]` shortcode must keep working.
+- CI (`.github/workflows/ci.yml`) checks syntax, build sync, ZIP
+  cleanliness, version consistency and Plugin Check on every push — but
+  no behaviour. Playback still needs manual testing.
 - Test on: a shortcode page, a page-builder page, and a page without a
   player (must load zero plugin assets). Never test against production.
   Local test site exists at https://duesseldorp-test.local/ (LocalWP,

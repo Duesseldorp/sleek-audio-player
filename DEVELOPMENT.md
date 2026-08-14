@@ -35,6 +35,7 @@ whitelist, so they cannot end up in a wordpress.org submission:
 | `CODE_OF_CONDUCT.md` | Short, plain-language conduct rules |
 | `.github/ISSUE_TEMPLATE/` | Issue forms; the bug form requires device, browser, WP version and embedding method up front |
 | `.github/PULL_REQUEST_TEMPLATE.md` | PR checklist mirroring this document |
+| `.github/workflows/ci.yml` | Static checks on every push/PR (see Testing a change) |
 | `.github/workflows/release.yml` | Tag-triggered release automation (see Release checklist) |
 | `DEVELOPMENT.md`, `CLAUDE.md`, `.windsurfrules` | Conventions for humans and AI assistants |
 
@@ -146,7 +147,24 @@ as happened with `duration`):
 
 ## Testing a change
 
-There is no automated test suite yet, so before committing test at minimum:
+### What CI checks automatically
+
+`.github/workflows/ci.yml` runs on every push and pull request and fails on:
+
+- PHP syntax errors under **PHP 7.4 and 8.3** (the supported range)
+- JavaScript syntax errors (`node --check` — the dev machine has no Node,
+  so this is the only real parser check that exists)
+- `.min` / `.mo` files that are out of sync with their sources
+- development files leaking into the distribution ZIP
+- version mismatches across the four locations
+- WordPress Plugin Check findings (keeps wordpress.org compliance intact)
+
+CI does **not** test behaviour — a green run means "it parses, builds and
+complies", not "it plays audio".
+
+### What you still have to test by hand
+
+Browser behaviour is not covered yet, so before committing test at minimum:
 
 1. **A regular page with a player** (shortcode in content → early enqueue path)
 2. **A page-builder page with a player** (e.g. the production homepage layout →
