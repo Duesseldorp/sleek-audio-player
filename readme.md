@@ -327,4 +327,10 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 ## License
 
-GPL v2 or later
+Copyright © 2025–2026 Martin Gräbing
+
+Released under the **GNU General Public License v2 or later** — see [LICENSE](LICENSE).
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE.

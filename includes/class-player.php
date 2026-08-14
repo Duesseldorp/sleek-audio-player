@@ -2,11 +2,16 @@
 /**
  * Player: shortcodes, block, REST, meta boxes, assets, embed and SEO output
  *
- * Moved out of sleek-audio-player.php unchanged. See DEVELOPMENT.md.
+ * @package   Sleek_Audio_Player
+ * @author    Martin Gräbing <kontakt@duesseldorp.de>
+ * @copyright 2025-2026 Martin Gräbing
+ * @license   GPL-2.0-or-later https://www.gnu.org/licenses/gpl-2.0.html
  *
- * @package Sleek_Audio_Player
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation; either version 2 of the License, or (at your option)
+ * any later version.
  */
-
 defined('ABSPATH') || exit;
 
 class SleekAudio_Player {
