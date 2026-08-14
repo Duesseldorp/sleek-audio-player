@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.5.6
+Stable tag: 2.5.7
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,9 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.5.7 =
+* 🔧 Internal restructuring: the three PHP classes moved into includes/, the main file is now a small bootstrap. No functional change - same options, shortcodes, markup and behaviour
 
 = 2.5.6 =
 * 📱 The More menu no longer closes on the slightest scroll - it tolerates 8px and stays attached to its button, so momentum scrolling on touch devices no longer makes it flash open and shut

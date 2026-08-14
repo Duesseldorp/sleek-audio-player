@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.6
+**Current Version:** 2.5.7
 
 ---
 
@@ -166,6 +166,13 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.7 (2026-08-14)
+
+**Internal restructuring (nothing changes for users):**
+- The three PHP classes moved out of the main file into `includes/`; `sleek-audio-player.php` is now a 139-line bootstrap instead of 4,153 lines. Same options, same shortcodes, same markup, same behaviour
+- Not a line of logic was changed: the move was scripted and verified by comparing the function/class inventory before and after (79 symbols, unchanged) plus the full test suite
+- The distribution package and CI now verify that every required PHP file actually ships
 
 ### Version 2.5.6 (2026-08-14)
 
