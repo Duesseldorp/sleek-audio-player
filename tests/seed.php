@@ -150,17 +150,6 @@ if ($written === false) {
     WP_CLI::warning('Could not write ' . $htaccess_file . ' - pretty permalinks may 404.');
 }
 
-// Hand the IDs to the test suite instead of hardcoding them there
-$ids = array(
-    'playlist'  => (int) $playlist_id,
-    'playerPage' => (int) $player_page,
-    'miniPage'  => (int) $mini_page,
-    'legacyPage' => (int) $legacy_page,
-    'twoPage'   => (int) $two_page,
-    'noPlayerPage' => (int) $no_player,
-);
-file_put_contents(dirname(__FILE__) . '/fixtures/seed.json', wp_json_encode($ids));
-
 WP_CLI::success(sprintf(
     'Seeded: playlist #%d, pages: player #%d, mini #%d, legacy #%d, two #%d, none #%d (permalinks: %s, .htaccess: %d bytes)',
     $playlist_id,

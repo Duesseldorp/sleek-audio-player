@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test";
-import { seedIds } from "./helpers/player.js";
 
 /**
  * The regression this file exists for: in 2.5.0 saving a playlist silently
@@ -21,8 +20,6 @@ async function login(page) {
 
 test.describe("Playlist admin", () => {
   test("saving a playlist without changes preserves all track fields", async ({ page }) => {
-    const ids = seedIds();
-
     // What the frontend shows before the save
     await page.goto("/player-page/");
     const before = await page.evaluate(() => {
@@ -41,9 +38,11 @@ test.describe("Playlist admin", () => {
     expect(before[1].soundcloud).toBeTruthy();
     expect(before[1].downloadable).toBe(true);
 
-    // Open the playlist in the editor and press Update without changing anything
+    // Open the playlist from the admin list (no hardcoded IDs) and press
+    // Update without changing anything
     await login(page);
-    await page.goto(`/wp-admin/post.php?post=${ids.playlist}&action=edit`);
+    await page.goto("/wp-admin/edit.php?post_type=sap_playlist");
+    await page.getByRole("link", { name: "E2E Playlist", exact: true }).first().click();
     await expect(page.locator(".sap-track-row").first()).toBeVisible();
 
     const publish = page.locator("#publish");
