@@ -43,6 +43,24 @@ test.describe("More menu", () => {
     expect(foreign.p).toBe(0);
   });
 
+  // The menu is position:fixed and closes on scroll so it cannot drift away
+  // from its button. Momentum scrolling on touch devices emits tiny scroll
+  // events right after the opening tap, so there is a small tolerance.
+  test("survives a tiny scroll but closes on a real one", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    await player.openMoreMenu();
+
+    // Within the threshold: stays open
+    await page.mouse.wheel(0, 3);
+    await page.waitForTimeout(300);
+    await expect(player.moreWrapper).toHaveClass(/active/);
+
+    // Clearly beyond it: closes
+    await page.mouse.wheel(0, 200);
+    await expect(player.moreWrapper).not.toHaveClass(/active/);
+  });
+
   test("streaming links only appear for tracks that have them", async ({ page }) => {
     await page.goto("/player-page/");
     const player = new Player(page);

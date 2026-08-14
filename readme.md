@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.5
+**Current Version:** 2.5.6
 
 ---
 
@@ -166,6 +166,11 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.5.6 (2026-08-14)
+
+**Improvements:**
+- The More menu no longer closes on the slightest scroll. It stays open within a small tolerance (8px) and is repositioned to stay attached to its button; only a deliberate scroll closes it. Momentum scrolling on touch devices emits tiny scroll events right after the tap that opens the menu, which previously made it flash open and shut
 
 ### Version 2.5.5 (2026-08-13)
 

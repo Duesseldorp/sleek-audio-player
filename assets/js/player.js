@@ -1540,22 +1540,45 @@
                 moreMenu.style.left = left + 'px';
             }
             
+            // Scroll position the menu was opened at - the close-on-scroll
+            // handler measures the distance from here, not "any scroll at all"
+            let menuScrollAnchor = null;
+
             moreBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 const isActive = moreWrapper.classList.toggle('active');
                 this.setAttribute('aria-expanded', isActive);
                 if (isActive) {
+                    menuScrollAnchor = window.scrollY;
                     positionMenu();
+                } else {
+                    menuScrollAnchor = null;
                 }
                 blurButton(this);
             });
-            
-            // Close menu on scroll (menu stays fixed, closes when user scrolls)
+
+            // Close menu on scroll - the menu is position:fixed and would
+            // otherwise drift away from its button. Small scrolls are tolerated:
+            // momentum scrolling on touch devices keeps emitting 1-2px events
+            // after the tap that opened the menu, which used to close it again
+            // immediately. Within the threshold the menu is repositioned instead.
+            const SCROLL_CLOSE_THRESHOLD = 8; // px
+
             window.addEventListener('scroll', function() {
-                if (moreWrapper.classList.contains('active')) {
-                    moreWrapper.classList.remove('active');
-                    moreBtn.setAttribute('aria-expanded', 'false');
+                if (!moreWrapper.classList.contains('active')) return;
+
+                if (menuScrollAnchor === null) {
+                    menuScrollAnchor = window.scrollY;
                 }
+
+                if (Math.abs(window.scrollY - menuScrollAnchor) <= SCROLL_CLOSE_THRESHOLD) {
+                    positionMenu(); // keep the fixed menu glued to the button
+                    return;
+                }
+
+                moreWrapper.classList.remove('active');
+                moreBtn.setAttribute('aria-expanded', 'false');
+                menuScrollAnchor = null;
             }, { passive: true });
             
             // Reposition only on resize
