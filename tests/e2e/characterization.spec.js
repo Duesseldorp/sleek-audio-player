@@ -34,7 +34,9 @@ test.describe("Characterization: rendered markup", () => {
     expect(attrs.hasDefaultCover).toBe(true);
     expect(attrs.role).toBe("region");
 
-    // Every structural hook the JS and CSS rely on must exist exactly once
+    // Every structural hook the JS and CSS rely on must exist exactly once.
+    // These names are taken from the markup in render_player(), not guessed -
+    // getting them from anywhere else cost three CI rounds.
     for (const selector of [
       ".sap-cover-carousel",
       ".sap-cover-track",
@@ -50,7 +52,9 @@ test.describe("Characterization: rendered markup", () => {
       ".sap-volume-wrapper",
       ".sap-volume-btn",
       ".sap-volume-slider",
-      ".sap-tracklist",
+      ".sap-playlist", // the track list container
+      ".sap-progress-bar",
+      ".sap-visualizer",
       "audio.sap-audio",
     ]) {
       await expect(player.locator(selector), `missing or duplicated: ${selector}`).toHaveCount(1);
