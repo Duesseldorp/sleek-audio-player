@@ -89,6 +89,11 @@ export class Player {
    * elements still have layout).
    */
   async openMoreMenu() {
+    // Scroll FIRST, then click - do not leave the scrolling to click()'s own
+    // actionability step. The player closes the menu on any scroll event
+    // (the menu is position:fixed and would otherwise drift), and a scroll
+    // dispatched by the click itself arrives after the menu opened, closing
+    // it again. This cost a full CI round to find.
     await this.moreButton.scrollIntoViewIfNeeded();
     await this.moreButton.click();
 
