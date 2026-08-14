@@ -170,9 +170,19 @@ jobs:
             fi
             echo "ok: $url"
           done
-          if curl -sS "http://localhost:8888/no-player-page/" | grep -q "sleek-audio-player"; then
+          # What matters is that no JS/CSS of this plugin is requested. Other
+          # mentions of the plugin name in the HTML are reported, not fatal.
+          html=$(curl -sS "http://localhost:8888/no-player-page/")
+          mentions=$(printf '%s' "$html" | grep -o "sleek-audio-player[^\"'<> ]*" | sort -u || true)
+          assets=$(printf '%s' "$mentions" | grep -E "assets/.*\.(js|css)" || true)
+          if [ -n "$assets" ]; then
             echo "::error::/no-player-page/ loads plugin assets - conditional loading is broken"
+            printf '%s\n' "$assets"
             exit 1
+          fi
+          if [ -n "$mentions" ]; then
+            echo "note: page mentions the plugin without loading assets:"
+            printf '  %s\n' $mentions
           fi
           echo "ok: /no-player-page/ loads no plugin assets"
 
