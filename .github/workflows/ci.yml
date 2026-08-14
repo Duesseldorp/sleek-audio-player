@@ -92,7 +92,8 @@ jobs:
           zip_path = glob.glob("dist/sleek-audio-player-*.zip")[0]
           names = zipfile.ZipFile(zip_path).namelist()
           forbidden = ("LICENSE", "SECURITY", "CONTRIBUTING", "CODE_OF_CONDUCT",
-                       "DEVELOPMENT", "CLAUDE", "windsurfrules", ".github", "tools/", "readme.md")
+                       "DEVELOPMENT", "CLAUDE", "windsurfrules", ".github", "tools/",
+                       "readme.md", "tests/", "package.json", "playwright", "wp-env")
           leaks = [n for n in names if any(f in n for f in forbidden)]
           if leaks:
               print(f"::error::Development files leaked into the distribution ZIP: {leaks}")
@@ -120,6 +121,46 @@ jobs:
             echo "::error::Version mismatch - all four locations must match (see DEVELOPMENT.md)."
             exit 1
           fi
+
+  e2e:
+    name: End-to-end tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate test audio fixtures
+        run: npm run fixtures
+
+      - name: Start WordPress (wp-env)
+        run: npx wp-env start
+
+      - name: Seed test content
+        run: npm run seed
+
+      - name: Run end-to-end tests
+        run: npm run test:e2e
+
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
+
+      - name: WordPress debug log on failure
+        if: failure()
+        run: npx wp-env run wordpress cat wp-content/debug.log || true
 
   plugin-check:
     name: WordPress Plugin Check

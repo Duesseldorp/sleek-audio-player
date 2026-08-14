@@ -162,9 +162,42 @@ as happened with `duration`):
 CI does **not** test behaviour — a green run means "it parses, builds and
 complies", not "it plays audio".
 
+### End-to-end tests
+
+`tests/e2e/` drives a real browser against a real WordPress instance
+(`@wordpress/env` in Docker) on every push. Covered today: playback starts,
+**track transitions at the end of a song** (the regression that shipped five
+times), next/previous, More menu spacing (wpautop defence), streaming-link
+visibility, durations rendering, zero plugin assets on pages without a player,
+minified assets served, mini layout, playlist page with JSON-LD.
+
+Run locally (needs Node and Docker):
+
+```bash
+npm install
+npm test          # fixtures + wp-env start + seed + playwright
+npm run test:e2e  # just the tests, if the environment is already up
+```
+
+**How to add a test:**
+
+1. Put interactions and selectors in `tests/e2e/helpers/player.js` — never
+   query the player DOM directly from a spec. When markup changes, that one
+   file is the only thing to update.
+2. Add the test to the matching spec (`playback`, `menu`, `assets`) or create
+   a new `*.spec.js` — CI picks up new files automatically.
+3. Need new content? Extend `tests/seed.php` (idempotent, runs before tests).
+4. Need another browser or a mobile viewport? Uncomment the projects in
+   `playwright.config.js`.
+
+**What these tests cannot cover:** real devices and locked screens, actual
+audible sound, iOS Safari, third-party page builders, visual design, and
+conflicts with other plugins. A green run means the logic works in headless
+Chromium — not that it works on every phone.
+
 ### What you still have to test by hand
 
-Browser behaviour is not covered yet, so before committing test at minimum:
+Before committing, and always for playback changes:
 
 1. **A regular page with a player** (shortcode in content → early enqueue path)
 2. **A page-builder page with a player** (e.g. the production homepage layout →

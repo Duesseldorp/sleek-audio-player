@@ -49,10 +49,17 @@ hand-built ZIPs.
 
 ## CI runs on every push
 .github/workflows/ci.yml checks PHP 7.4+8.3 syntax, JS syntax, .min/.mo
-sync, ZIP cleanliness, version consistency across all four locations, and
-WordPress Plugin Check. A red run blocks nothing technically but must be
-fixed before the next release. CI does NOT test behaviour - playback still
-needs manual testing.
+sync, ZIP cleanliness, version consistency across all four locations,
+WordPress Plugin Check, AND end-to-end browser tests (tests/e2e/, Playwright
+against a real WordPress via wp-env).
+
+When you change player behaviour, add or update a test in tests/e2e/.
+Selectors and interactions belong in tests/e2e/helpers/player.js, never
+directly in a spec file. New *.spec.js files are picked up automatically.
+Test content lives in tests/seed.php.
+
+E2E tests do NOT cover real devices, locked screens, audible sound, iOS
+Safari or page builders - those stay manual checks.
 
 ## Testing before commit (browser behaviour is not automated)
 A local test environment EXISTS: https://duesseldorp-test.local/ (LocalWP).

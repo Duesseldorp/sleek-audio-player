@@ -27,3 +27,10 @@ desktop.ini
 
 # Build output (tools/build-zip.py)
 dist/
+
+# Test suite (see DEVELOPMENT.md)
+node_modules/
+package-lock.json
+playwright-report/
+test-results/
+tests/fixtures/audio/
