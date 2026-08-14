@@ -6,11 +6,24 @@
  * readable and stable. Add new interactions here rather than reaching into
  * the DOM from a test.
  */
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+/** IDs of the content created by tests/seed.php. */
+export function seedIds() {
+  const file = join(dirname(fileURLToPath(import.meta.url)), "..", "fixtures", "seed.json");
+  return JSON.parse(readFileSync(file, "utf8"));
+}
+
 export class Player {
-  /** @param {import('@playwright/test').Page} page */
-  constructor(page, root = ".sap-player") {
+  /**
+   * @param {import('@playwright/test').Page} page
+   * @param {number} index which player on the page (for multi-player tests)
+   */
+  constructor(page, root = ".sap-player", index = 0) {
     this.page = page;
-    this.root = page.locator(root).first();
+    this.root = page.locator(root).nth(index);
     this.audio = this.root.locator("audio.sap-audio");
     this.playButton = this.root.locator(".sap-play");
     this.nextButton = this.root.locator(".sap-next");
@@ -20,6 +33,46 @@ export class Player {
     this.moreWrapper = this.root.locator(".sap-more-wrapper");
     this.nowPlaying = this.root.locator(".sap-now-playing");
     this.trackList = this.root.locator(".sap-track");
+    this.repeatItem = this.root.locator(".sap-more-item.sap-repeat");
+  }
+
+  async closeMoreMenu() {
+    await this.page.mouse.click(2, 2); // click outside the menu
+    await this.page.waitForTimeout(150);
+  }
+
+  /**
+   * Cycles the repeat button until it reads the wanted mode.
+   * Labels come from player.js: off -> 'Off', playlist -> 'All', track -> 'One'.
+   */
+  async setRepeat(mode) {
+    await this.openMoreMenu();
+    for (let i = 0; i < 4; i++) {
+      const label = (await this.repeatItem.textContent())?.trim() || "";
+      if (label.includes(mode)) break;
+      await this.repeatItem.click();
+      await this.page.waitForTimeout(150);
+    }
+    const label = (await this.repeatItem.textContent())?.trim();
+    if (!label?.includes(mode)) {
+      throw new Error(`Could not set repeat to "${mode}", label is "${label}"`);
+    }
+    await this.closeMoreMenu();
+  }
+
+  /** Clicks the nth entry in the track list (0-based). */
+  async selectTrack(index) {
+    await this.trackList.nth(index).click();
+    await this.waitUntilPlaying();
+  }
+
+  /** Seeks close to the end and waits for whatever the player does next. */
+  async seekToEnd() {
+    await this.audio.evaluate((el) => {
+      if (Number.isFinite(el.duration) && el.duration > 0.5) {
+        el.currentTime = el.duration - 0.4;
+      }
+    });
   }
 
   /** Reads live state straight from the <audio> element. */

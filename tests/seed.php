@@ -104,6 +104,22 @@ $player_page = sleekaudio_e2e_upsert('player-page', 'page', 'Player Page', $play
 $mini_content = "[sleek_player id=\"{$playlist_id}\" layout=\"mini\"]";
 $mini_page = sleekaudio_e2e_upsert('player-mini', 'page', 'Player Mini', $mini_content);
 
+// Legacy shortcode alias - a documented compatibility promise
+$legacy_page = sleekaudio_e2e_upsert(
+    'player-legacy',
+    'page',
+    'Player Legacy',
+    "[simple_player id=\"{$playlist_id}\"]"
+);
+
+// Two players on one page - only one may play at a time
+$two_page = sleekaudio_e2e_upsert(
+    'player-two',
+    'page',
+    'Two Players',
+    "First player:\n\n[sleek_player id=\"{$playlist_id}\"]\n\nSecond player:\n\n[sleek_player id=\"{$playlist_id}\" layout=\"mini\"]"
+);
+
 $no_player = sleekaudio_e2e_upsert(
     'no-player-page',
     'page',
@@ -134,11 +150,24 @@ if ($written === false) {
     WP_CLI::warning('Could not write ' . $htaccess_file . ' - pretty permalinks may 404.');
 }
 
+// Hand the IDs to the test suite instead of hardcoding them there
+$ids = array(
+    'playlist'  => (int) $playlist_id,
+    'playerPage' => (int) $player_page,
+    'miniPage'  => (int) $mini_page,
+    'legacyPage' => (int) $legacy_page,
+    'twoPage'   => (int) $two_page,
+    'noPlayerPage' => (int) $no_player,
+);
+file_put_contents(dirname(__FILE__) . '/fixtures/seed.json', wp_json_encode($ids));
+
 WP_CLI::success(sprintf(
-    'Seeded: playlist #%d, /player-page/ #%d, /player-mini/ #%d, /no-player-page/ #%d (permalinks: %s, .htaccess: %d bytes)',
+    'Seeded: playlist #%d, pages: player #%d, mini #%d, legacy #%d, two #%d, none #%d (permalinks: %s, .htaccess: %d bytes)',
     $playlist_id,
     $player_page,
     $mini_page,
+    $legacy_page,
+    $two_page,
     $no_player,
     get_option('permalink_structure'),
     (int) $written

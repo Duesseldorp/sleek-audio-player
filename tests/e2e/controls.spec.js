@@ -1,0 +1,154 @@
+import { expect, test } from "@playwright/test";
+import { Player, watchForErrors } from "./helpers/player.js";
+
+test.describe("Repeat modes", () => {
+  test("repeat One restarts the same track instead of advancing", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+    const first = await player.state();
+
+    await player.setRepeat("One");
+    await player.seekToEnd();
+
+    // Same file, playing again from the start
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector(".sap-player audio.sap-audio");
+        return el && !el.paused && el.currentTime < 1.5;
+      },
+      undefined,
+      { timeout: 15_000 }
+    );
+    const after = await player.state();
+    expect(after.file).toBe(first.file);
+    expect(after.paused).toBe(false);
+  });
+
+  test("repeat All wraps from the last track back to the first", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.setRepeat("All");
+    await player.selectTrack(2); // last of three
+    const last = await player.state();
+
+    await player.seekToEnd();
+    await page.waitForFunction(
+      ([previous]) => {
+        const el = document.querySelector(".sap-player audio.sap-audio");
+        if (!el) return false;
+        const file = (el.currentSrc || el.src).split("/").pop();
+        return file !== previous && !el.paused;
+      },
+      [last.file],
+      { timeout: 20_000 }
+    );
+
+    await expect(player.nowPlaying).toHaveText(/E2E Track One/i);
+  });
+
+  test("without repeat, playback stops after the last track", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.selectTrack(2); // last track, repeat is Off by default
+    await player.seekToEnd();
+
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector(".sap-player audio.sap-audio");
+        return el && el.paused;
+      },
+      undefined,
+      { timeout: 15_000 }
+    );
+    await expect(player.nowPlaying).toHaveText(/E2E Track Three/i);
+  });
+});
+
+test.describe("Keyboard shortcuts", () => {
+  // Handled globally (document-level, by e.code) so they work without focus
+  test("N advances, Space pauses", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+    const first = await player.state();
+
+    await page.keyboard.press("KeyN");
+    await player.waitUntilPlaying();
+    const afterNext = await player.state();
+    expect(afterNext.file).not.toBe(first.file);
+
+    await page.keyboard.press("Space");
+    await page.waitForFunction(
+      () => document.querySelector(".sap-player audio.sap-audio")?.paused === true,
+      undefined,
+      { timeout: 10_000 }
+    );
+  });
+
+  test("S toggles shuffle", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    await page.keyboard.press("KeyS");
+    await expect(player.root.locator(".sap-menu-shuffle")).toHaveClass(/active/);
+  });
+});
+
+test.describe("Multiple players on one page", () => {
+  test("starting the second player pauses the first", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.goto("/player-two/");
+
+    const first = new Player(page, ".sap-player", 0);
+    const second = new Player(page, ".sap-player", 1);
+    await expect(page.locator(".sap-player")).toHaveCount(2);
+
+    await first.play();
+    await first.waitUntilPlaying();
+
+    await second.play();
+    await second.waitUntilPlaying();
+
+    await page.waitForFunction(
+      () => document.querySelectorAll(".sap-player audio.sap-audio")[0].paused === true,
+      undefined,
+      { timeout: 10_000 }
+    );
+    expect((await second.state()).paused).toBe(false);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe("Compatibility", () => {
+  // The legacy alias is a documented promise in readme.txt and DEVELOPMENT.md
+  test("the legacy [simple_player] shortcode still renders a working player", async ({ page }) => {
+    const errors = watchForErrors(page);
+    await page.goto("/player-legacy/");
+    const player = new Player(page);
+
+    await expect(player.root).toBeVisible();
+    await expect(player.trackList).toHaveCount(3);
+    await player.play();
+    await player.waitUntilPlaying();
+
+    expect(errors).toEqual([]);
+  });
+
+  test("a shared link opens the requested track", async ({ page }) => {
+    await page.goto("/playlist/e2e-playlist/?track=2&play=1");
+    const player = new Player(page);
+
+    await expect(player.root).toBeVisible();
+    await expect(player.nowPlaying).toHaveText(/E2E Track Two/i, { timeout: 15_000 });
+  });
+});
