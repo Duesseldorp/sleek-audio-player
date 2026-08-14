@@ -19,6 +19,27 @@ change a convention, change it in this file first.
 | `tools/minify.py` | Builds the `.min` assets (`pip install rjsmin rcssmin`) |
 | `tools/po2mo.py` | Compiles `.po` → `.mo` (stdlib only) |
 | `tools/build-zip.py` | Builds the distribution ZIP (`dist/`) for wordpress.org — whitelist-based, dev files can never leak in |
+| `readme.txt` | wordpress.org readme (**shipped**) — changelog, FAQ, External Services section |
+| `readme.md` | GitHub readme (repo only) — changelog kept in sync with readme.txt |
+
+### Repository-only files (never shipped in the plugin ZIP)
+
+These serve GitHub and contributors; `tools/build-zip.py` excludes them by
+whitelist, so they cannot end up in a wordpress.org submission:
+
+| Path | Purpose |
+|---|---|
+| `LICENSE` | Verbatim GPL-2.0 text — makes GitHub detect the license (the plugin header and readmes state it too) |
+| `SECURITY.md` | Private vulnerability reporting (GitHub advisories + kontakt@duesseldorp.de), response times, scope. Linked from readme.md and rendered at the repo's Security tab |
+| `CONTRIBUTING.md` | Contributor entry point — points here for the conventions |
+| `CODE_OF_CONDUCT.md` | Short, plain-language conduct rules |
+| `.github/ISSUE_TEMPLATE/` | Issue forms; the bug form requires device, browser, WP version and embedding method up front |
+| `.github/PULL_REQUEST_TEMPLATE.md` | PR checklist mirroring this document |
+| `.github/workflows/release.yml` | Tag-triggered release automation (see Release checklist) |
+| `DEVELOPMENT.md`, `CLAUDE.md`, `.windsurfrules` | Conventions for humans and AI assistants |
+
+Keep these in sync when conventions change: edit `DEVELOPMENT.md` first, then
+mirror the hard constraints into `CLAUDE.md` and `.windsurfrules`.
 
 ## Build steps (the two rules you must not forget)
 
