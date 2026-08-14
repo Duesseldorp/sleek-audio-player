@@ -165,11 +165,30 @@ complies", not "it plays audio".
 ### End-to-end tests
 
 `tests/e2e/` drives a real browser against a real WordPress instance
-(`@wordpress/env` in Docker) on every push. Covered today: playback starts,
-**track transitions at the end of a song** (the regression that shipped five
-times), next/previous, More menu spacing (wpautop defence), streaming-link
-visibility, durations rendering, zero plugin assets on pages without a player,
-minified assets served, mini layout, playlist page with JSON-LD.
+(`@wordpress/env` in Docker) on every push. 23 tests covering:
+
+- **Playback**: starts, **track transitions at the end of a song** (the
+  regression that shipped five times), next/previous, durations rendering
+- **Repeat modes**: One restarts the track, All wraps last → first,
+  Off stops at the end
+- **Admin round-trip**: saving a playlist unchanged must preserve every track
+  field — the only test that exercises `save_meta`, and exactly the path that
+  silently destroyed all durations in 2.5.0
+- **More menu**: opens, item spacing in pixels (wpautop defence), no foreign
+  `<br>`/`<p>`, scroll tolerance, streaming links only where present
+- **Assets**: zero plugin assets without a player, exactly one minified
+  script + stylesheet with one, mini layout, playlist page with JSON-LD
+- **Compatibility**: legacy `[simple_player]`, shared links
+  (`?track=2&play=1`), two players on one page (the second pauses the first),
+  global keyboard shortcuts (N, Space, S)
+
+Two rules learned the hard way:
+
+- Do not add `node:` imports to files under `tests/e2e/` — it changes how
+  Playwright classifies the module and the **entire suite** stops loading
+  ("exports is not defined in ES module scope" / "No tests found").
+- Scroll before clicking the More button, never rely on `click()`'s own
+  auto-scroll (see the comment in `helpers/player.js`).
 
 Run locally (needs Node and Docker):
 
