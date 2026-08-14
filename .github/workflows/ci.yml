@@ -88,7 +88,7 @@ jobs:
         run: |
           python tools/build-zip.py
           python - <<'EOF'
-          import glob, sys, zipfile
+          import glob, pathlib, sys, zipfile
           zip_path = glob.glob("dist/sleek-audio-player-*.zip")[0]
           names = zipfile.ZipFile(zip_path).namelist()
           forbidden = ("LICENSE", "SECURITY", "CONTRIBUTING", "CODE_OF_CONDUCT",
@@ -98,7 +98,15 @@ jobs:
           if leaks:
               print(f"::error::Development files leaked into the distribution ZIP: {leaks}")
               sys.exit(1)
-          print(f"{zip_path}: {len(names)} files, clean")
+          # Every PHP file the plugin requires must actually ship, or the
+          # plugin fatals on activation
+          required = ["sleek-audio-player.php", "uninstall.php", "readme.txt"]
+          required += [f"includes/{p.name}" for p in sorted(pathlib.Path("includes").glob("*.php"))]
+          missing = [r for r in required if not any(n.endswith(r) for n in names)]
+          if missing:
+              print(f"::error::Files missing from the distribution ZIP: {missing}")
+              sys.exit(1)
+          print(f"{zip_path}: {len(names)} files, clean and complete")
           EOF
 
   version-consistency:

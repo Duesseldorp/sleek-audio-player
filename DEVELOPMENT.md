@@ -8,7 +8,10 @@ change a convention, change it in this file first.
 
 | Path | Purpose |
 |---|---|
-| `sleek-audio-player.php` | Entire PHP backend: `SleekAudio_Theme_Manager`, `SleekAudio_Waveform_Manager`, `SleekAudio_Player` (shortcode, block, REST, meta boxes, embed, SEO) |
+| `sleek-audio-player.php` | Bootstrap: plugin header, constants, helper functions, `require`s and initialisation. Keep it small — new code belongs in `includes/` |
+| `includes/class-theme-manager.php` | `SleekAudio_Theme_Manager` — colour schemes in a custom table, admin page, AJAX |
+| `includes/class-waveform-manager.php` | `SleekAudio_Waveform_Manager` — waveform peaks per attachment, admin page, AJAX |
+| `includes/class-player.php` | `SleekAudio_Player` — shortcodes, block, REST, meta boxes, assets, embed, SEO output |
 | `assets/js/player.js` | Frontend player (vanilla JS, no dependencies) |
 | `assets/js/player.min.js` | **Generated** — never edit by hand |
 | `assets/css/player.css` | Frontend styles |

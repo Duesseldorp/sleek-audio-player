@@ -18,6 +18,7 @@ SLUG = "sleek-audio-player"
 # Everything the shipped plugin consists of - nothing else goes in
 INCLUDE = [
     "sleek-audio-player.php",
+    "includes/*.php",
     "uninstall.php",
     "readme.txt",
     "assets/css/*.css",
