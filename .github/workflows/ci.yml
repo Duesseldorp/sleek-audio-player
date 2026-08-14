@@ -156,6 +156,12 @@ jobs:
             code=$(echo "$body" | tail -n1)
             if [ "$code" != "200" ]; then
               echo "::error::$url returned HTTP $code - permalinks or seeding are broken"
+              echo "--- diagnostics ---"
+              npx wp-env run cli wp option get permalink_structure || true
+              npx wp-env run wordpress ls -la /var/www/html/.htaccess || echo "no .htaccess"
+              npx wp-env run wordpress cat /var/www/html/.htaccess || true
+              npx wp-env run wordpress bash -c "apache2ctl -M 2>/dev/null | grep -i rewrite" || echo "mod_rewrite not listed"
+              curl -sS -I "http://localhost:8888$url" || true
               exit 1
             fi
             if ! echo "$body" | grep -q "sap-player"; then

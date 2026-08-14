@@ -111,14 +111,35 @@ $no_player = sleekaudio_e2e_upsert(
     "This page contains no player at all.\n\nIt must not load any plugin assets."
 );
 
-// Hard flush so the rewrite rules (and .htaccess) are actually written
 flush_rewrite_rules(true);
 
+// WP-CLI has no $_SERVER['SERVER_SOFTWARE'], so WordPress does not consider
+// itself to be running under Apache and flush_rewrite_rules(true) silently
+// skips writing .htaccess - pretty permalinks then 404. Write it ourselves.
+global $wp_rewrite;
+$htaccess_file = ABSPATH . '.htaccess';
+$rules = $wp_rewrite->mod_rewrite_rules();
+if (empty($rules)) {
+    $rules = "<IfModule mod_rewrite.c>\n"
+        . "RewriteEngine On\n"
+        . "RewriteBase /\n"
+        . "RewriteRule ^index\\.php$ - [L]\n"
+        . "RewriteCond %{REQUEST_FILENAME} !-f\n"
+        . "RewriteCond %{REQUEST_FILENAME} !-d\n"
+        . "RewriteRule . /index.php [L]\n"
+        . "</IfModule>\n";
+}
+$written = file_put_contents($htaccess_file, "# BEGIN WordPress\n" . $rules . "# END WordPress\n");
+if ($written === false) {
+    WP_CLI::warning('Could not write ' . $htaccess_file . ' - pretty permalinks may 404.');
+}
+
 WP_CLI::success(sprintf(
-    'Seeded: playlist #%d, /player-page/ #%d, /player-mini/ #%d, /no-player-page/ #%d (permalinks: %s)',
+    'Seeded: playlist #%d, /player-page/ #%d, /player-mini/ #%d, /no-player-page/ #%d (permalinks: %s, .htaccess: %d bytes)',
     $playlist_id,
     $player_page,
     $mini_page,
     $no_player,
-    get_option('permalink_structure')
+    get_option('permalink_structure'),
+    (int) $written
 ));
