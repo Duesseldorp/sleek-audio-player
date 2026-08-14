@@ -1,0 +1,151 @@
+name: CI
+
+# Runs on every push and pull request. Catches the mistakes that used to slip
+# through until release time (or until a user reported them).
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  php-syntax:
+    name: PHP ${{ matrix.php }} syntax
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Lowest supported version (plugin header: Requires PHP 7.4) and a
+        # current one - enforces the compatibility promise instead of assuming it
+        php: ["7.4", "8.3"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      - name: Lint all PHP files
+        run: find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+
+  js-syntax:
+    name: JavaScript syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Check all JavaScript files parse
+        run: |
+          status=0
+          for f in assets/js/*.js; do
+            if node --check "$f"; then
+              echo "ok: $f"
+            else
+              echo "::error file=$f::Syntax error"
+              status=1
+            fi
+          done
+          exit $status
+
+  build-artifacts:
+    name: Generated files in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install rjsmin==1.2.5 rcssmin==1.2.2
+
+      - name: Minified assets match their sources
+        run: |
+          python tools/minify.py
+          if ! git diff --exit-code -- assets/js/player.min.js assets/css/player.min.css; then
+            echo "::error::player.min.js / player.min.css are out of date. Run 'python tools/minify.py' and commit the result."
+            exit 1
+          fi
+
+      - name: Compiled translations match their sources
+        run: |
+          python tools/po2mo.py
+          if ! git diff --exit-code -- languages/; then
+            echo "::error::.mo files are out of date. Run 'python tools/po2mo.py' and commit the result."
+            exit 1
+          fi
+
+      - name: Distribution ZIP builds and contains no development files
+        run: |
+          python tools/build-zip.py
+          python - <<'EOF'
+          import glob, sys, zipfile
+          zip_path = glob.glob("dist/sleek-audio-player-*.zip")[0]
+          names = zipfile.ZipFile(zip_path).namelist()
+          forbidden = ("LICENSE", "SECURITY", "CONTRIBUTING", "CODE_OF_CONDUCT",
+                       "DEVELOPMENT", "CLAUDE", "windsurfrules", ".github", "tools/", "readme.md")
+          leaks = [n for n in names if any(f in n for f in forbidden)]
+          if leaks:
+              print(f"::error::Development files leaked into the distribution ZIP: {leaks}")
+              sys.exit(1)
+          print(f"{zip_path}: {len(names)} files, clean")
+          EOF
+
+  version-consistency:
+    name: Version consistent in all four places
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compare plugin header, constant, readme.txt and readme.md
+        run: |
+          header=$(grep -oP '^\s*\*\s*Version:\s*\K[\d.]+' sleek-audio-player.php)
+          constant=$(grep -oP "SLEEKAUDIO_VERSION',\s*'\K[\d.]+" sleek-audio-player.php)
+          stable=$(grep -oP '^Stable tag:\s*\K[\d.]+' readme.txt)
+          current=$(grep -oP '^\*\*Current Version:\*\*\s*\K[\d.]+' readme.md)
+          echo "plugin header : $header"
+          echo "SLEEKAUDIO_VERSION: $constant"
+          echo "readme.txt    : $stable"
+          echo "readme.md     : $current"
+          if [ "$header" != "$constant" ] || [ "$header" != "$stable" ] || [ "$header" != "$current" ]; then
+            echo "::error::Version mismatch - all four locations must match (see DEVELOPMENT.md)."
+            exit 1
+          fi
+
+  plugin-check:
+    name: WordPress Plugin Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build tools
+        run: pip install rjsmin==1.2.5 rcssmin==1.2.2
+
+      - name: Build a clean plugin directory to scan
+        run: |
+          python tools/build-zip.py
+          mkdir -p build
+          unzip -q dist/sleek-audio-player-*.zip -d build
+
+      - name: Run Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: ./build/sleek-audio-player
+          # Advisory checks that the plugin deliberately does not follow are
+          # excluded; every remaining finding must stay at zero.
+          exclude-checks: |
+            late_escaping
+            plugin_review_phpcs
