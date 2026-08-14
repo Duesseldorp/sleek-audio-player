@@ -83,9 +83,47 @@ export class Player {
     return { from: before, to: (await this.state()).file };
   }
 
+  /**
+   * Opens the More menu and waits until it is really open, so tests that
+   * inspect the menu cannot pass vacuously against a closed menu (hidden
+   * elements still have layout).
+   */
   async openMoreMenu() {
+    await this.moreButton.scrollIntoViewIfNeeded();
     await this.moreButton.click();
-    await this.page.waitForTimeout(300); // menu transition
+
+    try {
+      await this.page.waitForFunction(
+        () => document.querySelector(".sap-more-wrapper")?.classList.contains("active"),
+        undefined,
+        { timeout: 5000 }
+      );
+    } catch (e) {
+      // Collect why it stayed closed instead of just timing out on a class assertion
+      const info = await this.page.evaluate(() => {
+        const btn = document.querySelector(".sap-more-btn");
+        const wrapper = document.querySelector(".sap-more-wrapper");
+        const rect = btn?.getBoundingClientRect();
+        const atPoint = rect
+          ? document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+          : null;
+        // Does a scripted click work where the real mouse click did not?
+        btn?.click();
+        const openedByScript = wrapper?.classList.contains("active") || false;
+        return {
+          buttonFound: !!btn,
+          wrapperClass: wrapper?.className || null,
+          buttonRect: rect ? { x: Math.round(rect.x), y: Math.round(rect.y), w: Math.round(rect.width), h: Math.round(rect.height) } : null,
+          elementAtButtonCentre: atPoint ? atPoint.tagName + "." + String(atPoint.className).split(" ").join(".") : null,
+          playerCount: document.querySelectorAll(".sap-player").length,
+          moreMenuExists: !!document.querySelector(".sap-more-menu"),
+          openedByScriptedClick: openedByScript,
+        };
+      });
+      throw new Error("More menu did not open after a real click. Diagnostics: " + JSON.stringify(info));
+    }
+
+    await this.page.waitForTimeout(200); // let the open transition settle
   }
 
   /**
