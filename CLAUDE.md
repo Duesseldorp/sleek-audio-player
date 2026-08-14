@@ -36,6 +36,9 @@ Hard constraints (details in DEVELOPMENT.md):
   Playwright end-to-end tests (`tests/e2e/`). Behaviour changes need a test;
   selectors belong in `tests/e2e/helpers/player.js`, content in
   `tests/seed.php`. Real devices/locked screens stay manual.
+- Flaky tests are fixed at the root cause, never with a longer
+  `waitForTimeout` — wait for a condition, not a duration; never skip a
+  test to get green.
 - Test on: a shortcode page, a page-builder page, and a page without a
   player (must load zero plugin assets). Never test against production.
   Local test site exists at https://duesseldorp-test.local/ (LocalWP,

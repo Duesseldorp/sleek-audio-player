@@ -69,6 +69,13 @@ Test content lives in tests/seed.php.
 E2E tests do NOT cover real devices, locked screens, audible sound, iOS
 Safari or page builders - those stay manual checks.
 
+Flaky tests are repaired at the root cause, NEVER calmed with a longer
+waitForTimeout. Wait for a condition (waitForFunction / auto-retrying
+expect), not for a duration. Consider that the flake may be a real bug.
+Never skip or quarantine a test to get green - fix it or delete it and say
+so. The only fixed wait allowed is when asserting something does NOT
+happen; there is one in menu.spec.js and it is commented as such.
+
 ## Testing before commit (browser behaviour is not automated)
 A local test environment EXISTS: https://duesseldorp-test.local/ (LocalWP).
 This repo is junction-linked into its plugins folder — every edit is live

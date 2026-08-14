@@ -212,6 +212,24 @@ npm run test:e2e  # just the tests, if the environment is already up
 4. Need another browser or a mobile viewport? Uncomment the projects in
    `playwright.config.js`.
 
+**Flaky tests are repaired at the root cause — never calmed with a longer
+`waitForTimeout`.** A suite that goes red at random gets ignored within weeks,
+and once it is ignored every other test in it is worthless too. So when a test
+becomes unreliable:
+
+1. **Wait for a condition, not for a duration.** `page.waitForFunction(...)` or
+   an auto-retrying `expect(...)` — never "sleep 300ms and hope". The helper
+   waits for the menu's animation to have *finished* (opacity 1, transform
+   settled) rather than for an assumed 200ms.
+2. **Ask whether the flake is real.** Timing that is unreliable in a test is
+   often unreliable for users too. The locked-screen playback bug behaved
+   exactly like a flaky test before it was understood.
+3. **The only legitimate fixed wait** is when asserting that something does
+   *not* happen — there is no condition to wait for. There is exactly one in
+   this suite (scroll tolerance in `menu.spec.js`), and it says so in a comment.
+4. **Never skip or quarantine a test to get green.** A skipped test is a lie
+   about coverage. Fix it, or delete it and say so in the commit message.
+
 **What these tests cannot cover:** real devices and locked screens, actual
 audible sound, iOS Safari, third-party page builders, visual design, and
 conflicts with other plugins. A green run means the logic works in headless

@@ -51,7 +51,9 @@ test.describe("More menu", () => {
     const player = new Player(page);
     await player.openMoreMenu();
 
-    // Within the threshold: stays open
+    // Within the threshold: stays open.
+    // This is the one legitimate fixed wait in the suite - the assertion is
+    // that something does NOT happen, and there is no condition to wait for.
     await page.mouse.wheel(0, 3);
     await page.waitForTimeout(300);
     await expect(player.moreWrapper).toHaveClass(/active/);

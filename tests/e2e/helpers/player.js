@@ -28,7 +28,11 @@ export class Player {
 
   async closeMoreMenu() {
     await this.page.mouse.click(2, 2); // click outside the menu
-    await this.page.waitForTimeout(150);
+    await this.page.waitForFunction(
+      () => !document.querySelector(".sap-more-wrapper")?.classList.contains("active"),
+      undefined,
+      { timeout: 5000 }
+    );
   }
 
   /**
@@ -41,7 +45,15 @@ export class Player {
       const label = (await this.repeatItem.textContent())?.trim() || "";
       if (label.includes(mode)) break;
       await this.repeatItem.click();
-      await this.page.waitForTimeout(150);
+      // Wait for the label to actually change instead of guessing a duration
+      await this.page.waitForFunction(
+        (previous) => {
+          const el = document.querySelector(".sap-more-item.sap-repeat");
+          return el && el.textContent.trim() !== previous;
+        },
+        label,
+        { timeout: 5000 }
+      );
     }
     const label = (await this.repeatItem.textContent())?.trim();
     if (!label?.includes(mode)) {
@@ -171,7 +183,22 @@ export class Player {
       throw new Error("More menu did not open after a real click. Diagnostics: " + JSON.stringify(info));
     }
 
-    await this.page.waitForTimeout(200); // let the open transition settle
+    // Wait for the opening animation to have finished, not for a guessed
+    // number of milliseconds - the menu fades in and scales from 0.95, and
+    // measuring mid-animation would give slightly wrong geometry.
+    await this.page.waitForFunction(
+      () => {
+        const menu = document.querySelector(".sap-more-menu");
+        if (!menu) return false;
+        const style = getComputedStyle(menu);
+        return (
+          style.opacity === "1" &&
+          (style.transform === "none" || style.transform === "matrix(1, 0, 0, 1, 0, 0)")
+        );
+      },
+      undefined,
+      { timeout: 5000 }
+    );
   }
 
   /**
