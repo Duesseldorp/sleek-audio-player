@@ -168,7 +168,7 @@ complies", not "it plays audio".
 ### End-to-end tests
 
 `tests/e2e/` drives a real browser against a real WordPress instance
-(`@wordpress/env` in Docker) on every push. 23 tests covering:
+(`@wordpress/env` in Docker) on every push. 38 tests covering:
 
 - **Playback**: starts, **track transitions at the end of a song** (the
   regression that shipped five times), next/previous, durations rendering
@@ -184,6 +184,17 @@ complies", not "it plays audio".
 - **Compatibility**: legacy `[simple_player]`, shared links
   (`?track=2&play=1`), two players on one page (the second pauses the first),
   global keyboard shortcuts (N, Space, S)
+- **Controls**: playback speed (`playbackRate`), volume mute/unmute, seeking
+  by clicking the waveform, sleep timer "End of Track" (stops instead of
+  advancing), download button visibility per track
+- **Embedding**: Gutenberg block, oEmbed endpoint (valid document, and 404 for
+  a non-playlist URL), embed-code generator incl. layout switch, `?embed=1`
+
+Still uncovered on purpose: visualizers, adaptive colours, cover carousel and
+swipe gestures — visual behaviour makes brittle tests. Uncovered and worth
+adding later: URL protection with expired tokens, resume playback, and pure
+PHP logic (validation, schema, token verification), which belongs in PHPUnit
+rather than a browser.
 
 Two rules learned the hard way:
 
