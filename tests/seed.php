@@ -112,6 +112,14 @@ $legacy_page = sleekaudio_e2e_upsert(
     "[simple_player id=\"{$playlist_id}\"]"
 );
 
+// Gutenberg block - the second official embedding path
+$block_page = sleekaudio_e2e_upsert(
+    'player-block',
+    'page',
+    'Player Block',
+    '<!-- wp:sleek-audio-player/player {"playlistId":"' . $playlist_id . '","layout":"wide"} /-->'
+);
+
 // Two players on one page - only one may play at a time
 $two_page = sleekaudio_e2e_upsert(
     'player-two',
@@ -151,11 +159,12 @@ if ($written === false) {
 }
 
 WP_CLI::success(sprintf(
-    'Seeded: playlist #%d, pages: player #%d, mini #%d, legacy #%d, two #%d, none #%d (permalinks: %s, .htaccess: %d bytes)',
+    'Seeded: playlist #%d, pages: player #%d, mini #%d, legacy #%d, block #%d, two #%d, none #%d (permalinks: %s, .htaccess: %d bytes)',
     $playlist_id,
     $player_page,
     $mini_page,
     $legacy_page,
+    $block_page,
     $two_page,
     $no_player,
     get_option('permalink_structure'),
