@@ -229,6 +229,9 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 * 🌍 The admin interface is now translatable as well: settings page, playlist editor, embed codes and the BunnyCDN guide - 74 further strings, German included
 * 🇩🇪 The WordPress menu entries ("Player Settings", "Settings") and the twelve visualizer options now appear in German too
 * 🔗 New track rows added in the editor use the same translated labels as existing ones (admin.js shares the strings with PHP)
+* 🎨 Theme Manager and Waveform Analysis are translated as well, including their dialogs and status messages - both pages had no translation support at all
+* 🐛 Fixed: the waveform page decided which files were pending by reading the status text, so translating it would have stopped the analyse button from finding anything. The state now lives in a data attribute
+* 📊 237 translatable strings in total, all with German wording
 
 = 2.6.1 =
 * 🐛 Fixed: the bundled translations never loaded. Since 2.5.7 the plugin looked for them in the wrong folder, so a German site still showed the English interface - including everything 2.6.0 had just translated

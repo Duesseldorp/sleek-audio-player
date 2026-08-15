@@ -177,6 +177,10 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 **One subtlety worth naming:** `admin.js` rebuilds a track row in JavaScript when you add one, duplicating the PHP markup. Translating only the PHP would have produced English placeholders in new rows next to German ones in existing rows. Both now read the same strings, via a `sapAdminText()` helper that mirrors the player's `sapText()` — English fallback mandatory.
 
+**Theme Manager and Waveform Analysis are covered too.** Both classes contained not a single translation call — every colour label, button, badge, table header, confirmation dialog and AJAX message was hardcoded English (the waveform page even had one German sentence mixed in). That is 86 further strings; 237 in total, all translated.
+
+**A bug this uncovered:** the waveform page selected pending files by reading the status column's text (`.text().includes('Pending')`). Translating that text would have left the analyse button unable to find anything — a feature broken by its own translation. The state now lives in a `data-status` attribute, where the display language cannot reach it.
+
 Deliberately left in English: product names (Spotify, Apple Music, bunny.net, Umami), example URLs, shortcode snippets and the `Access-Control-Allow-Origin` header name — translating those would make the instructions wrong.
 
 ### Version 2.6.1 (2026-08-15)

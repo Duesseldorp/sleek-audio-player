@@ -45,8 +45,8 @@ class SleekAudio_Waveform_Manager {
     public function add_waveform_menu() {
         add_submenu_page(
             'edit.php?post_type=sap_playlist',
-            'Waveform Analysis',
-            'Waveforms',
+            __('Waveform Analysis', 'sleek-audio-player'),
+            __('Waveforms', 'sleek-audio-player'),
             'manage_options',
             'sap-waveforms',
             array($this, 'render_waveform_page')
@@ -161,15 +161,15 @@ class SleekAudio_Waveform_Manager {
         $peaks = isset($_POST['peaks']) ? json_decode(wp_unslash($_POST['peaks']), true) : array();
 
         if (!$attachment_id || !is_array($peaks)) {
-            wp_send_json_error('Invalid data');
+            wp_send_json_error(__('Invalid data', 'sleek-audio-player'));
         }
 
         $peaks = array_map('floatval', $peaks);
         
         if (self::save_waveform($attachment_id, $peaks)) {
-            wp_send_json_success('Waveform saved');
+            wp_send_json_success(__('Waveform saved', 'sleek-audio-player'));
         } else {
-            wp_send_json_error('Failed to save waveform');
+            wp_send_json_error(__('Failed to save waveform', 'sleek-audio-player'));
         }
     }
     
@@ -187,7 +187,7 @@ class SleekAudio_Waveform_Manager {
         $file_path = get_attached_file($attachment_id);
         
         if (!$file_path || !file_exists($file_path)) {
-            wp_send_json_error('File not found');
+            wp_send_json_error(__('File not found', 'sleek-audio-player'));
         }
         
         // Try server-side analysis (basic approach using file sampling)
@@ -280,7 +280,7 @@ class SleekAudio_Waveform_Manager {
         
         // Validate peaks array
         if (!$attachment_id || !is_array($peaks) || count($peaks) < 10 || count($peaks) > 200) {
-            wp_send_json_error('Invalid data');
+            wp_send_json_error(__('Invalid data', 'sleek-audio-player'));
         }
         
         // Verify attachment exists and is audio
@@ -298,7 +298,7 @@ class SleekAudio_Waveform_Manager {
         if (self::save_waveform($attachment_id, $peaks)) {
             wp_send_json_success(array('saved' => true, 'attachment_id' => $attachment_id));
         } else {
-            wp_send_json_error('Failed to save waveform');
+            wp_send_json_error(__('Failed to save waveform', 'sleek-audio-player'));
         }
     }
     
@@ -310,28 +310,43 @@ class SleekAudio_Waveform_Manager {
         $pending_count = count(array_filter($attachments, function($a) { return !$a['has_waveform']; }));
         ?>
         <div class="wrap">
-            <h1>🎵 Waveform Analysis</h1>
-            <p>Generate real waveform data from your audio files for an authentic waveform display in the player.</p>
+            <h1>🎵 <?php echo esc_html__('Waveform Analysis', 'sleek-audio-player'); ?></h1>
+            <p><?php echo esc_html__('Generate real waveform data from your audio files for an authentic waveform display in the player.', 'sleek-audio-player'); ?></p>
             
             <div class="sap-waveform-stats" style="background:#fff;padding:20px;border:1px solid #ddd;border-radius:8px;margin:20px 0;">
-                <h2 style="margin-top:0;">Status</h2>
+                <h2 style="margin-top:0;"><?php echo esc_html__('Status', 'sleek-audio-player'); ?></h2>
                 <p>
-                    <strong><?php echo esc_html( count($attachments) ); ?></strong> audio files found in playlists<br>
-                    <strong style="color:#46b450;"><?php echo esc_html( count($attachments) - $pending_count ); ?></strong> analyzed<br>
-                    <strong style="color:#dc3232;"><?php echo esc_html( $pending_count ); ?></strong> pending
+                    <?php
+                    /* translators: %s is the number of audio files, wrapped in <strong> */
+                    echo wp_kses(sprintf(_n('%s audio file found in playlists', '%s audio files found in playlists', count($attachments), 'sleek-audio-player'), '<strong>' . esc_html(number_format_i18n(count($attachments))) . '</strong>'), array('strong' => array()));
+                    ?><br>
+                    <?php
+                    /* translators: %s is the number of analyzed files, wrapped in <strong> */
+                    echo wp_kses(sprintf(__('%s analyzed', 'sleek-audio-player'), '<strong style="color:#46b450;">' . esc_html(number_format_i18n(count($attachments) - $pending_count)) . '</strong>'), array('strong' => array('style' => array())));
+                    ?><br>
+                    <?php
+                    /* translators: %s is the number of pending files, wrapped in <strong> */
+                    echo wp_kses(sprintf(__('%s pending', 'sleek-audio-player'), '<strong style="color:#dc3232;">' . esc_html(number_format_i18n($pending_count)) . '</strong>'), array('strong' => array('style' => array())));
+                    ?>
                 </p>
                 
                 <?php if ($pending_count > 0) : ?>
                 <button type="button" id="sap-analyze-all" class="button button-primary button-hero" data-mode="pending">
-                    🔬 Analyze <?php echo esc_html( $pending_count ); ?> pending files
+                    🔬 <?php
+                    /* translators: %s is the number of files waiting to be analyzed */
+                    printf(esc_html(_n('Analyze %s pending file', 'Analyze %s pending files', $pending_count, 'sleek-audio-player')), esc_html(number_format_i18n($pending_count)));
+                    ?>
                 </button>
                 <?php else : ?>
-                <p style="color:#46b450;font-weight:600;">✓ All files have been analyzed!</p>
+                <p style="color:#46b450;font-weight:600;">✓ <?php echo esc_html__('All files have been analyzed!', 'sleek-audio-player'); ?></p>
                 <?php endif; ?>
                 
                 <?php if (count($attachments) > 0) : ?>
                 <button type="button" id="sap-reanalyze-all" class="button" style="margin-left:10px;">
-                    🔄 Re-analyze all <?php echo esc_html( count($attachments) ); ?> files
+                    🔄 <?php
+                    /* translators: %s is the total number of audio files */
+                    printf(esc_html(_n('Re-analyze the %s file', 'Re-analyze all %s files', count($attachments), 'sleek-audio-player')), esc_html(number_format_i18n(count($attachments))));
+                    ?>
                 </button>
                 <?php endif; ?>
                 
@@ -339,19 +354,19 @@ class SleekAudio_Waveform_Manager {
                     <div style="background:#e0e0e0;border-radius:4px;height:24px;overflow:hidden;">
                         <div id="sap-progress-bar" style="background:#0073aa;height:100%;width:0%;transition:width 0.3s;"></div>
                     </div>
-                    <p id="sap-progress-text" style="margin-top:10px;">Analyzing...</p>
+                    <p id="sap-progress-text" style="margin-top:10px;"><?php echo esc_html__('Analyzing...', 'sleek-audio-player'); ?></p>
                 </div>
             </div>
             
-            <h2>Audio Files</h2>
+            <h2><?php echo esc_html__('Audio Files', 'sleek-audio-player'); ?></h2>
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
                         <th style="width:40px;">ID</th>
-                        <th>Title</th>
-                        <th>Playlist</th>
-                        <th style="width:120px;">Status</th>
-                        <th style="width:200px;">Waveform</th>
+                        <th><?php echo esc_html__('Title', 'sleek-audio-player'); ?></th>
+                        <th><?php echo esc_html__('Playlist', 'sleek-audio-player'); ?></th>
+                        <th style="width:120px;"><?php echo esc_html__('Status', 'sleek-audio-player'); ?></th>
+                        <th style="width:200px;"><?php echo esc_html__('Waveform', 'sleek-audio-player'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -360,11 +375,11 @@ class SleekAudio_Waveform_Manager {
                         <td><?php echo esc_html( $att['id'] ); ?></td>
                         <td><?php echo esc_html($att['title']); ?></td>
                         <td><?php echo esc_html($att['playlist']); ?></td>
-                        <td>
+                        <td data-status="<?php echo esc_attr($att['has_waveform'] ? 'analyzed' : 'pending'); ?>">
                             <?php if ($att['has_waveform']) : ?>
-                                <span style="color:#46b450;">✓ Analyzed</span>
+                                <span style="color:#46b450;">✓ <?php echo esc_html__('Analyzed', 'sleek-audio-player'); ?></span>
                             <?php else : ?>
-                                <span style="color:#dc3232;">⏳ Pending</span>
+                                <span style="color:#dc3232;">⏳ <?php echo esc_html__('Pending', 'sleek-audio-player'); ?></span>
                             <?php endif; ?>
                         </td>
                         <td>
@@ -381,6 +396,23 @@ class SleekAudio_Waveform_Manager {
         <script>
         jQuery(document).ready(function($) {
             const nonce = '<?php echo esc_attr( wp_create_nonce('sap_waveform_nonce') ); ?>';
+
+            // Texts come from PHP so this page follows the site language too.
+            const sapI18n = {
+                analyzed: '<?php echo esc_js(__('Analyzed', 'sleek-audio-player')); ?>',
+                /* translators: %1$s is the current file number, %2$s the total */
+                analyzing: '<?php echo esc_js(__('Analyzing %1$s of %2$s...', 'sleek-audio-player')); ?>',
+                complete: '<?php echo esc_js(__('Analysis complete!', 'sleek-audio-player')); ?>',
+                done: '<?php echo esc_js(__('Done', 'sleek-audio-player')); ?>',
+                /* translators: %s is the number of files */
+                reanalyzed: '<?php echo esc_js(__('All %s files re-analyzed!', 'sleek-audio-player')); ?>'
+            };
+
+            function sapMarkAnalyzed($row) {
+                $row.find('td[data-status]')
+                    .attr('data-status', 'analyzed')
+                    .html('<span style="color:#46b450;">✓ ' + sapI18n.analyzed + '</span>');
+            }
             
             // Draw existing waveforms
             $('.sap-mini-waveform').each(function() {
@@ -424,7 +456,7 @@ class SleekAudio_Waveform_Manager {
                 // Get pending files
                 const pending = [];
                 $('tr[data-id]').each(function() {
-                    if ($(this).find('td:eq(3)').text().includes('Pending')) {
+                    if ($(this).find('td[data-status="pending"]').length) {
                         pending.push({
                             id: $(this).data('id'),
                             row: $(this)
@@ -436,7 +468,7 @@ class SleekAudio_Waveform_Manager {
                     const item = pending[i];
                     const percent = Math.round((i / pending.length) * 100);
                     $bar.css('width', percent + '%');
-                    $text.text('Analyzing ' + (i + 1) + ' of ' + pending.length + '...');
+                    $text.text(sapI18n.analyzing.replace('%1$s', i + 1).replace('%2$s', pending.length));
                     
                     try {
                         // First try server-side
@@ -460,13 +492,13 @@ class SleekAudio_Waveform_Manager {
                                 // Update UI
                                 const canvas = item.row.find('.sap-mini-waveform')[0];
                                 drawMiniWaveform(canvas, peaks);
-                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
+                                sapMarkAnalyzed(item.row);
                             }
                         } else if (response.success && response.data.peaks) {
                             // Server-side worked
                             const canvas = item.row.find('.sap-mini-waveform')[0];
                             drawMiniWaveform(canvas, response.data.peaks);
-                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
+                            sapMarkAnalyzed(item.row);
                         }
                     } catch (e) {
                         console.error('Error analyzing', item.id, e);
@@ -474,8 +506,8 @@ class SleekAudio_Waveform_Manager {
                 }
                 
                 $bar.css('width', '100%');
-                $text.text('✓ Analysis complete!');
-                $btn.text('✓ Done').prop('disabled', true);
+                $text.text('✓ ' + sapI18n.complete);
+                $btn.text('✓ ' + sapI18n.done).prop('disabled', true);
             });
             
             // Re-analyze ALL files button
@@ -502,7 +534,7 @@ class SleekAudio_Waveform_Manager {
                     const item = allFiles[i];
                     const percent = Math.round((i / allFiles.length) * 100);
                     $bar.css('width', percent + '%');
-                    $text.text('Analysiere ' + (i + 1) + ' von ' + allFiles.length + '...');
+                    $text.text(sapI18n.analyzing.replace('%1$s', i + 1).replace('%2$s', allFiles.length));
                     
                     try {
                         // First try server-side
@@ -526,13 +558,13 @@ class SleekAudio_Waveform_Manager {
                                 // Update UI
                                 const canvas = item.row.find('.sap-mini-waveform')[0];
                                 drawMiniWaveform(canvas, peaks);
-                                item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
+                                sapMarkAnalyzed(item.row);
                             }
                         } else if (response.success && response.data.peaks) {
                             // Server-side worked
                             const canvas = item.row.find('.sap-mini-waveform')[0];
                             drawMiniWaveform(canvas, response.data.peaks);
-                            item.row.find('td:eq(3)').html('<span style="color:#46b450;">✓ Analyzed</span>');
+                            sapMarkAnalyzed(item.row);
                         }
                     } catch (e) {
                         console.error('Error analyzing', item.id, e);
@@ -540,8 +572,8 @@ class SleekAudio_Waveform_Manager {
                 }
                 
                 $bar.css('width', '100%');
-                $text.text('✓ All ' + allFiles.length + ' files re-analyzed!');
-                $btn.text('✓ Done').prop('disabled', true);
+                $text.text('✓ ' + sapI18n.reanalyzed.replace('%s', allFiles.length));
+                $btn.text('✓ ' + sapI18n.done).prop('disabled', true);
             });
             
             // Client-side audio analysis using Web Audio API

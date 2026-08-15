@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sleek Audio Player 2.7.0\n"
 "Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
-"POT-Creation-Date: 2026-08-15 10:19+0000\n"
+"POT-Creation-Date: 2026-08-15 10:30+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -23,7 +23,7 @@ msgstr ""
 msgid "Player Settings"
 msgstr ""
 
-#: includes/class-player.php:694
+#: includes/class-player.php:694 includes/class-theme-manager.php:1181
 msgid "Settings"
 msgstr ""
 
@@ -363,7 +363,7 @@ msgstr ""
 msgid "Select cover"
 msgstr ""
 
-#: includes/class-player.php:1139 includes/class-player.php:1234
+#: includes/class-player.php:1139 includes/class-player.php:1234 includes/class-waveform-manager.php:366
 msgid "Title"
 msgstr ""
 
@@ -379,7 +379,7 @@ msgstr ""
 msgid "Playlists"
 msgstr ""
 
-#: includes/class-player.php:1162 includes/class-player.php:1804
+#: includes/class-player.php:1162 includes/class-player.php:1804 includes/class-theme-manager.php:544 includes/class-waveform-manager.php:367
 msgid "Playlist"
 msgstr ""
 
@@ -620,8 +620,367 @@ msgid "Preview"
 msgstr ""
 
 #. translators: %s is the number of tracks in the playlist
-#: includes/class-player.php:1683
+#: includes/class-player.php:1683 includes/class-theme-manager.php:1221
 msgid "%s Track"
 msgid_plural "%s Tracks"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-theme-manager.php:154 includes/class-theme-manager.php:1089
+msgid "Theme Manager"
+msgstr ""
+
+#: includes/class-theme-manager.php:155
+msgid "Themes"
+msgstr ""
+
+#: includes/class-theme-manager.php:457
+msgid "Theme saved!"
+msgstr ""
+
+#: includes/class-theme-manager.php:475
+msgid "Theme deleted!"
+msgstr ""
+
+#: includes/class-theme-manager.php:477
+msgid "Default theme cannot be deleted."
+msgstr ""
+
+#: includes/class-theme-manager.php:497
+msgid "Theme not found."
+msgstr ""
+
+#: includes/class-theme-manager.php:514
+msgid "Theme activated!"
+msgstr ""
+
+#: includes/class-theme-manager.php:528
+msgid "Backgrounds"
+msgstr ""
+
+#: includes/class-theme-manager.php:530
+msgid "Player Background (outer)"
+msgstr ""
+
+#: includes/class-theme-manager.php:531
+msgid "Player Background (inner)"
+msgstr ""
+
+#: includes/class-theme-manager.php:532
+msgid "Border Color"
+msgstr ""
+
+#: includes/class-theme-manager.php:536
+msgid "Buttons"
+msgstr ""
+
+#: includes/class-theme-manager.php:538
+msgid "Button Background (pressed)"
+msgstr ""
+
+#: includes/class-theme-manager.php:539
+msgid "Active Toggle Color (Shuffle, Repeat)"
+msgstr ""
+
+#: includes/class-theme-manager.php:540
+msgid "Active Toggle Hover"
+msgstr ""
+
+#: includes/class-theme-manager.php:546
+msgid "Track Hover (mouse over)"
+msgstr ""
+
+#: includes/class-theme-manager.php:547
+msgid "Current Track (background)"
+msgstr ""
+
+#: includes/class-theme-manager.php:551
+msgid "Progress & Visualizer"
+msgstr ""
+
+#: includes/class-theme-manager.php:553
+msgid "Progress Bar & Visualizer"
+msgstr ""
+
+#: includes/class-theme-manager.php:554
+msgid "Progress Bar (inactive)"
+msgstr ""
+
+#: includes/class-theme-manager.php:555
+msgid "Glow Effect (shadow)"
+msgstr ""
+
+#: includes/class-theme-manager.php:556
+msgid "Glow Effect (strong)"
+msgstr ""
+
+#: includes/class-theme-manager.php:557
+msgid "Glow Effect (soft)"
+msgstr ""
+
+#: includes/class-theme-manager.php:561
+msgid "Text"
+msgstr ""
+
+#: includes/class-theme-manager.php:563
+msgid "Title & Primary Text"
+msgstr ""
+
+#: includes/class-theme-manager.php:564
+msgid "Track Title in Playlist"
+msgstr ""
+
+#: includes/class-theme-manager.php:565
+msgid "Button Icons & Subtitle"
+msgstr ""
+
+#: includes/class-theme-manager.php:566
+msgid "Artist & Time Display"
+msgstr ""
+
+#: includes/class-theme-manager.php:567
+msgid "Track Numbers & Dimmed Text"
+msgstr ""
+
+#: includes/class-theme-manager.php:571
+msgid "Effects"
+msgstr ""
+
+#: includes/class-theme-manager.php:573
+msgid "Blue Overlay (Cover)"
+msgstr ""
+
+#: includes/class-theme-manager.php:579
+msgid "Border Radius"
+msgstr ""
+
+#: includes/class-theme-manager.php:580
+msgid "Border Radius (Small)"
+msgstr ""
+
+#: includes/class-theme-manager.php:581
+msgid "Animation Timing"
+msgstr ""
+
+#: includes/class-theme-manager.php:1091
+msgid "Import"
+msgstr ""
+
+#: includes/class-theme-manager.php:1092
+msgid "Export"
+msgstr ""
+
+#: includes/class-theme-manager.php:1101
+msgid "Saved Themes"
+msgstr ""
+
+#: includes/class-theme-manager.php:1114
+msgid "Standard"
+msgstr ""
+
+#: includes/class-theme-manager.php:1117
+msgid "Active"
+msgstr ""
+
+#: includes/class-theme-manager.php:1124
+msgid "Create New Theme"
+msgstr ""
+
+#: includes/class-theme-manager.php:1130
+msgid "Edit Theme"
+msgstr ""
+
+#: includes/class-theme-manager.php:1132
+msgid "Reset"
+msgstr ""
+
+#: includes/class-theme-manager.php:1133
+msgid "Delete"
+msgstr ""
+
+#: includes/class-theme-manager.php:1134
+msgid "Activate"
+msgstr ""
+
+#: includes/class-theme-manager.php:1135
+msgid "Save"
+msgstr ""
+
+#: includes/class-theme-manager.php:1144
+msgid "Theme Name"
+msgstr ""
+
+#: includes/class-theme-manager.php:1145
+msgid "My Theme"
+msgstr ""
+
+#: includes/class-theme-manager.php:1218
+msgid "Track Title"
+msgstr ""
+
+#: includes/class-theme-manager.php:1219
+msgid "Artist Name"
+msgstr ""
+
+#: includes/class-theme-manager.php:1256
+msgid "Active Track"
+msgstr ""
+
+#: includes/class-theme-manager.php:1261
+msgid "Next Song"
+msgstr ""
+
+#: includes/class-theme-manager.php:1266
+msgid "Hover State"
+msgstr ""
+
+#. translators: %s is the theme name
+#: includes/class-theme-manager.php:1286
+msgid "Theme: %s"
+msgstr ""
+
+#: includes/class-theme-manager.php:1287
+msgid "New Theme"
+msgstr ""
+
+#: includes/class-theme-manager.php:1288
+msgid "Reset all colors to default?"
+msgstr ""
+
+#: includes/class-theme-manager.php:1289
+msgid "Really delete this theme?"
+msgstr ""
+
+#: includes/class-theme-manager.php:1290
+msgid "Please enter a name."
+msgstr ""
+
+#: includes/class-theme-manager.php:1291
+msgid "Please save the theme first."
+msgstr ""
+
+#: includes/class-theme-manager.php:1292
+msgid "Invalid theme file: missing colors or settings."
+msgstr ""
+
+#. translators: %s is the theme name
+#: includes/class-theme-manager.php:1294
+msgid "Theme \"%s\" imported and saved!"
+msgstr ""
+
+#: includes/class-theme-manager.php:1295
+msgid "Error:"
+msgstr ""
+
+#: includes/class-theme-manager.php:1296
+msgid "Error saving imported theme:"
+msgstr ""
+
+#: includes/class-theme-manager.php:1297
+msgid "Error parsing theme file:"
+msgstr ""
+
+#: includes/class-waveform-manager.php:48 includes/class-waveform-manager.php:313
+msgid "Waveform Analysis"
+msgstr ""
+
+#: includes/class-waveform-manager.php:49
+msgid "Waveforms"
+msgstr ""
+
+#: includes/class-waveform-manager.php:164 includes/class-waveform-manager.php:283
+msgid "Invalid data"
+msgstr ""
+
+#: includes/class-waveform-manager.php:170
+msgid "Waveform saved"
+msgstr ""
+
+#: includes/class-waveform-manager.php:172 includes/class-waveform-manager.php:301
+msgid "Failed to save waveform"
+msgstr ""
+
+#: includes/class-waveform-manager.php:190
+msgid "File not found"
+msgstr ""
+
+#: includes/class-waveform-manager.php:314
+msgid "Generate real waveform data from your audio files for an authentic waveform display in the player."
+msgstr ""
+
+#: includes/class-waveform-manager.php:317 includes/class-waveform-manager.php:368
+msgid "Status"
+msgstr ""
+
+#. translators: %s is the number of analyzed files, wrapped in <strong>
+#: includes/class-waveform-manager.php:325
+msgid "%s analyzed"
+msgstr ""
+
+#. translators: %s is the number of pending files, wrapped in <strong>
+#: includes/class-waveform-manager.php:329
+msgid "%s pending"
+msgstr ""
+
+#: includes/class-waveform-manager.php:341
+msgid "All files have been analyzed!"
+msgstr ""
+
+#: includes/class-waveform-manager.php:357
+msgid "Analyzing..."
+msgstr ""
+
+#: includes/class-waveform-manager.php:361
+msgid "Audio Files"
+msgstr ""
+
+#: includes/class-waveform-manager.php:369
+msgid "Waveform"
+msgstr ""
+
+#: includes/class-waveform-manager.php:380 includes/class-waveform-manager.php:402
+msgid "Analyzed"
+msgstr ""
+
+#: includes/class-waveform-manager.php:382
+msgid "Pending"
+msgstr ""
+
+#. translators: %1$s is the current file number, %2$s the total
+#: includes/class-waveform-manager.php:404
+msgid "Analyzing %1$s of %2$s..."
+msgstr ""
+
+#: includes/class-waveform-manager.php:405
+msgid "Analysis complete!"
+msgstr ""
+
+#: includes/class-waveform-manager.php:406
+msgid "Done"
+msgstr ""
+
+#. translators: %s is the number of files
+#: includes/class-waveform-manager.php:408
+msgid "All %s files re-analyzed!"
+msgstr ""
+
+#. translators: %s is the number of audio files, wrapped in <strong>
+#: includes/class-waveform-manager.php:321
+msgid "%s audio file found in playlists"
+msgid_plural "%s audio files found in playlists"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s is the number of files waiting to be analyzed
+#: includes/class-waveform-manager.php:337
+msgid "Analyze %s pending file"
+msgid_plural "Analyze %s pending files"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s is the total number of audio files
+#: includes/class-waveform-manager.php:348
+msgid "Re-analyze the %s file"
+msgid_plural "Re-analyze all %s files"
 msgstr[0] ""
 msgstr[1] ""

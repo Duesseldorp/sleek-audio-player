@@ -151,8 +151,8 @@ class SleekAudio_Theme_Manager {
     public function add_theme_menu() {
         add_submenu_page(
             'edit.php?post_type=sap_playlist',
-            'Theme Manager',
-            'Themes',
+            __('Theme Manager', 'sleek-audio-player'),
+            __('Themes', 'sleek-audio-player'),
             'manage_options',
             'sap-themes',
             array($this, 'render_theme_page')
@@ -454,7 +454,7 @@ class SleekAudio_Theme_Manager {
         
         wp_send_json_success(array(
             'id' => $id,
-            'message' => 'Theme saved!',
+            'message' => __('Theme saved!', 'sleek-audio-player'),
         ));
     }
     
@@ -472,9 +472,9 @@ class SleekAudio_Theme_Manager {
         $result = $this->delete_theme($id);
         
         if ($result) {
-            wp_send_json_success('Theme deleted!');
+            wp_send_json_success(__('Theme deleted!', 'sleek-audio-player'));
         } else {
-            wp_send_json_error('Default theme cannot be deleted.');
+            wp_send_json_error(__('Default theme cannot be deleted.', 'sleek-audio-player'));
         }
     }
     
@@ -494,7 +494,7 @@ class SleekAudio_Theme_Manager {
         if ($theme) {
             wp_send_json_success($theme);
         } else {
-            wp_send_json_error('Theme not found.');
+            wp_send_json_error(__('Theme not found.', 'sleek-audio-player'));
         }
     }
     
@@ -511,7 +511,7 @@ class SleekAudio_Theme_Manager {
         $id = isset($_POST['id']) ? absint($_POST['id']) : 0;
         update_option('sap_active_theme_id', $id);
         
-        wp_send_json_success('Theme activated!');
+        wp_send_json_success(__('Theme activated!', 'sleek-audio-player'));
     }
     
     /**
@@ -525,60 +525,60 @@ class SleekAudio_Theme_Manager {
         // Grouped color labels for better organization
         $color_groups = array(
             'background' => array(
-                'title' => '🎨 Backgrounds',
+                'title' => '🎨 ' . __('Backgrounds', 'sleek-audio-player'),
                 'colors' => array(
-                    'sap-bg' => 'Player Background (outer)',
-                    'sap-card' => 'Player Background (inner)',
-                    'sap-border' => 'Border Color',
+                    'sap-bg' => __('Player Background (outer)', 'sleek-audio-player'),
+                    'sap-card' => __('Player Background (inner)', 'sleek-audio-player'),
+                    'sap-border' => __('Border Color', 'sleek-audio-player'),
                 )
             ),
             'buttons' => array(
-                'title' => '🔘 Buttons',
+                'title' => '🔘 ' . __('Buttons', 'sleek-audio-player'),
                 'colors' => array(
-                    'sap-btn-bg' => 'Button Background (pressed)',
-                    'sap-accent' => 'Active Toggle Color (Shuffle, Repeat)',
-                    'sap-accent-light' => 'Active Toggle Hover',
+                    'sap-btn-bg' => __('Button Background (pressed)', 'sleek-audio-player'),
+                    'sap-accent' => __('Active Toggle Color (Shuffle, Repeat)', 'sleek-audio-player'),
+                    'sap-accent-light' => __('Active Toggle Hover', 'sleek-audio-player'),
                 )
             ),
             'playlist' => array(
-                'title' => '📋 Playlist',
+                'title' => '📋 ' . __('Playlist', 'sleek-audio-player'),
                 'colors' => array(
-                    'sap-card-hover' => 'Track Hover (mouse over)',
-                    'sap-track-active' => 'Current Track (background)',
+                    'sap-card-hover' => __('Track Hover (mouse over)', 'sleek-audio-player'),
+                    'sap-track-active' => __('Current Track (background)', 'sleek-audio-player'),
                 )
             ),
             'progress' => array(
-                'title' => '🎵 Progress & Visualizer',
+                'title' => '🎵 ' . __('Progress & Visualizer', 'sleek-audio-player'),
                 'colors' => array(
-                    'sap-visualizer' => 'Progress Bar & Visualizer',
-                    'sap-waveform-inactive' => 'Progress Bar (inactive)',
-                    'sap-accent-glow' => 'Glow Effect (shadow)',
-                    'sap-accent-glow-strong' => 'Glow Effect (strong)',
-                    'sap-accent-glow-soft' => 'Glow Effect (soft)',
+                    'sap-visualizer' => __('Progress Bar & Visualizer', 'sleek-audio-player'),
+                    'sap-waveform-inactive' => __('Progress Bar (inactive)', 'sleek-audio-player'),
+                    'sap-accent-glow' => __('Glow Effect (shadow)', 'sleek-audio-player'),
+                    'sap-accent-glow-strong' => __('Glow Effect (strong)', 'sleek-audio-player'),
+                    'sap-accent-glow-soft' => __('Glow Effect (soft)', 'sleek-audio-player'),
                 )
             ),
             'text' => array(
-                'title' => '📝 Text',
+                'title' => '📝 ' . __('Text', 'sleek-audio-player'),
                 'colors' => array(
-                    'sap-white' => 'Title & Primary Text',
-                    'sap-gray-100' => 'Track Title in Playlist',
-                    'sap-gray-200' => 'Button Icons & Subtitle',
-                    'sap-gray-300' => 'Artist & Time Display',
-                    'sap-gray-400' => 'Track Numbers & Dimmed Text',
+                    'sap-white' => __('Title & Primary Text', 'sleek-audio-player'),
+                    'sap-gray-100' => __('Track Title in Playlist', 'sleek-audio-player'),
+                    'sap-gray-200' => __('Button Icons & Subtitle', 'sleek-audio-player'),
+                    'sap-gray-300' => __('Artist & Time Display', 'sleek-audio-player'),
+                    'sap-gray-400' => __('Track Numbers & Dimmed Text', 'sleek-audio-player'),
                 )
             ),
             'effects' => array(
-                'title' => '💫 Effects',
+                'title' => '💫 ' . __('Effects', 'sleek-audio-player'),
                 'colors' => array(
-                    'sap-blue-tint' => 'Blue Overlay (Cover)',
+                    'sap-blue-tint' => __('Blue Overlay (Cover)', 'sleek-audio-player'),
                 )
             ),
         );
         
         $settings_labels = array(
-            'sap-radius' => 'Border Radius',
-            'sap-radius-sm' => 'Border Radius (Small)',
-            'sap-transition' => 'Animation Timing',
+            'sap-radius' => __('Border Radius', 'sleek-audio-player'),
+            'sap-radius-sm' => __('Border Radius (Small)', 'sleek-audio-player'),
+            'sap-transition' => __('Animation Timing', 'sleek-audio-player'),
         );
         ?>
         <style>
@@ -1086,10 +1086,10 @@ class SleekAudio_Theme_Manager {
         
         <div class="sap-theme-manager">
             <div class="sap-theme-header">
-                <h1>🎨 Theme Manager</h1>
+                <h1>🎨 <?php echo esc_html__('Theme Manager', 'sleek-audio-player'); ?></h1>
                 <div class="sap-theme-header-actions">
-                    <button type="button" class="sap-btn sap-btn-secondary" id="sap-import-theme">📥 Import</button>
-                    <button type="button" class="sap-btn sap-btn-secondary" id="sap-export-theme">📤 Export</button>
+                    <button type="button" class="sap-btn sap-btn-secondary" id="sap-import-theme">📥 <?php echo esc_html__('Import', 'sleek-audio-player'); ?></button>
+                    <button type="button" class="sap-btn sap-btn-secondary" id="sap-export-theme">📤 <?php echo esc_html__('Export', 'sleek-audio-player'); ?></button>
                     <input type="file" id="sap-import-file" accept=".json" style="display:none;">
                 </div>
             </div>
@@ -1098,7 +1098,7 @@ class SleekAudio_Theme_Manager {
                 <!-- Themes List -->
                 <div>
                     <div class="sap-themes-list">
-                        <div class="sap-themes-list-header">Saved Themes</div>
+                        <div class="sap-themes-list-header"><?php echo esc_html__('Saved Themes', 'sleek-audio-player'); ?></div>
                         <?php foreach ($themes as $theme) : 
                             $is_active = ($active_id == $theme['id']) || ($active_id == 0 && $theme['is_default']);
                             $accent = $theme['colors']['sap-accent'] ?? '#e85d3d';
@@ -1111,28 +1111,28 @@ class SleekAudio_Theme_Manager {
                                     <div class="sap-theme-name">
                                         <?php echo esc_html($theme['name']); ?>
                                         <?php if ($theme['is_default']) : ?>
-                                            <span class="sap-theme-badge sap-badge-default">Standard</span>
+                                            <span class="sap-theme-badge sap-badge-default"><?php echo esc_html__('Standard', 'sleek-audio-player'); ?></span>
                                         <?php endif; ?>
                                         <?php if ($is_active) : ?>
-                                            <span class="sap-theme-badge sap-badge-active">Active</span>
+                                            <span class="sap-theme-badge sap-badge-active"><?php echo esc_html__('Active', 'sleek-audio-player'); ?></span>
                                         <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         <?php endforeach; ?>
                     </div>
-                    <button type="button" class="sap-new-theme-btn" id="sap-new-theme">+ Create New Theme</button>
+                    <button type="button" class="sap-new-theme-btn" id="sap-new-theme">+ <?php echo esc_html__('Create New Theme', 'sleek-audio-player'); ?></button>
                 </div>
                 
                 <!-- Theme Editor -->
                 <div class="sap-theme-editor" id="sap-theme-editor">
                     <div class="sap-editor-header">
-                        <div class="sap-editor-title" id="sap-editor-title">Edit Theme</div>
+                        <div class="sap-editor-title" id="sap-editor-title"><?php echo esc_html__('Edit Theme', 'sleek-audio-player'); ?></div>
                         <div class="sap-editor-actions">
-                            <button type="button" class="sap-btn sap-btn-secondary" id="sap-reset-theme">↺ Reset</button>
-                            <button type="button" class="sap-btn sap-btn-danger" id="sap-delete-theme" style="display:none;">🗑 Delete</button>
-                            <button type="button" class="sap-btn sap-btn-success" id="sap-activate-theme">✓ Activate</button>
-                            <button type="button" class="sap-btn sap-btn-primary" id="sap-save-theme">💾 Save</button>
+                            <button type="button" class="sap-btn sap-btn-secondary" id="sap-reset-theme">↺ <?php echo esc_html__('Reset', 'sleek-audio-player'); ?></button>
+                            <button type="button" class="sap-btn sap-btn-danger" id="sap-delete-theme" style="display:none;">🗑 <?php echo esc_html__('Delete', 'sleek-audio-player'); ?></button>
+                            <button type="button" class="sap-btn sap-btn-success" id="sap-activate-theme">✓ <?php echo esc_html__('Activate', 'sleek-audio-player'); ?></button>
+                            <button type="button" class="sap-btn sap-btn-primary" id="sap-save-theme">💾 <?php echo esc_html__('Save', 'sleek-audio-player'); ?></button>
                         </div>
                     </div>
                     
@@ -1141,8 +1141,8 @@ class SleekAudio_Theme_Manager {
                         <input type="hidden" name="is_default" id="sap-theme-is-default" value="0">
                         
                         <div class="sap-name-field">
-                            <label for="sap-theme-name">Theme Name</label>
-                            <input type="text" name="name" id="sap-theme-name" value="" placeholder="My Theme" required>
+                            <label for="sap-theme-name"><?php echo esc_html__('Theme Name', 'sleek-audio-player'); ?></label>
+                            <input type="text" name="name" id="sap-theme-name" value="" placeholder="<?php echo esc_attr__('My Theme', 'sleek-audio-player'); ?>" required>
                         </div>
                         
                         <?php foreach ($color_groups as $group_key => $group) : ?>
@@ -1178,7 +1178,7 @@ class SleekAudio_Theme_Manager {
                         <?php endforeach; ?>
                         
                         <div class="sap-color-section">
-                            <h3>⚙️ Settings</h3>
+                            <h3>⚙️ <?php echo esc_html__('Settings', 'sleek-audio-player'); ?></h3>
                             <div class="sap-color-grid">
                                 <?php foreach ($settings_labels as $var => $label) : 
                                     $default_value = $default_theme['settings'][$var] ?? '16px';
@@ -1215,10 +1215,10 @@ class SleekAudio_Theme_Manager {
                             </div>
                             <div class="sap-preview-content">
                                 <div class="sap-preview-info">
-                                    <div class="sap-preview-title">Track Title</div>
-                                    <div class="sap-preview-artist">Artist Name</div>
+                                    <div class="sap-preview-title"><?php echo esc_html__('Track Title', 'sleek-audio-player'); ?></div>
+                                    <div class="sap-preview-artist"><?php echo esc_html__('Artist Name', 'sleek-audio-player'); ?></div>
                                     <div class="sap-preview-meta">
-                                        <span class="sap-preview-meta-text">5 Tracks</span>
+                                        <span class="sap-preview-meta-text"><?php printf(esc_html(_n('%s Track', '%s Tracks', 5, 'sleek-audio-player')), esc_html(number_format_i18n(5))); ?></span>
                                         <span class="sap-preview-meta-dot"></span>
                                         <span class="sap-preview-meta-text">12:34</span>
                                     </div>
@@ -1253,17 +1253,17 @@ class SleekAudio_Theme_Manager {
                                 <div class="sap-preview-playlist">
                                     <div class="sap-preview-track active">
                                         <span class="sap-preview-track-num">●</span>
-                                        <span class="sap-preview-track-title">Active Track</span>
+                                        <span class="sap-preview-track-title"><?php echo esc_html__('Active Track', 'sleek-audio-player'); ?></span>
                                         <span class="sap-preview-track-duration">3:45</span>
                                     </div>
                                     <div class="sap-preview-track">
                                         <span class="sap-preview-track-num">2</span>
-                                        <span class="sap-preview-track-title">Next Song</span>
+                                        <span class="sap-preview-track-title"><?php echo esc_html__('Next Song', 'sleek-audio-player'); ?></span>
                                         <span class="sap-preview-track-duration">4:12</span>
                                     </div>
                                     <div class="sap-preview-track hover">
                                         <span class="sap-preview-track-num">3</span>
-                                        <span class="sap-preview-track-title">Hover State</span>
+                                        <span class="sap-preview-track-title"><?php echo esc_html__('Hover State', 'sleek-audio-player'); ?></span>
                                         <span class="sap-preview-track-duration">2:58</span>
                                     </div>
                                 </div>
@@ -1279,7 +1279,24 @@ class SleekAudio_Theme_Manager {
             var defaultTheme = <?php echo wp_json_encode($default_theme); ?>;
             var currentThemeId = null;
             var nonce = '<?php echo esc_attr( wp_create_nonce('sap_theme_nonce') ); ?>';
-            
+
+            // Dialog texts come from PHP so this page follows the site language.
+            var sapThemeI18n = {
+                /* translators: %s is the theme name */
+                themeNamed: '<?php echo esc_js(__('Theme: %s', 'sleek-audio-player')); ?>',
+                newTheme: '<?php echo esc_js(__('New Theme', 'sleek-audio-player')); ?>',
+                confirmReset: '<?php echo esc_js(__('Reset all colors to default?', 'sleek-audio-player')); ?>',
+                confirmDelete: '<?php echo esc_js(__('Really delete this theme?', 'sleek-audio-player')); ?>',
+                enterName: '<?php echo esc_js(__('Please enter a name.', 'sleek-audio-player')); ?>',
+                saveFirst: '<?php echo esc_js(__('Please save the theme first.', 'sleek-audio-player')); ?>',
+                invalidFile: '<?php echo esc_js(__('Invalid theme file: missing colors or settings.', 'sleek-audio-player')); ?>',
+                /* translators: %s is the theme name */
+                imported: '<?php echo esc_js(__('Theme "%s" imported and saved!', 'sleek-audio-player')); ?>',
+                error: '<?php echo esc_js(__('Error:', 'sleek-audio-player')); ?>',
+                errorSaveImport: '<?php echo esc_js(__('Error saving imported theme:', 'sleek-audio-player')); ?>',
+                errorParse: '<?php echo esc_js(__('Error parsing theme file:', 'sleek-audio-player')); ?>'
+            };
+
             // Update preview
             function updatePreview() {
                 var preview = $('#sap-theme-preview');
@@ -1402,7 +1419,7 @@ class SleekAudio_Theme_Manager {
                 $('#sap-theme-id').val(theme.id || '');
                 $('#sap-theme-is-default').val(theme.is_default || 0);
                 $('#sap-theme-name').val(theme.name || '');
-                $('#sap-editor-title').text(theme.name ? 'Theme: ' + theme.name : 'New Theme');
+                $('#sap-editor-title').text(theme.name ? sapThemeI18n.themeNamed.replace('%s', theme.name) : sapThemeI18n.newTheme);
                 
                 // Load colors
                 if (theme.colors) {
@@ -1473,7 +1490,7 @@ class SleekAudio_Theme_Manager {
             
             // Reset to default
             $('#sap-reset-theme').on('click', function() {
-                if (confirm('Reset all colors to default?')) {
+                if (confirm(sapThemeI18n.confirmReset)) {
                     loadTheme({
                         id: currentThemeId,
                         name: $('#sap-theme-name').val(),
@@ -1488,7 +1505,7 @@ class SleekAudio_Theme_Manager {
             $('#sap-save-theme').on('click', function() {
                 var name = $('#sap-theme-name').val();
                 if (!name) {
-                    alert('Please enter a name.');
+                    alert(sapThemeI18n.enterName);
                     return;
                 }
                 
@@ -1514,14 +1531,14 @@ class SleekAudio_Theme_Manager {
                         alert(response.data.message);
                         location.reload();
                     } else {
-                        alert('Error: ' + response.data);
+                        alert(sapThemeI18n.error + ' ' + response.data);
                     }
                 });
             });
             
             // Delete theme
             $('#sap-delete-theme').on('click', function() {
-                if (!confirm('Really delete this theme?')) return;
+                if (!confirm(sapThemeI18n.confirmDelete)) return;
                 
                 $.post(ajaxurl, {
                     action: 'sap_delete_theme',
@@ -1531,7 +1548,7 @@ class SleekAudio_Theme_Manager {
                     if (response.success) {
                         location.reload();
                     } else {
-                        alert('Error: ' + response.data);
+                        alert(sapThemeI18n.error + ' ' + response.data);
                     }
                 });
             });
@@ -1539,7 +1556,7 @@ class SleekAudio_Theme_Manager {
             // Activate theme
             $('#sap-activate-theme').on('click', function() {
                 if (!currentThemeId) {
-                    alert('Please save the theme first.');
+                    alert(sapThemeI18n.saveFirst);
                     return;
                 }
                 
@@ -1612,7 +1629,7 @@ class SleekAudio_Theme_Manager {
                         
                         // Validate structure
                         if (!themeData.colors || !themeData.settings) {
-                            alert('Invalid theme file: missing colors or settings.');
+                            alert(sapThemeI18n.invalidFile);
                             return;
                         }
                         
@@ -1631,14 +1648,14 @@ class SleekAudio_Theme_Manager {
                         
                         $.post(ajaxurl, saveData, function(response) {
                             if (response.success) {
-                                alert('Theme "' + themeName + '" imported and saved!');
+                                alert(sapThemeI18n.imported.replace('%s', themeName));
                                 location.reload();
                             } else {
-                                alert('Error saving imported theme: ' + response.data);
+                                alert(sapThemeI18n.errorSaveImport + ' ' + response.data);
                             }
                         });
                     } catch (err) {
-                        alert('Error parsing theme file: ' + err.message);
+                        alert(sapThemeI18n.errorParse + ' ' + err.message);
                     }
                 };
                 reader.readAsText(file);
