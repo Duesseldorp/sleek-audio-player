@@ -2660,7 +2660,42 @@
             seekContainer.addEventListener('touchcancel', function() {
                 seekDragging = false;
             }, { passive: true });
-            
+
+            // Show the time under the cursor, so you can see where a click will
+            // land before making it. Only where hovering really exists - on a
+            // touch device the label would stay behind after a tap.
+            const hoverTimeEl = playerEl.querySelector('.sap-waveform-hover-time');
+            if (hoverTimeEl && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                let lastHoverText = '';
+                let halfLabelWidth = 0;
+
+                seekContainer.addEventListener('mousemove', function(e) {
+                    if (!audio.duration || isNaN(audio.duration)) return;
+
+                    const rect = seekContainer.getBoundingClientRect();
+                    const percent = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                    const text = formatTime(percent * audio.duration);
+
+                    // Measuring forces a reflow, so only do it when the label
+                    // actually changed - not on every mouse move.
+                    if (text !== lastHoverText) {
+                        hoverTimeEl.textContent = text;
+                        lastHoverText = text;
+                        halfLabelWidth = 0;
+                    }
+                    hoverTimeEl.classList.add('is-visible');
+                    if (!halfLabelWidth) halfLabelWidth = hoverTimeEl.offsetWidth / 2;
+
+                    // Keep the label inside the player at both ends of the track
+                    const x = Math.max(halfLabelWidth, Math.min(rect.width - halfLabelWidth, percent * rect.width));
+                    hoverTimeEl.style.left = x + 'px';
+                }, { passive: true });
+
+                seekContainer.addEventListener('mouseleave', function() {
+                    hoverTimeEl.classList.remove('is-visible');
+                }, { passive: true });
+            }
+
             function seekFromTouch(e) {
                 if (!e.touches || !e.touches[0]) return;
                 const rect = seekContainer.getBoundingClientRect();

@@ -360,6 +360,35 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Time under the cursor while hovering the waveform. Only on devices that
+   really hover - a touch tap would otherwise leave the label stuck on screen.
+   pointer-events: none so it never swallows a seek click. */
+.sap-waveform-hover-time {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    transform: translateX(-50%);
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--sap-card, #111);
+    color: var(--sap-white, #fff);
+    border: 1px solid var(--sap-border, rgba(255, 255, 255, 0.12));
+    font-size: 11px;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 5;
+}
+
+/* Driven by the class alone, not by :hover - the JS already refuses to set it
+   on touch devices, and a display:none element measures as zero width, which
+   would defeat the edge clamping below. */
+.sap-waveform-hover-time.is-visible {
+    display: block;
+}
+
 .sap-waveform-container:focus,
 .sap-waveform-container:focus-visible,
 .sap-waveform-container:active,

@@ -1696,6 +1696,8 @@ class SleekAudio_Player {
                         <div class="sap-progress">
                             <div class="sap-progress-bar"></div>
                         </div>
+                        <?php /* Filled by the JS on hover; aria-hidden because the slider already exposes the time via aria-valuetext */ ?>
+                        <span class="sap-waveform-hover-time" aria-hidden="true"></span>
                     </div>
                     <div class="sap-time-row">
                         <span class="sap-current" aria-live="off">0:00</span>

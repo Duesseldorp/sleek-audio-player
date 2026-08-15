@@ -204,6 +204,30 @@ test.describe("Accessible labels", () => {
       .toBe(0);
   });
 
+  // Seeking used to be a guess: the bar gave no clue where a click would land.
+  test("hovering the waveform shows the time under the cursor", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const waveform = player.root.locator(".sap-waveform-container");
+    const label = player.root.locator(".sap-waveform-hover-time");
+
+    await expect(label).toBeHidden();
+
+    // The label needs a known duration, which arrives with the metadata
+    await player.play();
+    await player.waitUntilPlaying();
+
+    const box = await waveform.boundingBox();
+    await page.mouse.move(box.x + box.width * 0.5, box.y + box.height / 2);
+
+    await expect(label).toBeVisible();
+    await expect(label).toHaveText(/^\d+:\d{2}$/);
+
+    // Moving away hides it again
+    await page.mouse.move(box.x + box.width * 0.5, box.y - 60);
+    await expect(label).toBeHidden();
+  });
+
   // Screen reader users get no visual cue that the track changed.
   test("the now-playing element is a live region", async ({ page }) => {
     await page.goto("/player-page/");

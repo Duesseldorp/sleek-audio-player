@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.7.1
+**Current Version:** 2.8.0
 
 ---
 
@@ -166,6 +166,15 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.8.0 (2026-08-15)
+
+**The waveform now shows the time under the cursor.** Seeking used to be a guess: the bar gave no clue where a click would land, which matters most in exactly the case where seeking matters most - a long mix.
+
+- The label is clamped to the player's edges, so it stays readable at the very start and end of a track
+- It is measured only when its text changes rather than on every mouse move, so a fast pointer does not force a reflow per pixel
+- `pointer-events: none` keeps it out of the click path; seeking works exactly as before
+- Touch devices never get it: they have no hover, and a tap would leave the label behind. Guarded with `matchMedia('(hover: hover) and (pointer: fine)')`
 
 ### Version 2.7.1 (2026-08-15)
 
