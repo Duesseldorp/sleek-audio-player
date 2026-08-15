@@ -348,6 +348,69 @@ test.describe("Keyboard operation", () => {
   });
 });
 
+// Counts pixels the visualizer has actually drawn on its canvas
+async function paintedPixels(player) {
+  return player.root.locator(".sap-visualizer").evaluate((canvas) => {
+    if (!canvas.width || !canvas.height) return 0;
+    const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+    let count = 0;
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 0) count++;
+    return count;
+  });
+}
+
+test.describe("Reduced motion", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  // Ken Burns runs for as long as the music plays and covers the whole cover
+  // image - the kind of motion the setting exists for.
+  test("the continuous cover animation stops", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    await expect(player.root.locator(".sap-cover-slide.active img")).toHaveCSS(
+      "animation-name",
+      "none"
+    );
+  });
+
+  test("the visualizer stays off", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    // A legitimate fixed wait: the assertion is that something does NOT
+    // happen, so there is no condition to wait for. Long enough for many
+    // animation frames.
+    await page.waitForTimeout(600);
+
+    expect(await paintedPixels(player), "the visualizer drew despite reduced motion").toBe(0);
+  });
+
+  // The setting is a default, not a lock: someone who deliberately switches a
+  // visualizer on should keep it.
+  test("an explicit choice still wins over the system setting", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("sap_visualizer_type", "bars");
+    });
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    // Waits for the condition, not for a duration
+    await expect
+      .poll(async () => paintedPixels(player), { timeout: 10_000 })
+      .toBeGreaterThan(0);
+  });
+});
+
 test.describe("Compatibility", () => {
   // The legacy alias is a documented promise in readme.txt and DEVELOPMENT.md
   test("the legacy [simple_player] shortcode still renders a working player", async ({ page }) => {

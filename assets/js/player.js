@@ -408,9 +408,19 @@
 
         // Get visualizer type from settings or localStorage (user preference)
         const visualizerTypes = ['bars', 'mirror', 'circular', 'oscilloscope', 'dots', 'wave', 'pulse', 'circular_bars', 'particles', 'starburst', 'orbits'];
-        let visualizerType = localStorage.getItem('sap_visualizer_type') 
-            || (typeof sapSettings !== 'undefined' && sapSettings.visualizerType) 
+        let visualizerType = localStorage.getItem('sap_visualizer_type')
+            || (typeof sapSettings !== 'undefined' && sapSettings.visualizerType)
             || 'bars';
+
+        // A system-wide "reduce motion" setting turns the visualizer off by
+        // default - it is continuous movement in the middle of the view, for as
+        // long as the music plays. An explicit choice still wins: cycling it
+        // with V or a double click writes to localStorage, which is read first
+        // above, so the setting is a default and not a lock.
+        if (!localStorage.getItem('sap_visualizer_type')
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            visualizerType = 'off';
+        }
         
         // Cycle to next visualizer type
         function cycleVisualizer() {

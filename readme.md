@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.9.0
+**Current Version:** 2.10.0
 
 ---
 
@@ -166,6 +166,22 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.10.0 (2026-08-15)
+
+**`prefers-reduced-motion` is now respected.** That setting is not a guess about the visitor — it is a switch they set themselves in their operating system, usually because screen motion makes them dizzy or nauseous.
+
+The player distinguishes three kinds of motion instead of switching everything off:
+
+| | |
+|---|---|
+| Ken Burns (20 s, endless), vinyl rotation (8 s), vinyl shimmer, the visualizer | **stop** |
+| Entrances of the player, the track rows and the embed dialog | keep their end state, skip the movement |
+| Loading spinner, buffering indicator, skeleton shimmer | **keep moving** |
+
+The third row is the reason this is a list and not the usual `* { animation: none }`: those animations *are* the information. Without them the player looks broken rather than calm, and they are small and local — not motion sweeping across the view.
+
+**The visualizer is a default, not a lock.** With reduced motion it starts off, but cycling it on with `V` or a double click still wins, because an explicit choice should outrank a system default.
 
 ### Version 2.9.0 (2026-08-15)
 

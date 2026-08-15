@@ -2177,3 +2177,41 @@
 }
 
 
+
+/* ===== Reduced motion =====
+   prefers-reduced-motion is not a guess about the visitor: it is a switch they
+   set themselves in their operating system. This distinguishes three kinds of
+   motion instead of switching everything off.
+
+   1. Continuous decorative motion runs for as long as the music plays, covers
+      a large area and cannot be escaped by scrolling away. That is the profile
+      which causes nausea and dizziness for people with vestibular disorders,
+      so it stops entirely.
+   2. Short one-shot entrances keep their end state but skip the movement.
+   3. Loading and buffering indicators stay. They ARE the information - without
+      them the player just looks broken - and they are small and local. The
+      usual blanket "* { animation: none }" would remove those too, which is
+      why the first list below is explicit rather than a wildcard. */
+@media (prefers-reduced-motion: reduce) {
+    .sap-player.is-playing .sap-cover-slide.active img,
+    .sap-player.sap-vinyl .sap-cover-slide.active img,
+    .sap-player.sap-vinyl.is-playing .sap-cover-slide.active img,
+    .sap-player.sap-vinyl.is-playing .sap-cover-slide.active::before,
+    .sap-cover-slide.active.sap-pulse img {
+        animation: none !important;
+    }
+
+    .sap-player,
+    .sap-track,
+    .sap-embed-dialog {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+
+    /* Sliding panels and fades become instant rather than gliding */
+    .sap-player *,
+    .sap-player *::before,
+    .sap-player *::after {
+        transition-duration: 0.01ms !important;
+    }
+}

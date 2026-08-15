@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.9.0
+Stable tag: 2.10.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.10.0 =
+* ♿ The player now respects the system setting "reduce motion": the Ken Burns zoom, the vinyl rotation and the visualizer stop, and sliding panels become instant
+* 🔊 Loading and buffering indicators deliberately keep moving - they are the information, not decoration
+* 🎛️ The setting is a default, not a lock: anyone who switches a visualizer on themselves keeps it
 
 = 2.9.0 =
 * ⌨️ The progress and volume sliders can now be focused and operated by keyboard - arrow keys, Page Up/Down, Home and End. They claimed to be sliders before without being reachable at all
