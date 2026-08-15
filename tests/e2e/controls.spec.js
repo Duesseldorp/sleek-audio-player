@@ -253,6 +253,9 @@ test.describe("Accessible labels", () => {
 test.describe("Keyboard operation", () => {
   // role="slider" promises that the element can be focused and adjusted.
   // Before 2.9.0 neither slider had a tabindex, so the promise was empty.
+  // The fixtures are three seconds long (tests/make-fixtures.mjs), so this
+  // deliberately avoids End and fixed step sizes - both would be swallowed by
+  // the track length rather than telling us anything about the keyboard.
   test("the progress slider can be focused and operated", async ({ page }) => {
     await page.goto("/player-page/");
     const player = new Player(page);
@@ -260,39 +263,23 @@ test.describe("Keyboard operation", () => {
 
     await player.play();
     await player.waitUntilPlaying();
+    await player.audio.evaluate((el) => {
+      el.pause();
+      el.currentTime = 0;
+    });
 
     await slider.focus();
     await expect(slider).toBeFocused();
+    await expect(slider).toHaveAttribute("aria-valuenow", "0");
 
-    await page.keyboard.press("End");
-    await expect(slider).toHaveAttribute("aria-valuenow", "100");
+    await page.keyboard.press("ArrowRight");
+    await expect
+      .poll(async () => Number(await slider.getAttribute("aria-valuenow")), { timeout: 5_000 })
+      .toBeGreaterThan(0);
 
     await page.keyboard.press("Home");
     await expect(slider).toHaveAttribute("aria-valuenow", "0");
-  });
-
-  // The document-level shortcuts also claim the arrow keys. Without
-  // stopPropagation a single press would seek twice - 5s from the slider plus
-  // 10s from the global handler.
-  test("a focused slider does not also trigger the global shortcut", async ({ page }) => {
-    await page.goto("/player-page/");
-    const player = new Player(page);
-    const slider = player.root.locator(".sap-waveform-container");
-
-    await player.play();
-    await player.waitUntilPlaying();
-    await slider.focus();
-    await page.keyboard.press("Home");
-
-    const before = await player.audio.evaluate((el) => {
-      el.pause();
-      return el.currentTime;
-    });
-    await page.keyboard.press("ArrowRight");
-    const after = await player.audio.evaluate((el) => el.currentTime);
-
-    expect(after - before, `expected one 5s step, got ${after - before}`).toBeGreaterThan(4.5);
-    expect(after - before, "the global handler seeked as well").toBeLessThan(6);
+    expect(await player.audio.evaluate((el) => el.currentTime)).toBe(0);
   });
 
   // The panel is visibility:hidden until the wrapper has hover or focus, which
@@ -314,6 +301,26 @@ test.describe("Keyboard operation", () => {
 
     await page.keyboard.press("End");
     await expect(slider).toHaveAttribute("aria-valuenow", "100");
+  });
+
+  // The document-level shortcuts claim the arrow keys too. The volume slider
+  // makes the difference measurable where the progress slider cannot: its own
+  // step is 5 %, the global one 10 %. From the default 70 a single press lands
+  // on 65 if only the slider acted, on 60 if both did.
+  test("a focused slider does not also trigger the global shortcut", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-volume-slider");
+
+    await player.root.locator(".sap-volume-btn").focus();
+    await slider.focus();
+    await expect(slider).toHaveAttribute("aria-valuenow", "70");
+
+    await page.keyboard.press("ArrowDown");
+    await expect(slider, "60 means the global handler fired as well").toHaveAttribute(
+      "aria-valuenow",
+      "65"
+    );
   });
 
   // Regression: the global shortcut used to set audio.volume directly, past
