@@ -184,6 +184,36 @@ jobs:
           fi
           echo "no __FILE__-relative plugin paths in includes/"
 
+      # player.js and admin.js read their strings from PHP via
+      # wp_localize_script. A key that exists in the JS but not in PHP renders
+      # the English fallback forever, which looks like a translation gap and is
+      # invisible to every other check.
+      - name: Every JS translation key exists in PHP
+        run: |
+          python - <<'EOF'
+          import re, sys
+          php = open("includes/class-player.php", encoding="utf-8").read()
+          failed = False
+          for js_file, helper in (("assets/js/player.js", "sapText"),
+                                  ("assets/js/admin.js", "sapAdminText")):
+              js = open(js_file, encoding="utf-8").read()
+              used = set(re.findall(helper + r"\(\s*'([^']+)'", js))
+              # Keys are defined as 'key' => __('...') inside the i18n arrays
+              defined = set(re.findall(r"'([A-Za-z][A-Za-z0-9]*)'\s*=>\s*__\(", php))
+              unknown = sorted(used - defined)
+              nofallback = re.findall(helper + r"\(\s*'[^']+'\s*\)", js)
+              if unknown:
+                  failed = True
+                  for k in unknown:
+                      print(f"::error::{js_file}: {helper}('{k}') has no matching key in PHP")
+              if nofallback:
+                  failed = True
+                  for c in nofallback:
+                      print(f"::error::{js_file}: {c} is missing its English fallback")
+              print(f"{js_file}: {len(used)} keys, all defined in PHP")
+          sys.exit(1 if failed else 0)
+          EOF
+
   e2e:
     name: End-to-end tests
     runs-on: ubuntu-latest

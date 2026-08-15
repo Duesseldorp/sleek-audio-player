@@ -690,8 +690,8 @@ class SleekAudio_Player {
     public function add_settings_page() {
         add_submenu_page(
             'edit.php?post_type=sap_playlist',
-            'Player Settings',
-            'Settings',
+            __('Player Settings', 'sleek-audio-player'),
+            __('Settings', 'sleek-audio-player'),
             'manage_options',
             'sap-settings',
             array($this, 'render_settings_page')
@@ -757,7 +757,7 @@ class SleekAudio_Player {
     public function render_settings_page() {
         ?>
         <div class="wrap">
-            <h1>Sleek Audio Player - Settings</h1>
+            <h1><?php echo esc_html__('Sleek Audio Player - Settings', 'sleek-audio-player'); ?></h1>
             
             <form method="post" action="options.php">
                 <?php settings_fields('sap_settings'); ?>
@@ -765,7 +765,7 @@ class SleekAudio_Player {
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="sap_cdn_url">CDN URL (BunnyCDN)</label>
+                            <label for="sap_cdn_url"><?php echo esc_html__('CDN URL (BunnyCDN)', 'sleek-audio-player'); ?></label>
                         </th>
                         <td>
                             <input type="url" 
@@ -775,8 +775,8 @@ class SleekAudio_Player {
                                    class="regular-text"
                                    placeholder="https://your-zone.b-cdn.net" />
                             <p class="description">
-                                Your BunnyCDN Pull Zone URL (without trailing slash).<br>
-                                Leave empty to disable CDN.
+                                <?php echo esc_html__('Your BunnyCDN Pull Zone URL (without trailing slash).', 'sleek-audio-player'); ?><br>
+                                <?php echo esc_html__('Leave empty to disable CDN.', 'sleek-audio-player'); ?>
                             </p>
                         </td>
                     </tr>
@@ -791,14 +791,14 @@ class SleekAudio_Player {
                                        name="sap_umami_tracking" 
                                        value="1"
                                        <?php checked(get_option('sap_umami_tracking', false)); ?> />
-                                Enable tracking
+                                <?php echo esc_html__('Enable tracking', 'sleek-audio-player'); ?>
                             </label>
                             <p class="description">
-                                Sends events to Umami when songs are played, completed, or downloaded.
+                                <?php echo esc_html__('Sends events to Umami when songs are played, completed, or downloaded.', 'sleek-audio-player'); ?>
                             </p>
                             
                             <div style="margin-top:12px;">
-                                <label for="sap_umami_script_url"><strong>Script URL:</strong></label><br>
+                                <label for="sap_umami_script_url"><strong><?php echo esc_html__('Script URL:', 'sleek-audio-player'); ?></strong></label><br>
                                 <input type="url" 
                                        id="sap_umami_script_url" 
                                        name="sap_umami_script_url" 
@@ -808,7 +808,7 @@ class SleekAudio_Player {
                             </div>
                             
                             <div style="margin-top:8px;">
-                                <label for="sap_umami_website_id"><strong>Website ID:</strong></label><br>
+                                <label for="sap_umami_website_id"><strong><?php echo esc_html__('Website ID:', 'sleek-audio-player'); ?></strong></label><br>
                                 <input type="text" 
                                        id="sap_umami_website_id" 
                                        name="sap_umami_website_id" 
@@ -818,14 +818,14 @@ class SleekAudio_Player {
                             </div>
                             
                             <p class="description" style="margin-top:8px;">
-                                Required for tracking in embedded players on external sites.<br>
-                                Leave empty if Umami is already integrated globally on your site.
+                                <?php echo esc_html__('Required for tracking in embedded players on external sites.', 'sleek-audio-player'); ?><br>
+                                <?php echo esc_html__('Leave empty if Umami is already integrated globally on your site.', 'sleek-audio-player'); ?>
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">
-                            <label for="sap_url_protection">🔒 URL Protection</label>
+                            <label for="sap_url_protection">🔒 <?php echo esc_html__('URL Protection', 'sleek-audio-player'); ?></label>
                         </th>
                         <td>
                             <label>
@@ -834,17 +834,17 @@ class SleekAudio_Player {
                                        name="sap_url_protection" 
                                        value="1"
                                        <?php checked(get_option('sap_url_protection', false)); ?> />
-                                Obfuscate audio URLs
+                                <?php echo esc_html__('Obfuscate audio URLs', 'sleek-audio-player'); ?>
                             </label>
                             <p class="description">
-                                Hides real file URLs and uses time-limited tokens.<br>
-                                <strong>Note:</strong> Does not work with CDN! When protection is enabled, CDN will be bypassed.
+                                <?php echo esc_html__('Hides real file URLs and uses time-limited tokens.', 'sleek-audio-player'); ?><br>
+                                <?php echo wp_kses(__('<strong>Note:</strong> Does not work with CDN! When protection is enabled, CDN will be bypassed.', 'sleek-audio-player'), array('strong' => array())); ?>
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">
-                            <label for="sap_cover_click_play">🖼️ Cover Click</label>
+                            <label for="sap_cover_click_play">🖼️ <?php echo esc_html__('Cover Click', 'sleek-audio-player'); ?></label>
                         </th>
                         <td>
                             <label>
@@ -853,17 +853,17 @@ class SleekAudio_Player {
                                        name="sap_cover_click_play" 
                                        value="1"
                                        <?php checked(get_option('sap_cover_click_play', true)); ?> />
-                                Start playback on cover click
+                                <?php echo esc_html__('Start playback on cover click', 'sleek-audio-player'); ?>
                             </label>
                             <p class="description">
-                                When enabled, clicking the cover image starts the first track.<br>
-                                Disable this to prevent accidental playback on mobile devices.
+                                <?php echo esc_html__('When enabled, clicking the cover image starts the first track.', 'sleek-audio-player'); ?><br>
+                                <?php echo esc_html__('Disable this to prevent accidental playback on mobile devices.', 'sleek-audio-player'); ?>
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">
-                            <label for="sap_remember_position">⏱️ Remember Position</label>
+                            <label for="sap_remember_position">⏱️ <?php echo esc_html__('Remember Position', 'sleek-audio-player'); ?></label>
                         </th>
                         <td>
                             <label>
@@ -872,102 +872,111 @@ class SleekAudio_Player {
                                        name="sap_remember_position" 
                                        value="1"
                                        <?php checked(get_option('sap_remember_position', false)); ?> />
-                                Remember playback position
+                                <?php echo esc_html__('Remember playback position', 'sleek-audio-player'); ?>
                             </label>
                             <p class="description">
-                                When enabled, the player remembers where the listener stopped.<br>
-                                Playback resumes from that position on the next visit.
+                                <?php echo esc_html__('When enabled, the player remembers where the listener stopped.', 'sleek-audio-player'); ?><br>
+                                <?php echo esc_html__('Playback resumes from that position on the next visit.', 'sleek-audio-player'); ?>
                             </p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">
-                            <label>🎵 Visualizer</label>
+                            <label>🎵 <?php echo esc_html__('Visualizer', 'sleek-audio-player'); ?></label>
                         </th>
                         <td>
                             <?php $viz_type = get_option('sap_visualizer_type', 'bars'); ?>
                             <fieldset>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="bars" <?php checked($viz_type, 'bars'); ?> />
-                                    Bars (Classic frequency bars)
+                                    <?php echo esc_html__('Bars (Classic frequency bars)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="mirror" <?php checked($viz_type, 'mirror'); ?> />
-                                    Mirror Bars (Top & bottom reflection)
+                                    <?php echo esc_html__('Mirror Bars (Top & bottom reflection)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="circular" <?php checked($viz_type, 'circular'); ?> />
-                                    Circular (Radial around center)
+                                    <?php echo esc_html__('Circular (Radial around center)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="oscilloscope" <?php checked($viz_type, 'oscilloscope'); ?> />
-                                    Oscilloscope (Waveform line)
+                                    <?php echo esc_html__('Oscilloscope (Waveform line)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="dots" <?php checked($viz_type, 'dots'); ?> />
-                                    Dots (Dancing dots)
+                                    <?php echo esc_html__('Dots (Dancing dots)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="wave" <?php checked($viz_type, 'wave'); ?> />
-                                    Wave (Filled waveform)
+                                    <?php echo esc_html__('Wave (Filled waveform)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="pulse" <?php checked($viz_type, 'pulse'); ?> />
-                                    Pulse (Pulsing circle)
+                                    <?php echo esc_html__('Pulse (Pulsing circle)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="circular_bars" <?php checked($viz_type, 'circular_bars'); ?> />
-                                    Circular Bars (Bars in a circle)
+                                    <?php echo esc_html__('Circular Bars (Bars in a circle)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="particles" <?php checked($viz_type, 'particles'); ?> />
-                                    Particles (Floating particles)
+                                    <?php echo esc_html__('Particles (Floating particles)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="starburst" <?php checked($viz_type, 'starburst'); ?> />
-                                    Starburst (Rays from center)
+                                    <?php echo esc_html__('Starburst (Rays from center)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="orbits" <?php checked($viz_type, 'orbits'); ?> />
-                                    Orbits (Rotating rings)
+                                    <?php echo esc_html__('Orbits (Rotating rings)', 'sleek-audio-player'); ?>
                                 </label>
                                 <label style="display:block; margin-bottom:8px;">
                                     <input type="radio" name="sap_visualizer_type" value="off" <?php checked($viz_type, 'off'); ?> />
-                                    Off (No visualizer)
+                                    <?php echo esc_html__('Off (No visualizer)', 'sleek-audio-player'); ?>
                                 </label>
                             </fieldset>
                             <p class="description">
-                                Choose the default visualization. Users can cycle through all options by double-clicking the cover or pressing V.
+                                <?php echo esc_html__('Choose the default visualization. Users can cycle through all options by double-clicking the cover or pressing V.', 'sleek-audio-player'); ?>
                             </p>
                         </td>
                     </tr>
                 </table>
                 
-                <?php submit_button('Save Settings'); ?>
+                <?php submit_button(__('Save Settings', 'sleek-audio-player')); ?>
             </form>
             
             <hr>
-            <h2>Guide: Setting up BunnyCDN</h2>
+            <h2><?php echo esc_html__('Guide: Setting up BunnyCDN', 'sleek-audio-player'); ?></h2>
             <ol>
-                <li>Go to <a href="https://bunny.net" target="_blank">bunny.net</a> and create an account</li>
-                <li>Create a new <strong>Pull Zone</strong></li>
-                <li>Enter your website URL as <strong>Origin URL</strong>: <code><?php echo esc_url( home_url() ); ?></code></li>
-                <li>Copy the Pull Zone URL (e.g. <code>https://yourname.b-cdn.net</code>) and enter it above</li>
+                <li><?php
+                    printf(
+                        /* translators: %s is a link to bunny.net */
+                        wp_kses(__('Go to %s and create an account', 'sleek-audio-player'), array('a' => array('href' => array(), 'target' => array(), 'rel' => array()))),
+                        '<a href="https://bunny.net" target="_blank" rel="noopener">bunny.net</a>'
+                    );
+                ?></li>
+                <li><?php echo wp_kses(__('Create a new <strong>Pull Zone</strong>', 'sleek-audio-player'), array('strong' => array())); ?></li>
+                <li><?php echo wp_kses(__('Enter your website URL as <strong>Origin URL</strong>:', 'sleek-audio-player'), array('strong' => array())); ?> <code><?php echo esc_url( home_url() ); ?></code></li>
+                <li><?php echo wp_kses(__('Copy the Pull Zone URL (e.g. <code>https://yourname.b-cdn.net</code>) and enter it above', 'sleek-audio-player'), array('code' => array())); ?></li>
             </ol>
             
-            <h3>⚠️ Important: CORS Headers for Audio Files</h3>
-            <p>For audio files to play from CDN, CORS headers must be configured:</p>
+            <h3>⚠️ <?php echo esc_html__('Important: CORS Headers for Audio Files', 'sleek-audio-player'); ?></h3>
+            <p><?php echo esc_html__('For audio files to play from CDN, CORS headers must be configured:', 'sleek-audio-player'); ?></p>
             <ol>
-                <li>Go to your Pull Zone → <strong>Headers</strong></li>
-                <li>Add a new header:
+                <li><?php echo wp_kses(__('Go to your Pull Zone → <strong>Headers</strong>', 'sleek-audio-player'), array('strong' => array())); ?></li>
+                <li><?php echo esc_html__('Add a new header:', 'sleek-audio-player'); ?>
                     <ul>
-                        <li><strong>Header Name:</strong> <code>Access-Control-Allow-Origin</code></li>
-                        <li><strong>Header Value:</strong> <code>*</code> (or <code><?php echo esc_url( home_url() ); ?></code>)</li>
+                        <li><?php echo wp_kses(__('<strong>Header Name:</strong>', 'sleek-audio-player'), array('strong' => array())); ?> <code>Access-Control-Allow-Origin</code></li>
+                        <li><?php echo wp_kses(__('<strong>Header Value:</strong>', 'sleek-audio-player'), array('strong' => array())); ?> <code>*</code> <?php
+                            /* translators: %s is the site URL */
+                            echo wp_kses(sprintf(__('(or <code>%s</code>)', 'sleek-audio-player'), esc_url( home_url() )), array('code' => array()));
+                        ?></li>
                     </ul>
                 </li>
-                <li>Save and clear cache</li>
+                <li><?php echo esc_html__('Save and clear cache', 'sleek-audio-player'); ?></li>
             </ol>
-            <p><em>Without CORS headers, audio files will be blocked by the browser!</em></p>
+            <p><em><?php echo esc_html__('Without CORS headers, audio files will be blocked by the browser!', 'sleek-audio-player'); ?></em></p>
         </div>
         <?php
     }
@@ -1121,6 +1130,17 @@ class SleekAudio_Player {
             'nonce' => wp_create_nonce('sap_admin_waveform'),
             'autoAnalyze' => true
         ));
+
+        // addTrackRow() rebuilds the meta box row in JavaScript, so it needs
+        // the same strings the PHP template uses - see sapAdminText().
+        wp_localize_script('sap-admin', 'sapAdmin', array(
+            'i18n' => array(
+                'selectCover' => __('Select cover', 'sleek-audio-player'),
+                'title' => __('Title', 'sleek-audio-player'),
+                'artist' => __('Artist', 'sleek-audio-player'),
+                'noFile' => __('No file', 'sleek-audio-player'),
+            ),
+        ));
         
         wp_enqueue_style('thickbox');
         
@@ -1209,12 +1229,12 @@ class SleekAudio_Player {
                            class="sap-track-cover-id" value="<?php echo esc_attr($track['cover_id'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][cover_url]" 
                            class="sap-track-cover-url" value="<?php echo esc_url($admin_cover_url); ?>" />
-                    <button type="button" class="button sap-select-cover" title="Select cover">🖼️</button>
+                    <button type="button" class="button sap-select-cover" title="<?php echo esc_attr__('Select cover', 'sleek-audio-player'); ?>">🖼️</button>
                     <input type="text" name="sap_tracks[<?php echo esc_attr( $index ); ?>][title]" 
-                           class="sap-track-title" placeholder="Title" 
+                           class="sap-track-title" placeholder="<?php echo esc_attr__('Title', 'sleek-audio-player'); ?>" 
                            value="<?php echo esc_attr($track['title'] ?? ''); ?>" />
                     <input type="text" name="sap_tracks[<?php echo esc_attr( $index ); ?>][artist]" 
-                           class="sap-track-artist" placeholder="Artist" 
+                           class="sap-track-artist" placeholder="<?php echo esc_attr__('Artist', 'sleek-audio-player'); ?>" 
                            value="<?php echo esc_attr($track['artist'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][url]" 
                            class="sap-track-url" value="<?php echo esc_url($track['url'] ?? ''); ?>" />
@@ -1222,8 +1242,8 @@ class SleekAudio_Player {
                            class="sap-track-id" value="<?php echo esc_attr($track['attachment_id'] ?? ''); ?>" />
                     <input type="hidden" name="sap_tracks[<?php echo esc_attr( $index ); ?>][duration]"
                            class="sap-track-duration" value="<?php echo esc_attr($track['duration'] ?? ''); ?>" />
-                    <span class="sap-track-filename"><?php echo esc_html(basename($track['url'] ?? 'No file')); ?></span>
-                    <button type="button" class="button sap-select-audio">🎵 Audio</button>
+                    <span class="sap-track-filename"><?php echo esc_html(!empty($track['url']) ? basename($track['url']) : __('No file', 'sleek-audio-player')); ?></span>
+                    <button type="button" class="button sap-select-audio">🎵 <?php echo esc_html__('Audio', 'sleek-audio-player'); ?></button>
                     <input type="url" name="sap_tracks[<?php echo esc_attr( $index ); ?>][spotify]" 
                            class="sap-track-link sap-link-spotify" placeholder="🎵 Spotify" 
                            value="<?php echo esc_url($track['spotify'] ?? ''); ?>" />
@@ -1239,33 +1259,33 @@ class SleekAudio_Player {
                     <label class="sap-download-label">
                         <input type="checkbox" name="sap_tracks[<?php echo esc_attr( $index ); ?>][downloadable]" 
                                value="1" <?php checked(!empty($track['downloadable'])); ?> />
-                        DL
+                        <?php echo esc_html__('DL', 'sleek-audio-player'); ?>
                     </label>
                     <button type="button" class="button sap-remove-track">✕</button>
                 </div>
             <?php endforeach; ?>
         </div>
         <p>
-            <button type="button" class="button button-primary" id="sap-add-track">+ Add Track</button>
-            <button type="button" class="button" id="sap-bulk-add">📁 Bulk add from Media Library</button>
+            <button type="button" class="button button-primary" id="sap-add-track">+ <?php echo esc_html__('Add Track', 'sleek-audio-player'); ?></button>
+            <button type="button" class="button" id="sap-bulk-add">📁 <?php echo esc_html__('Bulk add from Media Library', 'sleek-audio-player'); ?></button>
         </p>
         
         <!-- Embed Shortcode Info -->
         <div class="sap-embed-info">
-            <label>Embed Shortcode:</label>
+            <label><?php echo esc_html__('Embed Shortcode:', 'sleek-audio-player'); ?></label>
             <div class="sap-embed-codes">
                 <div class="sap-embed-code">
-                    <span class="sap-embed-label">Standard:</span>
-                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[sleek_player id="<?php echo esc_attr( $post->ID ); ?>"]</code>
+                    <span class="sap-embed-label"><?php echo esc_html__('Standard:', 'sleek-audio-player'); ?></span>
+                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="<?php echo esc_attr__('Click to copy', 'sleek-audio-player'); ?>">[sleek_player id="<?php echo esc_attr( $post->ID ); ?>"]</code>
                 </div>
                 <div class="sap-embed-code">
-                    <span class="sap-embed-label">Wide Layout:</span>
-                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="Click to copy">[sleek_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]</code>
+                    <span class="sap-embed-label"><?php echo esc_html__('Wide Layout:', 'sleek-audio-player'); ?></span>
+                    <code class="sap-shortcode" onclick="this.select(); document.execCommand('copy');" title="<?php echo esc_attr__('Click to copy', 'sleek-audio-player'); ?>">[sleek_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]</code>
                 </div>
                 <?php if ($post->post_status === 'publish') : ?>
                 <div class="sap-embed-code">
-                    <span class="sap-embed-label">iFrame (external):</span>
-                    <code class="sap-shortcode sap-iframe-code" onclick="this.select(); document.execCommand('copy');" title="Click to copy">&lt;iframe src="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post->ID))); ?>" width="100%" height="400" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</code>
+                    <span class="sap-embed-label"><?php echo esc_html__('iFrame (external):', 'sleek-audio-player'); ?></span>
+                    <code class="sap-shortcode sap-iframe-code" onclick="this.select(); document.execCommand('copy');" title="<?php echo esc_attr__('Click to copy', 'sleek-audio-player'); ?>">&lt;iframe src="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post->ID))); ?>" width="100%" height="400" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</code>
                 </div>
                 <?php endif; ?>
             </div>
@@ -1303,35 +1323,35 @@ class SleekAudio_Player {
         
         <?php if ($post->post_status === 'publish') : ?>
         <hr style="margin: 20px 0;">
-        <h4 style="margin-bottom: 10px;">📋 Embed Codes</h4>
+        <h4 style="margin-bottom: 10px;">📋 <?php echo esc_html__('Embed Codes', 'sleek-audio-player'); ?></h4>
         
         <p>
-            <label><strong>Shortcode:</strong></label>
+            <label><strong><?php echo esc_html__('Shortcode:', 'sleek-audio-player'); ?></strong></label>
             <input type="text" 
                    value='[sleek_player id="<?php echo esc_attr( $post->ID ); ?>"]' 
                    readonly 
-                   onclick="this.select(); document.execCommand('copy'); alert('Shortcode copied!');"
+                   onclick="this.select(); document.execCommand('copy'); alert('<?php echo esc_js(__('Shortcode copied!', 'sleek-audio-player')); ?>');"
                    style="width:100%; background:#f0f0f0; cursor:pointer;" />
         </p>
         
         <p>
-            <label><strong>Shortcode (Wide Layout):</strong></label>
+            <label><strong><?php echo esc_html__('Shortcode (Wide Layout):', 'sleek-audio-player'); ?></strong></label>
             <input type="text" 
                    value='[sleek_player id="<?php echo esc_attr( $post->ID ); ?>" layout="wide"]' 
                    readonly 
-                   onclick="this.select(); document.execCommand('copy'); alert('Shortcode copied!');"
+                   onclick="this.select(); document.execCommand('copy'); alert('<?php echo esc_js(__('Shortcode copied!', 'sleek-audio-player')); ?>');"
                    style="width:100%; background:#f0f0f0; cursor:pointer;" />
         </p>
         
         <p>
-            <label><strong>iFrame Embed:</strong></label>
+            <label><strong><?php echo esc_html__('iFrame Embed:', 'sleek-audio-player'); ?></strong></label>
             <textarea readonly 
-                      onclick="this.select(); document.execCommand('copy'); alert('Embed code copied!');"
+                      onclick="this.select(); document.execCommand('copy'); alert('<?php echo esc_js(__('Embed code copied!', 'sleek-audio-player')); ?>');"
                       style="width:100%; height:60px; background:#f0f0f0; cursor:pointer; font-size:11px;">&lt;iframe src="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post->ID))); ?>" width="100%" height="400" frameborder="0" allow="autoplay"&gt;&lt;/iframe&gt;</textarea>
-            <span class="description">For external websites</span>
+            <span class="description"><?php echo esc_html__('For external websites', 'sleek-audio-player'); ?></span>
         </p>
         <?php else : ?>
-        <p class="description" style="margin-top:15px;"><em>Embed codes will be shown after publishing.</em></p>
+        <p class="description" style="margin-top:15px;"><em><?php echo esc_html__('Embed codes will be shown after publishing.', 'sleek-audio-player'); ?></em></p>
         <?php endif; ?>
         
         <?php

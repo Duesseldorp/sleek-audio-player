@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.6.1
+**Current Version:** 2.7.0
 
 ---
 
@@ -166,6 +166,18 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.7.0 (2026-08-15)
+
+**The admin interface is now translatable too.** 2.6.1 completed the visitor-facing player; this covers everything the site owner sees:
+- Settings page: CDN, Umami, URL protection, cover click, remember position, all twelve visualizer options and the full BunnyCDN guide including the CORS instructions
+- Playlist editor: field labels and placeholders, the embed shortcodes, the copy confirmations
+- The WordPress menu entries themselves ("Player Settings", "Settings") — they were hardcoded English and stayed English on a German installation
+- 74 further strings, all translated into German (151 in total now)
+
+**One subtlety worth naming:** `admin.js` rebuilds a track row in JavaScript when you add one, duplicating the PHP markup. Translating only the PHP would have produced English placeholders in new rows next to German ones in existing rows. Both now read the same strings, via a `sapAdminText()` helper that mirrors the player's `sapText()` — English fallback mandatory.
+
+Deliberately left in English: product names (Spotify, Apple Music, bunny.net, Umami), example URLs, shortcode snippets and the `Access-Control-Allow-Origin` header name — translating those would make the instructions wrong.
 
 ### Version 2.6.1 (2026-08-15)
 

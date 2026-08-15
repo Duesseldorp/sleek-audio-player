@@ -10,6 +10,22 @@
 (function($) {
     'use strict';
     
+    /**
+     * Translated admin string with a mandatory English fallback.
+     *
+     * Mirrors sapText() in player.js: the strings come from PHP via
+     * wp_localize_script, and an unknown or misspelled key renders the English
+     * original instead of "undefined". The row template below duplicates the
+     * PHP meta box markup, so both must use the same strings — otherwise a
+     * newly added track row shows English placeholders next to German ones.
+     */
+    function sapAdminText(key, fallback) {
+        if (typeof sapAdmin !== 'undefined' && sapAdmin.i18n && sapAdmin.i18n[key]) {
+            return sapAdmin.i18n[key];
+        }
+        return fallback;
+    }
+
     // === Stability: Error logging ===
     function sapLog(message, data) {
         if (console && console.log) {
@@ -345,18 +361,18 @@
                 '<div class="sap-track-cover-preview"><span class="sap-no-cover">🎵</span></div>' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][cover_id]" class="sap-track-cover-id" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][cover_url]" class="sap-track-cover-url" value="" />' +
-                '<button type="button" class="button sap-select-cover" title="Select cover">🖼️</button>' +
+                '<button type="button" class="button sap-select-cover" title="' + sapAdminText('selectCover', 'Select cover') + '">🖼️</button>' +
                 '<input type="text" name="sap_tracks[' + trackIndex + '][title]" ' +
-                    'class="sap-track-title" placeholder="Title" value="" />' +
+                    'class="sap-track-title" placeholder="' + sapAdminText('title', 'Title') + '" value="" />' +
                 '<input type="text" name="sap_tracks[' + trackIndex + '][artist]" ' +
-                    'class="sap-track-artist" placeholder="Artist" value="" />' +
+                    'class="sap-track-artist" placeholder="' + sapAdminText('artist', 'Artist') + '" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][url]" ' +
                     'class="sap-track-url" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][attachment_id]" ' +
                     'class="sap-track-id" value="" />' +
                 '<input type="hidden" name="sap_tracks[' + trackIndex + '][duration]" ' +
                     'class="sap-track-duration" value="" />' +
-                '<span class="sap-track-filename">No file</span>' +
+                '<span class="sap-track-filename">' + sapAdminText('noFile', 'No file') + '</span>' +
                 '<button type="button" class="button sap-select-audio">🎵 Audio</button>' +
                 '<input type="url" name="sap_tracks[' + trackIndex + '][spotify]" ' +
                     'class="sap-track-link sap-link-spotify" placeholder="🎵 Spotify" value="" />' +

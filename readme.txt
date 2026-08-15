@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.6.1
+Stable tag: 2.7.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.7.0 =
+* 🌍 The admin interface is now translatable as well: settings page, playlist editor, embed codes and the BunnyCDN guide - 74 further strings, German included
+* 🇩🇪 The WordPress menu entries ("Player Settings", "Settings") and the twelve visualizer options now appear in German too
+* 🔗 New track rows added in the editor use the same translated labels as existing ones (admin.js shares the strings with PHP)
 
 = 2.6.1 =
 * 🐛 Fixed: the bundled translations never loaded. Since 2.5.7 the plugin looked for them in the wrong folder, so a German site still showed the English interface - including everything 2.6.0 had just translated
