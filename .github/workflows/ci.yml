@@ -161,6 +161,20 @@ jobs:
             exit 1
           fi
 
+  contrast:
+    name: Default theme meets contrast minimums
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Makes "the default theme meets WCAG AA" a checked fact instead of a
+      # claim in the readme. Custom themes cannot be checked - see the script.
+      - name: Contrast ratios of the shipped colours
+        run: python tools/check-contrast.py
+
   conventions:
     name: Plugin paths resolved in the main file
     runs-on: ubuntu-latest

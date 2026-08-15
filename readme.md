@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.10.0
+**Current Version:** 2.10.1
 
 ---
 
@@ -165,7 +165,52 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 ---
 
+## Accessibility
+
+What is checked, how, and what is not — so the claim can be judged rather than believed.
+
+### Verified automatically on every push
+
+| Guarantee | How |
+|---|---|
+| Both sliders can be focused and operated by keyboard | End-to-end tests press arrow keys, `Home` and `End` and read the resulting value |
+| The keyboard never triggers two handlers for one press | A focused volume slider must land on 65 %, not 60 % |
+| Sliders report their real value to assistive technology | `aria-valuenow` must leave 0 during playback; `aria-valuetext` must contain a time |
+| The track title is announced when it changes | `aria-live="polite"` asserted on the element |
+| Every control has a non-empty accessible name | All eleven controls checked for `aria-label` and `title` |
+| `prefers-reduced-motion` stops the continuous animations | Tested with the setting emulated, including that an explicit visualizer choice still wins |
+| The default theme meets WCAG 2.1 AA contrast | `tools/check-contrast.py` computes the ratios from the stylesheet |
+
+### Measured contrast of the shipped theme
+
+| Element | Ratio | AA (4.5:1) |
+|---|---|---|
+| Track title | 17.59:1 | ✅ |
+| Track title in playlist | 14.97:1 | ✅ |
+| Button icons and subtitle | 8.03:1 | ✅ |
+| Artist and time display | 4.85:1 | ✅ (was 3.91:1 — fixed in 2.10.1) |
+| Active toggles, progress, visualizer | 5.08:1 | ✅ |
+| **Track numbers** | **1.96:1** | ❌ **open** |
+
+### Known gaps
+
+- **Track numbers fail contrast** at 1.96:1. Raising them is a visible design change to a colour shared with other elements, so it is a decision about the look rather than a bug fix, and it is still open.
+- **Custom themes are not checked.** The Theme Manager lets anyone choose their own colours, including unreadable combinations. Only the shipped default is verified.
+- **No real screen reader has been used.** Everything above tests the markup and the values in the page — that the roles, names and live regions are correct and current. Whether NVDA, JAWS or VoiceOver announce them *usefully* is a different question, and it has not been answered. Do not read "accessible" as "tested with assistive technology".
+- **One browser.** The tests run in Chromium. Firefox and Safari are untested.
+- **Mobile screen readers** (TalkBack, VoiceOver iOS) are untested.
+
+This is deliberately not a claim of WCAG 2.1 AA conformance. It is a list of what is checked and what is not.
+
 ## Changelog
+
+### Version 2.10.1 (2026-08-15)
+
+**A contrast defect the audit found.** The artist name and the time display sat at 3.91:1 against the player background — below the 4.5:1 that WCAG 2.1 AA requires for normal text. Not decoration: that is the artist's name. Raised to 4.85:1, a change barely visible to anyone who could read it before.
+
+`tools/check-contrast.py` now computes these ratios from the stylesheet and CI fails when a shipped colour drops below its minimum, so "the default theme meets AA" is a checked fact rather than a sentence in a readme.
+
+The same measurement found the track numbers at 1.96:1. Raising them changes a colour shared with other elements, so that is a decision about the look and remains open — and is listed as such in the new Accessibility section rather than quietly ignored.
 
 ### Version 2.10.0 (2026-08-15)
 

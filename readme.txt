@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.10.0
+Stable tag: 2.10.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -223,7 +223,31 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 4. Backend: Settings
 5. Embed Code Generator modal
 
+== Accessibility ==
+
+Checked automatically on every push:
+
+* Both sliders can be focused and operated by keyboard (arrows, Page Up/Down, Home, End)
+* Sliders report their real value to assistive technology via aria-valuenow, and the time via aria-valuetext
+* The track title is a live region, so a screen reader announces what started playing
+* Every control carries a non-empty accessible name
+* The system setting "reduce motion" stops the continuous animations
+* The shipped theme meets the WCAG 2.1 AA contrast minimum of 4.5:1
+
+Known gaps, stated plainly:
+
+* The track numbers reach only 1.96:1 and fail the contrast minimum. Fixing this changes the look, so it is still an open decision
+* Custom themes are not checked - the Theme Manager allows unreadable colour combinations
+* No real screen reader has been used. The tests check that the markup and values are correct, not that NVDA, JAWS or VoiceOver announce them usefully
+* Tested in Chromium only; Firefox, Safari and mobile screen readers are untested
+
+This is not a claim of WCAG 2.1 AA conformance - it is a list of what is verified and what is not.
+
 == Changelog ==
+
+= 2.10.1 =
+* 🎨 Fixed: the artist name and the time display were too faint to meet the contrast minimum (3.91:1 instead of 4.5:1). Slightly brighter now, at 4.85:1
+* 📋 New Accessibility section documenting what is verified automatically - and what is not
 
 = 2.10.0 =
 * ♿ The player now respects the system setting "reduce motion": the Ken Burns zoom, the vinyl rotation and the visualizer stop, and sliding panels become instant

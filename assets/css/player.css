@@ -23,7 +23,10 @@
     --sap-white: #ffffff;
     --sap-gray-100: rgba(255, 255, 255, 0.92);
     --sap-gray-200: rgba(200, 215, 225, 0.8);
-    --sap-gray-300: rgba(160, 185, 200, 0.6);
+    /* 0.6 gave 3.91:1 against --sap-card and failed WCAG AA for normal text
+       (4.5:1). This is the artist name and the time display - real text, not
+       decoration. 0.7 reaches 4.85:1; see tools/check-contrast.py */
+    --sap-gray-300: rgba(160, 185, 200, 0.7);
     --sap-gray-400: rgba(120, 150, 170, 0.4);
     --sap-blue-tint: rgba(70, 130, 170, 0.1);
     --sap-visualizer: #e85d3d;
