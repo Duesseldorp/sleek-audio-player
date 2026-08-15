@@ -761,6 +761,51 @@ input.sap-track-link {
     padding: 12px !important;
 }
 
+/* "Save Draft" and "Preview" sit side by side via floats in core, which only
+   works while the labels are as short as the English ones. In German they need
+   293px in a 292px column, so the right one drops to its own line - and the
+   12px padding above makes it worse by another 24px. A flex row lets both
+   share the width evenly instead of overflowing.
+   #save-action is taller than #preview-action because it holds the spinner,
+   hence flex-start rather than center; the .clear div only exists to clear
+   floats and has no purpose here. */
+.post-type-sap_playlist #minor-publishing-actions {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 8px !important;
+    padding: 10px 0 0 !important;
+}
+
+.post-type-sap_playlist #minor-publishing-actions .clear {
+    display: none !important;
+}
+
+.post-type-sap_playlist #save-action,
+.post-type-sap_playlist #preview-action {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.post-type-sap_playlist #save-post,
+.post-type-sap_playlist #post-preview {
+    float: none !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.post-type-sap_playlist #save-action .spinner {
+    float: none !important;
+    margin: 4px auto 0 !important;
+}
+
 .post-type-sap_playlist #major-publishing-actions {
     background: var(--sap-light-bg) !important;
     border-top: 1px solid var(--sap-light-border) !important;

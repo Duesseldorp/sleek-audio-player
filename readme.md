@@ -181,6 +181,8 @@ I document the design decisions and use cases behind this plugin openly on my si
 
 **A bug this uncovered:** the waveform page selected pending files by reading the status column's text (`.text().includes('Pending')`). Translating that text would have left the analyse button unable to find anything — a feature broken by its own translation. The state now lives in a `data-status` attribute, where the display language cannot reach it.
 
+**Publish box layout fixed.** "Entwurf speichern" and "Vorschau anzeigen" dropped onto separate lines. Measured on the running page: the two buttons need 293px, the sidebar column offers 292px — core WordPress floats them side by side, which only holds while the labels are as short as in English. The plugin made it worse by adding 12px padding around the box, costing another 24px. They now share the width in a flex row instead of overflowing.
+
 Deliberately left in English: product names (Spotify, Apple Music, bunny.net, Umami), example URLs, shortcode snippets and the `Access-Control-Allow-Origin` header name — translating those would make the instructions wrong.
 
 ### Version 2.6.1 (2026-08-15)

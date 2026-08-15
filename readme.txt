@@ -232,6 +232,7 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 * 🎨 Theme Manager and Waveform Analysis are translated as well, including their dialogs and status messages - both pages had no translation support at all
 * 🐛 Fixed: the waveform page decided which files were pending by reading the status text, so translating it would have stopped the analyse button from finding anything. The state now lives in a data attribute
 * 📊 237 translatable strings in total, all with German wording
+* 🎯 Fixed: "Save Draft" and "Preview" no longer sit on separate lines in the publish box - the plugin's own padding made an already tight core layout overflow with longer labels
 
 = 2.6.1 =
 * 🐛 Fixed: the bundled translations never loaded. Since 2.5.7 the plugin looked for them in the wrong folder, so a German site still showed the English interface - including everything 2.6.0 had just translated

@@ -188,6 +188,34 @@ jobs:
       # wp_localize_script. A key that exists in the JS but not in PHP renders
       # the English fallback forever, which looks like a translation gap and is
       # invisible to every other check.
+      # Plugin Check rejects a placeholder string without a translators
+      # comment, and it only says so at the very end of a CI run. This finds
+      # it in seconds instead.
+      - name: Placeholder strings carry a translators comment
+        run: |
+          python - <<'EOF'
+          import re, sys
+          SQ = r"'((?:[^'\\]|\\.)*)'"
+          CALL = re.compile(r"\b(?:esc_html__|esc_attr__|esc_html_e|esc_attr_e|__|_e|_n)\(\s*" + SQ)
+          COMMENT = re.compile(r"/\*\s*translators:.*?\*/", re.S)
+          files = ["sleek-audio-player.php", "uninstall.php",
+                   "includes/class-player.php", "includes/class-theme-manager.php",
+                   "includes/class-waveform-manager.php"]
+          missing = []
+          for rel in files:
+              src = open(rel, encoding="utf-8").read()
+              for m in CALL.finditer(src):
+                  if "%" not in m.group(1):
+                      continue
+                  comments = list(COMMENT.finditer(src[:m.start()]))
+                  ok = comments and CALL.search(src[comments[-1].end():m.start()]) is None
+                  if not ok:
+                      missing.append((rel, src.count("\n", 0, m.start()) + 1, m.group(1)))
+          for rel, line, text in missing:
+              print(f"::error file={rel},line={line}::Placeholder string needs a /* translators: */ comment: {text}")
+          sys.exit(1 if missing else 0)
+          EOF
+
       - name: Every JS translation key exists in PHP
         run: |
           python - <<'EOF'

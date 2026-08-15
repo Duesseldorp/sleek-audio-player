@@ -1218,7 +1218,10 @@ class SleekAudio_Theme_Manager {
                                     <div class="sap-preview-title"><?php echo esc_html__('Track Title', 'sleek-audio-player'); ?></div>
                                     <div class="sap-preview-artist"><?php echo esc_html__('Artist Name', 'sleek-audio-player'); ?></div>
                                     <div class="sap-preview-meta">
-                                        <span class="sap-preview-meta-text"><?php printf(esc_html(_n('%s Track', '%s Tracks', 5, 'sleek-audio-player')), esc_html(number_format_i18n(5))); ?></span>
+                                        <span class="sap-preview-meta-text"><?php
+                                            /* translators: %s is the number of tracks shown in the theme preview */
+                                            printf(esc_html(_n('%s Track', '%s Tracks', 5, 'sleek-audio-player')), esc_html(number_format_i18n(5)));
+                                        ?></span>
                                         <span class="sap-preview-meta-dot"></span>
                                         <span class="sap-preview-meta-text">12:34</span>
                                     </div>

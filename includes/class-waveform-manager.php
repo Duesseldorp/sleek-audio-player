@@ -405,7 +405,7 @@ class SleekAudio_Waveform_Manager {
                 complete: '<?php echo esc_js(__('Analysis complete!', 'sleek-audio-player')); ?>',
                 done: '<?php echo esc_js(__('Done', 'sleek-audio-player')); ?>',
                 /* translators: %s is the number of files */
-                reanalyzed: '<?php echo esc_js(__('All %s files re-analyzed!', 'sleek-audio-player')); ?>'
+                reanalyzed: '<?php echo esc_js(_n('%s file re-analyzed!', 'All %s files re-analyzed!', count($attachments), 'sleek-audio-player')); ?>'
             };
 
             function sapMarkAnalyzed($row) {
