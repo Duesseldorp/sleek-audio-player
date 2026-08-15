@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Sleek Audio Player 2.7.0\n"
 "Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
-"POT-Creation-Date: 2026-08-15 10:46+0000\n"
+"POT-Creation-Date: 2026-08-15 10:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -213,12 +213,12 @@ msgid "Add a new header:"
 msgstr "Einen neuen Header hinzufügen:"
 
 #: includes/class-player.php:970
-msgid "<strong>Header Name:</strong>"
-msgstr "<strong>Header-Name:</strong>"
+msgid "Header Name:"
+msgstr "Header-Name:"
 
 #: includes/class-player.php:971
-msgid "<strong>Header Value:</strong>"
-msgstr "<strong>Header-Wert:</strong>"
+msgid "Header Value:"
+msgstr "Header-Wert:"
 
 #. translators: %s is the site URL
 #: includes/class-player.php:973
@@ -835,48 +835,48 @@ msgid "Hover State"
 msgstr "Bei Mauskontakt"
 
 #. translators: %s is the theme name
-#: includes/class-theme-manager.php:1289
+#: includes/class-theme-manager.php:1288
 msgid "Theme: %s"
 msgstr "Theme: %s"
 
-#: includes/class-theme-manager.php:1290
+#: includes/class-theme-manager.php:1289
 msgid "New Theme"
 msgstr "Neues Theme"
 
-#: includes/class-theme-manager.php:1291
+#: includes/class-theme-manager.php:1290
 msgid "Reset all colors to default?"
 msgstr "Alle Farben auf den Standard zurücksetzen?"
 
-#: includes/class-theme-manager.php:1292
+#: includes/class-theme-manager.php:1291
 msgid "Really delete this theme?"
 msgstr "Dieses Theme wirklich löschen?"
 
-#: includes/class-theme-manager.php:1293
+#: includes/class-theme-manager.php:1292
 msgid "Please enter a name."
 msgstr "Bitte einen Namen eingeben."
 
-#: includes/class-theme-manager.php:1294
+#: includes/class-theme-manager.php:1293
 msgid "Please save the theme first."
 msgstr "Bitte das Theme zuerst speichern."
 
-#: includes/class-theme-manager.php:1295
+#: includes/class-theme-manager.php:1294
 msgid "Invalid theme file: missing colors or settings."
 msgstr "Ungültige Theme-Datei: Farben oder Einstellungen fehlen."
 
 #. translators: %s is the theme name
-#: includes/class-theme-manager.php:1297
+#: includes/class-theme-manager.php:1295
 msgid "Theme \"%s\" imported and saved!"
 msgstr "Theme „%s“ importiert und gespeichert!"
 
-#: includes/class-theme-manager.php:1298
+#: includes/class-theme-manager.php:1296
 msgid "Error:"
 msgstr "Fehler:"
 
-#: includes/class-theme-manager.php:1299
+#: includes/class-theme-manager.php:1297
 msgid "Error saving imported theme:"
 msgstr "Fehler beim Speichern des importierten Themes:"
 
-#: includes/class-theme-manager.php:1300
+#: includes/class-theme-manager.php:1298
 msgid "Error parsing theme file:"
 msgstr "Fehler beim Lesen der Theme-Datei:"
 
@@ -947,15 +947,15 @@ msgid "Pending"
 msgstr "Ausstehend"
 
 #. translators: %1$s is the current file number, %2$s the total
-#: includes/class-waveform-manager.php:404
+#: includes/class-waveform-manager.php:403
 msgid "Analyzing %1$s of %2$s..."
 msgstr "Analysiere %1$s von %2$s …"
 
-#: includes/class-waveform-manager.php:405
+#: includes/class-waveform-manager.php:404
 msgid "Analysis complete!"
 msgstr "Analyse abgeschlossen!"
 
-#: includes/class-waveform-manager.php:406
+#: includes/class-waveform-manager.php:405
 msgid "Done"
 msgstr "Fertig"
 
@@ -981,7 +981,7 @@ msgstr[0] "%s Datei neu analysieren"
 msgstr[1] "Alle %s Dateien neu analysieren"
 
 #. translators: %s is the number of files
-#: includes/class-waveform-manager.php:408
+#: includes/class-waveform-manager.php:406
 msgid "%s file re-analyzed!"
 msgid_plural "All %s files re-analyzed!"
 msgstr[0] "%s Datei neu analysiert!"

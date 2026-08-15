@@ -967,8 +967,8 @@ class SleekAudio_Player {
                 <li><?php echo wp_kses(__('Go to your Pull Zone → <strong>Headers</strong>', 'sleek-audio-player'), array('strong' => array())); ?></li>
                 <li><?php echo esc_html__('Add a new header:', 'sleek-audio-player'); ?>
                     <ul>
-                        <li><?php echo wp_kses(__('<strong>Header Name:</strong>', 'sleek-audio-player'), array('strong' => array())); ?> <code>Access-Control-Allow-Origin</code></li>
-                        <li><?php echo wp_kses(__('<strong>Header Value:</strong>', 'sleek-audio-player'), array('strong' => array())); ?> <code>*</code> <?php
+                        <li><strong><?php echo esc_html__('Header Name:', 'sleek-audio-player'); ?></strong> <code>Access-Control-Allow-Origin</code></li>
+                        <li><strong><?php echo esc_html__('Header Value:', 'sleek-audio-player'); ?></strong> <code>*</code> <?php
                             /* translators: %s is the site URL */
                             echo wp_kses(sprintf(__('(or <code>%s</code>)', 'sleek-audio-player'), esc_url( home_url() )), array('code' => array()));
                         ?></li>

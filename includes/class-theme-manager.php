@@ -1285,16 +1285,14 @@ class SleekAudio_Theme_Manager {
 
             // Dialog texts come from PHP so this page follows the site language.
             var sapThemeI18n = {
-                /* translators: %s is the theme name */
-                themeNamed: '<?php echo esc_js(__('Theme: %s', 'sleek-audio-player')); ?>',
+                themeNamed: '<?php /* translators: %s is the theme name */ echo esc_js(__('Theme: %s', 'sleek-audio-player')); ?>',
                 newTheme: '<?php echo esc_js(__('New Theme', 'sleek-audio-player')); ?>',
                 confirmReset: '<?php echo esc_js(__('Reset all colors to default?', 'sleek-audio-player')); ?>',
                 confirmDelete: '<?php echo esc_js(__('Really delete this theme?', 'sleek-audio-player')); ?>',
                 enterName: '<?php echo esc_js(__('Please enter a name.', 'sleek-audio-player')); ?>',
                 saveFirst: '<?php echo esc_js(__('Please save the theme first.', 'sleek-audio-player')); ?>',
                 invalidFile: '<?php echo esc_js(__('Invalid theme file: missing colors or settings.', 'sleek-audio-player')); ?>',
-                /* translators: %s is the theme name */
-                imported: '<?php echo esc_js(__('Theme "%s" imported and saved!', 'sleek-audio-player')); ?>',
+                imported: '<?php /* translators: %s is the theme name */ echo esc_js(__('Theme "%s" imported and saved!', 'sleek-audio-player')); ?>',
                 error: '<?php echo esc_js(__('Error:', 'sleek-audio-player')); ?>',
                 errorSaveImport: '<?php echo esc_js(__('Error saving imported theme:', 'sleek-audio-player')); ?>',
                 errorParse: '<?php echo esc_js(__('Error parsing theme file:', 'sleek-audio-player')); ?>'

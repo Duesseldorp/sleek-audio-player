@@ -400,12 +400,10 @@ class SleekAudio_Waveform_Manager {
             // Texts come from PHP so this page follows the site language too.
             const sapI18n = {
                 analyzed: '<?php echo esc_js(__('Analyzed', 'sleek-audio-player')); ?>',
-                /* translators: %1$s is the current file number, %2$s the total */
-                analyzing: '<?php echo esc_js(__('Analyzing %1$s of %2$s...', 'sleek-audio-player')); ?>',
+                analyzing: '<?php /* translators: %1$s is the current file number, %2$s the total */ echo esc_js(__('Analyzing %1$s of %2$s...', 'sleek-audio-player')); ?>',
                 complete: '<?php echo esc_js(__('Analysis complete!', 'sleek-audio-player')); ?>',
                 done: '<?php echo esc_js(__('Done', 'sleek-audio-player')); ?>',
-                /* translators: %s is the number of files */
-                reanalyzed: '<?php echo esc_js(_n('%s file re-analyzed!', 'All %s files re-analyzed!', count($attachments), 'sleek-audio-player')); ?>'
+                reanalyzed: '<?php /* translators: %s is the number of files */ echo esc_js(_n('%s file re-analyzed!', 'All %s files re-analyzed!', count($attachments), 'sleek-audio-player')); ?>'
             };
 
             function sapMarkAnalyzed($row) {

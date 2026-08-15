@@ -207,12 +207,18 @@ jobs:
               for m in CALL.finditer(src):
                   if "%" not in m.group(1):
                       continue
-                  comments = list(COMMENT.finditer(src[:m.start()]))
+                  before = src[:m.start()]
+                  # The comment must live inside the SAME <?php ... ?> block as the
+                  # call. In an inline <script> a /* translators: */ placed outside
+                  # the tags is JavaScript, invisible to PHP's tokenizer - which is
+                  # exactly how four of these reached Plugin Check unnoticed.
+                  block_start = before.rfind("<?php")
+                  comments = [c for c in COMMENT.finditer(before) if c.start() > block_start]
                   ok = comments and CALL.search(src[comments[-1].end():m.start()]) is None
                   if not ok:
                       missing.append((rel, src.count("\n", 0, m.start()) + 1, m.group(1)))
           for rel, line, text in missing:
-              print(f"::error file={rel},line={line}::Placeholder string needs a /* translators: */ comment: {text}")
+              print(f"::error file={rel},line={line}::Placeholder string needs a /* translators: */ comment inside the same PHP block: {text}")
           sys.exit(1 if missing else 0)
           EOF
 
