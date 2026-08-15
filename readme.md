@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.6.0
+**Current Version:** 2.6.1
 
 ---
 
@@ -166,6 +166,23 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.6.1 (2026-08-15)
+
+**The translations from 2.6.0 never actually reached the site.**
+- The plugin loaded its translation files from `includes/languages/` instead of `languages/` — a leftover from the 2.5.7 restructuring, when the loading code moved into `includes/` and its `__FILE__` started pointing one directory too deep. Nothing failed loudly: WordPress simply found no translations and showed English. Found by testing against a real German site
+- Fixed at the class of bug, not the instance: plugin paths are now resolved once in the main file (`SLEEKAUDIO_PLUGIN_BASENAME`), and CI rejects any `__FILE__`-relative plugin path inside `includes/`
+
+**The server-rendered markup was never translatable at all:**
+- Every tooltip and screen-reader label (`Previous track`, `Play or pause`, `Volume control`, `Playback progress`, …), plus "Select a track", the track count and the Download entry, were hardcoded English. 2.6.0 had translated only the strings JavaScript writes at runtime
+- The initial menu labels now use the same complete sentences as the JavaScript, so a label no longer jumps from English to German on first click
+
+**Plural forms were silently dropped:**
+- `tools/po2mo.py` did not understand `msgid_plural`, so the track count could never be translated. It now compiles plural entries the way WordPress reads them
+
+**New safeguards:**
+- `tools/make-pot.py` generates the translation template from the sources; CI fails if a translatable string is missing from it or has no German translation
+- Two new end-to-end tests: every control has a non-empty accessible name, and the track count uses the plural form
 
 ### Version 2.6.0 (2026-08-14)
 

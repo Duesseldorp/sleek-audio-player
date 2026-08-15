@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.6.0
+Stable tag: 2.6.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,12 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.6.1 =
+* 🐛 Fixed: the bundled translations never loaded. Since 2.5.7 the plugin looked for them in the wrong folder, so a German site still showed the English interface - including everything 2.6.0 had just translated
+* 🌍 The player markup is now translatable too: all tooltips, screen-reader labels, "Select a track", the track count and the Download entry were still hardcoded English
+* 🔢 Fixed: plural forms were silently dropped when compiling translations, so the track count stayed English
+* ✅ CI now verifies that every translatable string reaches the translation template and has a German translation
 
 = 2.6.0 =
 * 🌍 The player interface is now fully translatable: ~30 runtime strings (More menu labels, all 11 visualizer names, "Copied!", every playback error) were hardcoded English and are now translated - German included

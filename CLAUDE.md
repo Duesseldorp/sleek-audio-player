@@ -7,9 +7,10 @@ by editing DEVELOPMENT.md first.
 
 Hard constraints (details in DEVELOPMENT.md):
 
-- `*.min.js` / `*.min.css` / `*.mo` are generated — never edit by hand.
-  After changing `player.js`/`player.css` run `python tools/minify.py`;
-  after changing `.po` files run `python tools/po2mo.py`. Commit build
+- `*.min.js` / `*.min.css` / `*.mo` / `*.pot` are generated — never edit by
+  hand. After changing `player.js`/`player.css` run `python tools/minify.py`;
+  after changing translatable strings run `python tools/make-pot.py`, add the
+  German wording to the `.po`, then `python tools/po2mo.py`. Commit build
   outputs together with the sources.
 - Version must match in four places (plugin header, `SLEEKAUDIO_VERSION`,
   readme.txt Stable tag, readme.md Current Version) and every user-facing
@@ -28,7 +29,13 @@ Hard constraints (details in DEVELOPMENT.md):
 - Track meta fields exist in four places (meta box form, `addTrackRow()`,
   `save_meta()`, `sleekaudio_validate_track()`) — always change all four.
 - AJAX: nonce + capability check. All output escaped, all input sanitized.
-- No hardcoded user-facing strings in `player.js` — use `sapSettings.i18n`.
+- No hardcoded user-facing strings in `player.js` — use `sapSettings.i18n`
+  via `sapText(key, englishFallback)`. In PHP the same applies to the player
+  markup **including `aria-label` and `title`**. Stateful labels are whole
+  sentences, never assembled from fragments.
+- Only `sleek-audio-player.php` may derive plugin paths from `__FILE__`; in
+  `includes/` use `SLEEKAUDIO_PLUGIN_DIR`/`_URL`/`_BASENAME`. Getting this
+  wrong fails silently (it broke all translations in 2.5.7–2.6.0).
 - PHP 7.4 / WP 5.0 compatible; `player.js` dependency-free; legacy
   `[simple_player]` shortcode must keep working.
 - CI (`.github/workflows/ci.yml`) runs on every push: syntax (PHP 7.4/8.3,

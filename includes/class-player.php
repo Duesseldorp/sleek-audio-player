@@ -86,10 +86,15 @@ class SleekAudio_Player {
     
     /**
      * Load translations from the plugin's languages/ folder
+     *
+     * The relative path must come from SLEEKAUDIO_PLUGIN_BASENAME, never from
+     * plugin_basename(__FILE__): this file lives in includes/, so its own
+     * __FILE__ would resolve to ".../includes/languages" — a directory that
+     * does not exist, leaving every string untranslated without any error.
      */
     public function load_textdomain() {
         // phpcs:ignore PluginCheck.CodeAnalysis.DiscouragedFunctions.load_plugin_textdomainFound -- required for installs distributed outside wordpress.org (GitHub); bundled translations in /languages don't load without it on WP < 4.6-language-pack coverage
-        load_plugin_textdomain('sleek-audio-player', false, dirname(plugin_basename(__FILE__)) . '/languages');
+        load_plugin_textdomain('sleek-audio-player', false, dirname(SLEEKAUDIO_PLUGIN_BASENAME) . '/languages');
     }
 
     /**
@@ -1629,7 +1634,7 @@ class SleekAudio_Player {
         // Note: No !important here so CSS media queries can override on mobile
         $wide_style = $is_wide ? 'display:grid;grid-template-columns:auto 1fr;max-width:100%;width:100%;' : '';
         ?>
-        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="' . esc_attr( $wide_style ) . '"'; ?> data-playlist='<?php echo esc_attr(wp_json_encode($tracks)); ?>' data-playlist-id='<?php echo esc_attr($post_id); ?>' data-default-cover='<?php echo esc_url($cover); ?>' <?php if($autoplay) echo 'data-autoplay="true"'; ?> role="region" aria-label="Audio Player">
+        <div class="sap-player<?php echo esc_attr($layout_class); ?>" <?php if($wide_style) echo 'style="' . esc_attr( $wide_style ) . '"'; ?> data-playlist='<?php echo esc_attr(wp_json_encode($tracks)); ?>' data-playlist-id='<?php echo esc_attr($post_id); ?>' data-default-cover='<?php echo esc_url($cover); ?>' <?php if($autoplay) echo 'data-autoplay="true"'; ?> role="region" aria-label="<?php echo esc_attr__('Audio Player', 'sleek-audio-player'); ?>">
             
             <!-- Cover Carousel -->
             <div class="sap-cover-carousel" <?php if($is_wide) echo 'style="' . esc_attr('height:100%;flex-shrink:0;') . '"'; ?>>
@@ -1652,18 +1657,18 @@ class SleekAudio_Player {
                 
                 <!-- Track Info -->
                 <div class="sap-track-info">
-                    <div class="sap-now-playing">Select a track</div>
+                    <div class="sap-now-playing"><?php echo esc_html__('Select a track', 'sleek-audio-player'); ?></div>
                     <div class="sap-artist"></div>
                     <div class="sap-meta">
-                        <span><?php echo intval(count($tracks)); ?> Tracks</span>
+                        <span><?php /* translators: %s is the number of tracks in the playlist */ printf(esc_html(_n('%s Track', '%s Tracks', count($tracks), 'sleek-audio-player')), esc_html(number_format_i18n(count($tracks)))); ?></span>
                         <span class="sap-meta-divider"></span>
                         <span><?php echo esc_html($total_duration); ?></span>
                     </div>
                 </div>
 
                 <!-- Progress with Waveform -->
-                <div class="sap-progress-section" role="group" aria-label="Playback progress">
-                    <div class="sap-waveform-container" role="slider" aria-label="Time position" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                <div class="sap-progress-section" role="group" aria-label="<?php echo esc_attr__('Playback progress', 'sleek-audio-player'); ?>">
+                    <div class="sap-waveform-container" role="slider" aria-label="<?php echo esc_attr__('Time position', 'sleek-audio-player'); ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                         <canvas class="sap-waveform" aria-hidden="true"></canvas>
                         <div class="sap-progress">
                             <div class="sap-progress-bar"></div>
@@ -1676,19 +1681,19 @@ class SleekAudio_Player {
                 </div>
 
                 <!-- Controls -->
-                <div class="sap-controls" role="group" aria-label="Audio controls">
-                    <button class="sap-btn sap-prev" title="Previous" aria-label="Previous track">
+                <div class="sap-controls" role="group" aria-label="<?php echo esc_attr__('Audio controls', 'sleek-audio-player'); ?>">
+                    <button class="sap-btn sap-prev" title="<?php echo esc_attr__('Previous', 'sleek-audio-player'); ?>" aria-label="<?php echo esc_attr__('Previous track', 'sleek-audio-player'); ?>">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
                     </button>
-                    <button class="sap-btn sap-play" title="Play/Pause" aria-label="Play or pause">
+                    <button class="sap-btn sap-play" title="<?php echo esc_attr__('Play/Pause', 'sleek-audio-player'); ?>" aria-label="<?php echo esc_attr__('Play or pause', 'sleek-audio-player'); ?>">
                         <svg class="sap-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
                         <svg class="sap-icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
-                    <button class="sap-btn sap-next" title="Next" aria-label="Next track">
+                    <button class="sap-btn sap-next" title="<?php echo esc_attr__('Next', 'sleek-audio-player'); ?>" aria-label="<?php echo esc_attr__('Next track', 'sleek-audio-player'); ?>">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                     </button>
                     <div class="sap-more-wrapper">
-                        <button class="sap-btn sap-btn-small sap-more-btn" title="More options" aria-label="More options" aria-expanded="false">
+                        <button class="sap-btn sap-btn-small sap-more-btn" title="<?php echo esc_attr__('More options', 'sleek-audio-player'); ?>" aria-label="<?php echo esc_attr__('More options', 'sleek-audio-player'); ?>" aria-expanded="false">
                             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
                         </button>
                         <div class="sap-more-menu">
@@ -1702,20 +1707,20 @@ class SleekAudio_Player {
                             </button>
                             <button type="button" class="sap-more-item sap-download" data-action="download">
                                 <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-                                <span>Download</span>
+                                <span><?php echo esc_html__('Download', 'sleek-audio-player'); ?></span>
                             </button>
                             <button type="button" class="sap-more-item sap-repeat" data-action="repeat" data-mode="off" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"/></svg>
-                                <span>Repeat: Off</span>
+                                <span><?php echo esc_html__('Repeat: Off', 'sleek-audio-player'); ?></span>
                             </button>
                             <button type="button" class="sap-more-item sap-speed" data-action="speed" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M20.38 8.57l-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44z"/><path d="M10.59 15.41a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83z"/></svg>
-                                <span class="sap-speed-label">Speed: 1x</span>
+                                <span class="sap-speed-label"><?php /* translators: %s is the playback speed, e.g. 1.25 */ printf(esc_html__('Speed: %sx', 'sleek-audio-player'), '1'); ?></span>
                             </button>
                             <div class="sap-more-divider"></div>
                             <button type="button" class="sap-more-item sap-sleep-timer" data-action="sleep" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
-                                <span class="sap-sleep-label"><?php echo esc_html__('Sleep Timer', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
+                                <span class="sap-sleep-label"><?php echo esc_html__('Sleep Timer: Off', 'sleek-audio-player'); ?></span>
                             </button>
                             <div class="sap-sleep-submenu" style="display:none;">
                                 <button type="button" class="sap-more-item sap-sleep-option" data-minutes="0"><?php echo esc_html__('Off', 'sleek-audio-player'); ?></button>
@@ -1729,7 +1734,7 @@ class SleekAudio_Player {
                             </div>
                             <button type="button" class="sap-more-item sap-cover-anim" data-action="cover-anim" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14zM9.41 15.95L12 12.36l2.59 3.59L17 13l4 5H3l4-4z"/></svg>
-                                <span class="sap-cover-anim-label"><?php echo esc_html__('Cover', 'sleek-audio-player'); ?>: Ken Burns</span>
+                                <span class="sap-cover-anim-label"><?php echo esc_html__('Cover: Ken Burns', 'sleek-audio-player'); ?></span>
                             </button>
                             <div class="sap-cover-anim-submenu" style="display:none;">
                                 <button type="button" class="sap-more-item sap-cover-anim-option" data-anim="none"><?php echo esc_html__('Off', 'sleek-audio-player'); ?></button>
@@ -1738,7 +1743,7 @@ class SleekAudio_Player {
                             </div>
                             <button type="button" class="sap-more-item sap-adaptive-color" data-action="adaptive-color" aria-pressed="false">
                                 <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
-                                <span class="sap-adaptive-color-label"><?php echo esc_html__('Adaptive Colors', 'sleek-audio-player'); ?>: <?php echo esc_html__('Off', 'sleek-audio-player'); ?></span>
+                                <span class="sap-adaptive-color-label"><?php echo esc_html__('Adaptive Colors: Off', 'sleek-audio-player'); ?></span>
                             </button>
                             <div class="sap-more-divider"></div>
                             <button type="button" class="sap-more-item sap-embed-btn" data-action="embed" data-embed-url="<?php echo esc_url(add_query_arg('embed', '1', get_permalink($post_id))); ?>">
@@ -1761,12 +1766,12 @@ class SleekAudio_Player {
                         </div>
                     </div>
                     <div class="sap-volume-wrapper">
-                        <button class="sap-btn sap-btn-small sap-volume-btn" title="Volume" aria-label="Volume control">
+                        <button class="sap-btn sap-btn-small sap-volume-btn" title="<?php echo esc_attr__('Volume', 'sleek-audio-player'); ?>" aria-label="<?php echo esc_attr__('Volume control', 'sleek-audio-player'); ?>">
                             <svg class="sap-icon-volume-high" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
                             <svg class="sap-icon-volume-low" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/></svg>
                             <svg class="sap-icon-volume-mute" viewBox="0 0 24 24" aria-hidden="true"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
                         </button>
-                        <div class="sap-volume-slider" role="slider" aria-label="Volume" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
+                        <div class="sap-volume-slider" role="slider" aria-label="<?php echo esc_attr__('Volume', 'sleek-audio-player'); ?>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="70">
                             <div class="sap-volume-track">
                                 <div class="sap-volume-fill"></div>
                                 <div class="sap-volume-handle"></div>
@@ -1776,7 +1781,7 @@ class SleekAudio_Player {
                 </div>
 
                 <!-- Playlist -->
-                <ul class="sap-playlist" role="listbox" aria-label="Playlist">
+                <ul class="sap-playlist" role="listbox" aria-label="<?php echo esc_attr__('Playlist', 'sleek-audio-player'); ?>">
                     <?php foreach ($tracks as $index => $track) : ?>
                         <li class="sap-track" role="option" aria-selected="<?php echo esc_attr($index === 0 ? 'true' : 'false'); ?>" tabindex="0" data-index="<?php echo esc_attr( $index ); ?>" data-url="<?php echo esc_url($track['url']); ?>" data-downloadable="<?php echo esc_attr(!empty($track['downloadable']) ? '1' : '0'); ?>">
                             <span class="sap-track-num" aria-hidden="true"><span><?php echo esc_html( $index + 1 ); ?></span></span>
@@ -1811,11 +1816,11 @@ class SleekAudio_Player {
                             <div class="sap-embed-layouts">
                                 <button type="button" class="sap-embed-layout active" data-layout="wide" data-height="280">
                                     <svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                                    <span>Wide</span>
+                                    <span><?php echo esc_html__('Wide', 'sleek-audio-player'); ?></span>
                                 </button>
                                 <button type="button" class="sap-embed-layout" data-layout="mini" data-height="150">
                                     <svg viewBox="0 0 24 24"><rect x="2" y="9" width="20" height="6" rx="1" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-                                    <span>Mini</span>
+                                    <span><?php echo esc_html__('Mini', 'sleek-audio-player'); ?></span>
                                 </button>
                             </div>
                         </div>

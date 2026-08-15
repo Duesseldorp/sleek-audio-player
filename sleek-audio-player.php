@@ -2,11 +2,12 @@
 /**
  * Plugin Name: Sleek Audio Player
  * Description: Minimal audio player with download, shuffle, cover art, and visualization
- * Version: 2.6.0
+ * Version: 2.6.1
  * Author: Martin Gräbing
  * Author URI: https://www.duesseldorp.de
  * Plugin URI: https://www.duesseldorp.de/sleek-audio-player
  * Text Domain: sleek-audio-player
+ * Domain Path: /languages
  * Requires at least: 5.0
  * Requires PHP: 7.4
  * License: GPL v2 or later
@@ -28,7 +29,7 @@
 
 defined('ABSPATH') || exit;
 
-define('SLEEKAUDIO_VERSION', '2.6.0');
+define('SLEEKAUDIO_VERSION', '2.6.1');
 define('SLEEKAUDIO_DEBUG', defined('WP_DEBUG') && WP_DEBUG);
 
 /**
@@ -133,7 +134,14 @@ function sleekaudio_db_query($query, ...$args) {
 define('SLEEKAUDIO_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SLEEKAUDIO_PLUGIN_URL', plugin_dir_url(__FILE__));
 
-// Text domain is loaded automatically by WordPress 4.6+ for plugins hosted on WordPress.org
+// Must be resolved here, like register_activation_hook() below: only in this
+// file does __FILE__ identify the plugin. Code in includes/ that derives a
+// plugin path from its own __FILE__ silently gets ".../includes/..." instead.
+define('SLEEKAUDIO_PLUGIN_BASENAME', plugin_basename(__FILE__));
+
+// Translations are loaded by SleekAudio_Player::load_textdomain() on 'init'.
+// WordPress only auto-loads language packs from wordpress.org; the bundled
+// files in languages/ need the explicit call.
 
 require_once SLEEKAUDIO_PLUGIN_DIR . 'includes/class-theme-manager.php';
 require_once SLEEKAUDIO_PLUGIN_DIR . 'includes/class-waveform-manager.php';

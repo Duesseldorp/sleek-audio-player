@@ -129,6 +129,54 @@ test.describe("Multiple players on one page", () => {
   });
 });
 
+test.describe("Accessible labels", () => {
+  // Since 2.6.1 every label and tooltip comes from a translation call. An
+  // empty or missing one leaves screen-reader users with an unnamed button,
+  // and that is the only way the markup change could regress unnoticed.
+  test("every control carries a non-empty accessible name", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    await expect(player.root).toBeVisible();
+
+    const named = await player.root.evaluate((root) => {
+      const result = {};
+      const record = (key, el, attrs) => {
+        result[key] = el ? attrs.map((a) => el.getAttribute(a)) : null;
+      };
+      record("region", root, ["aria-label"]);
+      for (const sel of [
+        ".sap-progress-section",
+        ".sap-waveform-container",
+        ".sap-controls",
+        ".sap-playlist",
+        ".sap-volume-slider",
+      ]) {
+        record(sel, root.querySelector(sel), ["aria-label"]);
+      }
+      for (const sel of [".sap-prev", ".sap-play", ".sap-next", ".sap-more-btn", ".sap-volume-btn"]) {
+        record(sel, root.querySelector(sel), ["aria-label", "title"]);
+      }
+      return result;
+    });
+
+    for (const [element, values] of Object.entries(named)) {
+      expect(values, `${element} is missing from the markup`).not.toBeNull();
+      for (const value of values) {
+        expect(value, `${element} has an empty accessible name`).toBeTruthy();
+      }
+    }
+  });
+
+  // The track count is the plugin's only plural string; po2mo.py used to drop
+  // plural entries on the floor, so the compiled .mo silently lost them.
+  test("the track count uses the plural form", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await expect(player.root.locator(".sap-meta span").first()).toHaveText(/^3 Tracks$/);
+  });
+});
+
 test.describe("Compatibility", () => {
   // The legacy alias is a documented promise in readme.txt and DEVELOPMENT.md
   test("the legacy [simple_player] shortcode still renders a working player", async ({ page }) => {

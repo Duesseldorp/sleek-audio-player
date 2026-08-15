@@ -20,7 +20,8 @@ change a convention, change it in this file first.
 | `assets/js/block.js` | Gutenberg block (editor only) |
 | `languages/` | `.pot` template, `.po` translations, **generated** `.mo` binaries |
 | `tools/minify.py` | Builds the `.min` assets (`pip install rjsmin rcssmin`) |
-| `tools/po2mo.py` | Compiles `.po` → `.mo` (stdlib only) |
+| `tools/make-pot.py` | **Generates** the `.pot` from the PHP sources (stdlib only) |
+| `tools/po2mo.py` | Compiles `.po` → `.mo`, plural forms included (stdlib only) |
 | `tools/build-zip.py` | Builds the distribution ZIP (`dist/`) for wordpress.org — whitelist-based, dev files can never leak in |
 | `readme.txt` | wordpress.org readme (**shipped**) — changelog, FAQ, External Services section |
 | `readme.md` | GitHub readme (repo only) — changelog kept in sync with readme.txt |
@@ -45,7 +46,7 @@ whitelist, so they cannot end up in a wordpress.org submission:
 Keep these in sync when conventions change: edit `DEVELOPMENT.md` first, then
 mirror the hard constraints into `CLAUDE.md` and `.windsurfrules`.
 
-## Build steps (the two rules you must not forget)
+## Build steps (the three rules you must not forget)
 
 1. **After every change to `player.js` or `player.css`:**
    ```bash
@@ -57,12 +58,21 @@ mirror the hard constraints into `CLAUDE.md` and `.windsurfrules`.
    — WordPress then serves the readable sources and you only need to rebuild
    once before committing.
 
-2. **After every change to a `.po` file or to translatable strings:**
+2. **After adding, changing or removing any translatable string:**
+   ```bash
+   python tools/make-pot.py
+   ```
+   The `.pot` is generated from the PHP sources — never edit it by hand. Then
+   add the German wording for any new entry to
+   `languages/sleek-audio-player-de_DE.po`. CI fails if a translatable string
+   is missing from the `.pot` or has no German translation.
+
+3. **After every change to a `.po` file:**
    ```bash
    python tools/po2mo.py
    ```
-   WordPress only loads the compiled `.mo`. New strings also go into
-   `languages/sleek-audio-player.pot` and `languages/sleek-audio-player-de_DE.po`.
+   WordPress only loads the compiled `.mo` — editing a `.po` without this step
+   means the translation never reaches the site.
 
 ## Release checklist
 
@@ -133,13 +143,34 @@ as happened with `duration`):
 - Audio streaming tokens: HMAC-SHA256 via `wp_salt('auth')`, verified with
   `hash_equals`, time-limited
 
+### Plugin paths (learned the hard way in 2.6.1)
+
+Only `sleek-audio-player.php` may derive plugin paths from `__FILE__`. In
+`includes/` those helpers resolve one directory too deep — `plugin_basename()`
+returns `sleek-audio-player/includes/…` — and nothing complains at runtime.
+This is how the bundled translations quietly stopped loading between 2.5.7 and
+2.6.0: `load_plugin_textdomain()` searched `includes/languages/`, found
+nothing, and every site kept showing English. Use `SLEEKAUDIO_PLUGIN_DIR`,
+`SLEEKAUDIO_PLUGIN_URL` or `SLEEKAUDIO_PLUGIN_BASENAME`; CI rejects the rest.
+
 ### i18n
 
-- PHP strings: `__('...', 'sleek-audio-player')`
+- PHP strings: `__('...', 'sleek-audio-player')`, escaped variants
+  `esc_html__()` / `esc_attr__()` — **including `aria-label` and `title`
+  attributes in the player markup**, which are user-facing text
 - Frontend JS strings: never hardcode user-facing text in `player.js`; pass it
   through the `sapSettings.i18n` array in `register_assets()`
-  (`wp_localize_script`), with an English fallback in the JS
-- Text domain loads via `load_plugin_textdomain` on `init`
+  (`wp_localize_script`) and read it with `sapText(key, englishFallback)`. The
+  fallback is mandatory, so an unknown key renders the English original rather
+  than `undefined`
+- Stateful labels are stored as complete sentences (`'Repeat: One'`), never
+  assembled from fragments (`'Repeat: ' + mode`) — other languages need their
+  own word order. Server-rendered initial labels use the *same* strings as the
+  JS, otherwise a label visibly switches language on first click
+- Text domain loads via `load_plugin_textdomain` on `init`, with the path
+  derived from `SLEEKAUDIO_PLUGIN_BASENAME` (see above)
+- Translating is only half the job: verify against a site whose language is
+  actually set to German. The local test site is (see below)
 
 ### Compatibility
 
@@ -158,6 +189,9 @@ as happened with `duration`):
 - JavaScript syntax errors (`node --check` — the dev machine has no Node,
   so this is the only real parser check that exists)
 - `.min` / `.mo` files that are out of sync with their sources
+- a translatable string missing from the `.pot`, or missing its German
+  translation (`tools/make-pot.py --check`)
+- `__FILE__`-relative plugin paths inside `includes/` (see "Plugin paths")
 - development files leaking into the distribution ZIP
 - version mismatches across the four locations
 - WordPress Plugin Check findings (keeps wordpress.org compliance intact)
@@ -168,7 +202,7 @@ complies", not "it plays audio".
 ### End-to-end tests
 
 `tests/e2e/` drives a real browser against a real WordPress instance
-(`@wordpress/env` in Docker) on every push. 38 tests covering:
+(`@wordpress/env` in Docker) on every push. 41 tests covering:
 
 - **Playback**: starts, **track transitions at the end of a song** (the
   regression that shipped five times), next/previous, durations rendering
@@ -189,6 +223,10 @@ complies", not "it plays audio".
   advancing), download button visibility per track
 - **Embedding**: Gutenberg block, oEmbed endpoint (valid document, and 404 for
   a non-playlist URL), embed-code generator incl. layout switch, `?embed=1`
+- **Labels**: no menu label is empty or renders `undefined`, every control has
+  a non-empty accessible name, the track count uses the plural form. The suite
+  runs in English, so it guards the plumbing, not the German wording — that
+  still needs the German test site
 
 Still uncovered on purpose: visualizers, adaptive colours, cover carousel and
 swipe gestures — visual behaviour makes brittle tests. Uncovered and worth

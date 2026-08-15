@@ -76,6 +76,37 @@ jobs:
             exit 1
           fi
 
+      # A string that never reaches the .pot can never be translated, and
+      # nothing at runtime complains about it - the site just shows English.
+      - name: Translation template covers every translatable string
+        run: |
+          if ! python tools/make-pot.py --check; then
+            echo "::error::languages/sleek-audio-player.pot is out of date. Run 'python tools/make-pot.py' and commit the result."
+            exit 1
+          fi
+
+      - name: German translation is complete
+        run: |
+          python - <<'EOF'
+          import re, sys
+          pot = open("languages/sleek-audio-player.pot", encoding="utf-8").read()
+          po = open("languages/sleek-audio-player-de_DE.po", encoding="utf-8").read()
+
+          def singular_ids(text):
+              return set(re.findall(r'^msgid "(.+)"$', text, re.M))
+
+          missing = sorted(singular_ids(pot) - singular_ids(po))
+          untranslated = sorted(re.findall(r'^msgid "(.+)"\nmsgstr ""$', po, re.M))
+          untranslated += sorted(re.findall(r'^msgid "(.+)"\nmsgid_plural ".*"\nmsgstr\[0\] ""', po, re.M))
+          if missing or untranslated:
+              for m in missing:
+                  print(f"::error::Missing from the German translation: {m}")
+              for u in untranslated:
+                  print(f"::error::Untranslated in German: {u}")
+              sys.exit(1)
+          print(f"German translation complete ({len(singular_ids(pot))} strings)")
+          EOF
+
       - name: Compiled translations match their sources
         run: |
           python tools/po2mo.py
@@ -129,6 +160,29 @@ jobs:
             echo "::error::Version mismatch - all four locations must match (see DEVELOPMENT.md)."
             exit 1
           fi
+
+  conventions:
+    name: Plugin paths resolved in the main file
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only sleek-audio-player.php may derive plugin paths from __FILE__.
+      # In includes/ those helpers silently return ".../includes/...", which
+      # is how the bundled translations stopped loading in 2.5.7-2.6.0:
+      # load_plugin_textdomain() looked in includes/languages/ and found
+      # nothing, with no error anywhere. Use the SLEEKAUDIO_* constants.
+      - name: No __FILE__-relative plugin paths outside the main file
+        run: |
+          # Docblocks are allowed to name the trap; only real calls fail.
+          hits=$(grep -nE 'plugin_(basename|dir_path|dir_url)\(__FILE__\)|plugins_url\([^)]*__FILE__' includes/*.php \
+                 | grep -vE ':[0-9]+:[[:space:]]*(\*|//|/\*)' || true)
+          if [ -n "$hits" ]; then
+            echo "$hits"
+            echo "::error::includes/ must not derive plugin paths from __FILE__ - use SLEEKAUDIO_PLUGIN_DIR / _URL / _BASENAME (see DEVELOPMENT.md)."
+            exit 1
+          fi
+          echo "no __FILE__-relative plugin paths in includes/"
 
   e2e:
     name: End-to-end tests
