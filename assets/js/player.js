@@ -19,6 +19,26 @@
     function sapError(message, error) {
         console.error('[SAP Error]', message, error || '');
     }
+
+    /**
+     * Translated UI string with a mandatory English fallback.
+     *
+     * The fallback is not optional on purpose: a missing or misspelled key
+     * then renders the English original - exactly today's behaviour - instead
+     * of showing "undefined" to a visitor. Keys are supplied from PHP via
+     * wp_localize_script (see register_assets()).
+     *
+     * @param {string} key      Key in sapSettings.i18n
+     * @param {string} fallback English original, always required
+     * @param {string} [value]  Replaces %s in the string, if present
+     */
+    function sapText(key, fallback, value) {
+        let text = fallback;
+        if (typeof sapSettings !== 'undefined' && sapSettings.i18n && sapSettings.i18n[key]) {
+            text = sapSettings.i18n[key];
+        }
+        return value === undefined ? text : text.replace('%s', value);
+    }
     
     // === Stability: Safe JSON parse ===
     function safeJsonParse(str, fallback) {
@@ -404,7 +424,19 @@
         
         // Show feedback when visualizer changes
         function showVisualizerFeedback(type) {
-            const names = { bars: 'Bars', mirror: 'Mirror', circular: 'Circular', oscilloscope: 'Oscilloscope', dots: 'Dots', wave: 'Wave', pulse: 'Pulse', circular_bars: 'Circular Bars', particles: 'Particles', starburst: 'Starburst', orbits: 'Orbits' };
+            const names = {
+                bars: sapText('vizBars', 'Bars'),
+                mirror: sapText('vizMirror', 'Mirror'),
+                circular: sapText('vizCircular', 'Circular'),
+                oscilloscope: sapText('vizOscilloscope', 'Oscilloscope'),
+                dots: sapText('vizDots', 'Dots'),
+                wave: sapText('vizWave', 'Wave'),
+                pulse: sapText('vizPulse', 'Pulse'),
+                circular_bars: sapText('vizCircularBars', 'Circular Bars'),
+                particles: sapText('vizParticles', 'Particles'),
+                starburst: sapText('vizStarburst', 'Starburst'),
+                orbits: sapText('vizOrbits', 'Orbits')
+            };
             const feedback = document.createElement('div');
             feedback.className = 'sap-viz-feedback';
             feedback.textContent = '🎵 ' + names[type];
@@ -1379,7 +1411,7 @@
             
             const overlay = document.createElement('div');
             overlay.className = 'sap-play-overlay';
-            const tapToPlayLabel = (typeof sapSettings !== 'undefined' && sapSettings.i18n && sapSettings.i18n.tapToPlay) || 'Tap to Play';
+            const tapToPlayLabel = sapText('tapToPlay', 'Tap to Play');
             overlay.innerHTML = '<div class="sap-play-overlay-btn"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div><div class="sap-play-overlay-text"></div>';
             overlay.querySelector('.sap-play-overlay-text').textContent = tapToPlayLabel;
             overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(10,17,24,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;cursor:pointer;overflow:hidden;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);';
@@ -1620,8 +1652,12 @@
                     // Update menu label
                     const label = this.querySelector('span');
                     if (label) {
-                        const modes = { off: 'Off', playlist: 'All', track: 'One' };
-                        label.textContent = 'Repeat: ' + (modes[repeatMode] || 'Off');
+                        const modes = {
+                            off: sapText('repeatOff', 'Repeat: Off'),
+                            playlist: sapText('repeatAll', 'Repeat: All'),
+                            track: sapText('repeatOne', 'Repeat: One')
+                        };
+                        label.textContent = modes[repeatMode] || modes.off;
                     }
                     this.classList.toggle('active', repeatMode !== 'off');
                 });
@@ -1635,7 +1671,7 @@
                     // Update menu label
                     const label = this.querySelector('.sap-speed-label');
                     if (label) {
-                        label.textContent = 'Speed: ' + playbackSpeeds[currentSpeedIndex] + 'x';
+                        label.textContent = sapText('speed', 'Speed: %sx', playbackSpeeds[currentSpeedIndex]);
                     }
                     this.classList.toggle('active', playbackSpeeds[currentSpeedIndex] !== 1);
                 });
@@ -1651,7 +1687,7 @@
                 if (!label) return;
                 
                 if (sleepEndOfTrack) {
-                    label.textContent = 'Sleep: End of Track';
+                    label.textContent = sapText('sleepEndOfTrack', 'Sleep: End of Track');
                     sleepTimerBtn.classList.add('active');
                     sleepTimerBtn.setAttribute('aria-pressed', 'true');
                 } else if (sleepEndTime) {
@@ -1660,14 +1696,14 @@
                     const remainingSec = Math.floor((remainingMs % 60000) / 1000);
                     
                     if (remainingMin > 0) {
-                        label.textContent = 'Sleep: ' + remainingMin + ':' + String(remainingSec).padStart(2, '0');
+                        label.textContent = sapText('sleepRemaining', 'Sleep: %s', remainingMin + ':' + String(remainingSec).padStart(2, '0'));
                     } else {
-                        label.textContent = 'Sleep: ' + remainingSec + 's';
+                        label.textContent = sapText('sleepRemaining', 'Sleep: %s', remainingSec + 's');
                     }
                     sleepTimerBtn.classList.add('active');
                     sleepTimerBtn.setAttribute('aria-pressed', 'true');
                 } else {
-                    label.textContent = 'Sleep Timer: Off';
+                    label.textContent = sapText('sleepOff', 'Sleep Timer: Off');
                     sleepTimerBtn.classList.remove('active');
                     sleepTimerBtn.setAttribute('aria-pressed', 'false');
                 }
@@ -1773,8 +1809,12 @@
                 // Update label and aria-pressed
                 const label = coverAnimBtn ? coverAnimBtn.querySelector('.sap-cover-anim-label') : null;
                 if (label) {
-                    const modeNames = { none: 'Off', kenburns: 'Ken Burns', vinyl: 'Vinyl' };
-                    label.textContent = 'Cover: ' + (modeNames[mode] || mode);
+                    const modeNames = {
+                        none: sapText('coverOff', 'Cover: Off'),
+                        kenburns: sapText('coverKenBurns', 'Cover: Ken Burns'),
+                        vinyl: sapText('coverVinyl', 'Cover: Vinyl')
+                    };
+                    label.textContent = modeNames[mode] || modeNames.none;
                 }
                 if (coverAnimBtn) {
                     coverAnimBtn.setAttribute('aria-pressed', mode !== 'none');
@@ -1829,7 +1869,9 @@
             function updateAdaptiveColorLabel() {
                 const label = adaptiveColorBtn ? adaptiveColorBtn.querySelector('.sap-adaptive-color-label') : null;
                 if (label) {
-                    label.textContent = 'Adaptive Colors: ' + (adaptiveColorsEnabled ? 'On' : 'Off');
+                    label.textContent = adaptiveColorsEnabled
+                        ? sapText('adaptiveOn', 'Adaptive Colors: On')
+                        : sapText('adaptiveOff', 'Adaptive Colors: Off');
                 }
                 if (adaptiveColorBtn) {
                     adaptiveColorBtn.classList.toggle('active', adaptiveColorsEnabled);
@@ -2149,7 +2191,7 @@
                 navigator.clipboard.writeText(embedCode.value).then(() => {
                     const span = this.querySelector('span');
                     const originalText = span.textContent;
-                    span.textContent = '✓ Copied!';
+                    span.textContent = sapText('copied', '✓ Copied!');
                     this.classList.add('copied');
                     setTimeout(() => {
                         span.textContent = originalText;
@@ -2656,7 +2698,7 @@
                 // Update label
                 const sleepLabel = playerEl.querySelector('.sap-sleep-label');
                 const sleepBtn = playerEl.querySelector('.sap-sleep-timer');
-                if (sleepLabel) sleepLabel.textContent = 'Sleep Timer: Off';
+                if (sleepLabel) sleepLabel.textContent = sapText('sleepOff', 'Sleep Timer: Off');
                 if (sleepBtn) {
                     sleepBtn.classList.remove('active');
                     sleepBtn.setAttribute('aria-pressed', 'false');
@@ -2917,7 +2959,7 @@
                             isLoading = false;
                             hideLoadingSpinner();
                             sapError('Play failed', err);
-                            showErrorFeedback('Playback failed');
+                            showErrorFeedback(sapText('errPlaybackFailed', 'Playback failed'));
                         }
                     });
                 } else {
@@ -2993,20 +3035,20 @@
                 hideLoadingSpinner();
                 
                 // Get detailed error info
-                let errorMsg = 'Track could not be loaded';
+                let errorMsg = sapText('errTrackLoad', 'Track could not be loaded');
                 if (audio.error) {
                     switch(audio.error.code) {
                         case MediaError.MEDIA_ERR_ABORTED:
-                            errorMsg = 'Playback aborted';
+                            errorMsg = sapText('errAborted', 'Playback aborted');
                             break;
                         case MediaError.MEDIA_ERR_NETWORK:
-                            errorMsg = 'Network error';
+                            errorMsg = sapText('errNetwork', 'Network error');
                             break;
                         case MediaError.MEDIA_ERR_DECODE:
-                            errorMsg = 'Audio decode error';
+                            errorMsg = sapText('errDecode', 'Audio decode error');
                             break;
                         case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                            errorMsg = 'Format not supported';
+                            errorMsg = sapText('errFormat', 'Format not supported');
                             break;
                     }
                 }

@@ -142,3 +142,123 @@ msgstr "Code kopieren"
 #: sleek-audio-player.php
 msgid "Preview"
 msgstr "Vorschau"
+
+#: assets/js/player.js
+msgid "Repeat: Off"
+msgstr "Wiederholen: Aus"
+
+#: assets/js/player.js
+msgid "Repeat: All"
+msgstr "Wiederholen: Alle"
+
+#: assets/js/player.js
+msgid "Repeat: One"
+msgstr "Wiederholen: Titel"
+
+#: assets/js/player.js
+msgid "Speed: %sx"
+msgstr "Tempo: %sx"
+
+#: assets/js/player.js
+msgid "Sleep Timer: Off"
+msgstr "Sleep-Timer: Aus"
+
+#: assets/js/player.js
+msgid "Sleep: End of Track"
+msgstr "Sleep: Ende des Titels"
+
+#: assets/js/player.js
+msgid "Sleep: %s"
+msgstr "Sleep: %s"
+
+#: assets/js/player.js
+msgid "Cover: Off"
+msgstr "Cover: Aus"
+
+#: assets/js/player.js
+msgid "Cover: Ken Burns"
+msgstr "Cover: Ken Burns"
+
+#: assets/js/player.js
+msgid "Cover: Vinyl"
+msgstr "Cover: Vinyl"
+
+#: assets/js/player.js
+msgid "Adaptive Colors: On"
+msgstr "Adaptive Farben: An"
+
+#: assets/js/player.js
+msgid "Adaptive Colors: Off"
+msgstr "Adaptive Farben: Aus"
+
+#: assets/js/player.js
+msgid "✓ Copied!"
+msgstr "✓ Kopiert!"
+
+#: assets/js/player.js
+msgid "Bars"
+msgstr "Balken"
+
+#: assets/js/player.js
+msgid "Mirror"
+msgstr "Spiegel"
+
+#: assets/js/player.js
+msgid "Circular"
+msgstr "Kreis"
+
+#: assets/js/player.js
+msgid "Oscilloscope"
+msgstr "Oszilloskop"
+
+#: assets/js/player.js
+msgid "Dots"
+msgstr "Punkte"
+
+#: assets/js/player.js
+msgid "Wave"
+msgstr "Welle"
+
+#: assets/js/player.js
+msgid "Pulse"
+msgstr "Puls"
+
+#: assets/js/player.js
+msgid "Circular Bars"
+msgstr "Kreisbalken"
+
+#: assets/js/player.js
+msgid "Particles"
+msgstr "Partikel"
+
+#: assets/js/player.js
+msgid "Starburst"
+msgstr "Sternexplosion"
+
+#: assets/js/player.js
+msgid "Orbits"
+msgstr "Umlaufbahnen"
+
+#: assets/js/player.js
+msgid "Playback failed"
+msgstr "Wiedergabe fehlgeschlagen"
+
+#: assets/js/player.js
+msgid "Track could not be loaded"
+msgstr "Titel konnte nicht geladen werden"
+
+#: assets/js/player.js
+msgid "Playback aborted"
+msgstr "Wiedergabe abgebrochen"
+
+#: assets/js/player.js
+msgid "Network error"
+msgstr "Netzwerkfehler"
+
+#: assets/js/player.js
+msgid "Audio decode error"
+msgstr "Audio-Dekodierfehler"
+
+#: assets/js/player.js
+msgid "Format not supported"
+msgstr "Format nicht unterstützt"

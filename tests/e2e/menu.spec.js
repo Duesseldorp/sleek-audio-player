@@ -63,6 +63,35 @@ test.describe("More menu", () => {
     await expect(player.moreWrapper).not.toHaveClass(/active/);
   });
 
+  // Guards the one real failure mode of the i18n rework: a missing or
+  // misspelled key in sapText() must never reach the visitor as "undefined"
+  // or an empty label. sapText() falls back to the English original instead.
+  test("no menu label is empty or renders undefined", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    await player.openMoreMenu();
+
+    const labels = await player.moreMenu.evaluate((menu) =>
+      Array.from(menu.querySelectorAll(".sap-more-item"))
+        .filter((el) => el.offsetHeight > 0)
+        .map((el) => el.textContent.trim())
+    );
+
+    expect(labels.length).toBeGreaterThan(3);
+    for (const label of labels) {
+      expect(label, "empty menu label").not.toBe("");
+      expect(label, `label contains undefined: ${label}`).not.toMatch(/undefined/i);
+    }
+
+    // Cycling the stateful labels must keep them intact too
+    for (const selector of [".sap-repeat", ".sap-speed"]) {
+      await player.root.locator(`.sap-more-item${selector}`).click();
+      const text = (await player.root.locator(`.sap-more-item${selector}`).textContent())?.trim();
+      expect(text).toBeTruthy();
+      expect(text).not.toMatch(/undefined|NaN/i);
+    }
+  });
+
   test("streaming links only appear for tracks that have them", async ({ page }) => {
     await page.goto("/player-page/");
     const player = new Player(page);

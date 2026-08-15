@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.5.8
+**Current Version:** 2.6.0
 
 ---
 
@@ -166,6 +166,14 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.6.0 (2026-08-14)
+
+**The player interface is now fully translatable:**
+- Around 30 strings that the player wrote into the page at runtime were hardcoded English, so German visitors saw "Repeat: Off", "Speed: 1.25x" or "Network error" even on a German site. They now go through the translation system and are translated into German
+- Covered: the More menu labels (Repeat, Speed, Sleep Timer, Cover, Adaptive Colors), all 11 visualizer names, the "Copied!" confirmation and every playback error message
+- Menu labels are stored as complete sentences rather than assembled from fragments, so translations are free to use their own word order
+- A missing or misspelled key falls back to the English original by design — it can never render an empty label or "undefined"
 
 ### Version 2.5.8 (2026-08-14)
 

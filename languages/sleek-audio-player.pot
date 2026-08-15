@@ -141,3 +141,123 @@ msgstr ""
 #: sleek-audio-player.php
 msgid "Preview"
 msgstr ""
+
+#: assets/js/player.js
+msgid "Repeat: Off"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Repeat: All"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Repeat: One"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Speed: %sx"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Sleep Timer: Off"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Sleep: End of Track"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Sleep: %s"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Cover: Off"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Cover: Ken Burns"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Cover: Vinyl"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Adaptive Colors: On"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Adaptive Colors: Off"
+msgstr ""
+
+#: assets/js/player.js
+msgid "✓ Copied!"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Bars"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Mirror"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Circular"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Oscilloscope"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Dots"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Wave"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Pulse"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Circular Bars"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Particles"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Starburst"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Orbits"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Playback failed"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Track could not be loaded"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Playback aborted"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Network error"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Audio decode error"
+msgstr ""
+
+#: assets/js/player.js
+msgid "Format not supported"
+msgstr ""

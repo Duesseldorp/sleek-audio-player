@@ -1010,8 +1010,50 @@ class SleekAudio_Player {
             'coverClickPlay' => (bool) get_option('sap_cover_click_play', true),
             'rememberPosition' => (bool) get_option('sap_remember_position', false),
             'visualizerType' => get_option('sap_visualizer_type', 'bars'),
+            // Every string the player writes into the DOM at runtime.
+            // player.js always passes an English fallback to sapText(), so a
+            // missing key degrades to English instead of breaking the label.
             'i18n' => array(
                 'tapToPlay' => __('Tap to Play', 'sleek-audio-player'),
+
+                // More menu labels - full strings, not assembled from parts,
+                // so translations can put the words in their own order
+                'repeatOff' => __('Repeat: Off', 'sleek-audio-player'),
+                'repeatAll' => __('Repeat: All', 'sleek-audio-player'),
+                'repeatOne' => __('Repeat: One', 'sleek-audio-player'),
+                /* translators: %s is the playback speed, e.g. 1.25 */
+                'speed' => __('Speed: %sx', 'sleek-audio-player'),
+                'sleepOff' => __('Sleep Timer: Off', 'sleek-audio-player'),
+                'sleepEndOfTrack' => __('Sleep: End of Track', 'sleek-audio-player'),
+                /* translators: %s is the remaining time, e.g. 4:59 or 45s */
+                'sleepRemaining' => __('Sleep: %s', 'sleek-audio-player'),
+                'coverOff' => __('Cover: Off', 'sleek-audio-player'),
+                'coverKenBurns' => __('Cover: Ken Burns', 'sleek-audio-player'),
+                'coverVinyl' => __('Cover: Vinyl', 'sleek-audio-player'),
+                'adaptiveOn' => __('Adaptive Colors: On', 'sleek-audio-player'),
+                'adaptiveOff' => __('Adaptive Colors: Off', 'sleek-audio-player'),
+                'copied' => __('✓ Copied!', 'sleek-audio-player'),
+
+                // Visualizer names, shown when cycling with a double-click
+                'vizBars' => __('Bars', 'sleek-audio-player'),
+                'vizMirror' => __('Mirror', 'sleek-audio-player'),
+                'vizCircular' => __('Circular', 'sleek-audio-player'),
+                'vizOscilloscope' => __('Oscilloscope', 'sleek-audio-player'),
+                'vizDots' => __('Dots', 'sleek-audio-player'),
+                'vizWave' => __('Wave', 'sleek-audio-player'),
+                'vizPulse' => __('Pulse', 'sleek-audio-player'),
+                'vizCircularBars' => __('Circular Bars', 'sleek-audio-player'),
+                'vizParticles' => __('Particles', 'sleek-audio-player'),
+                'vizStarburst' => __('Starburst', 'sleek-audio-player'),
+                'vizOrbits' => __('Orbits', 'sleek-audio-player'),
+
+                // Playback errors shown to the visitor
+                'errPlaybackFailed' => __('Playback failed', 'sleek-audio-player'),
+                'errTrackLoad' => __('Track could not be loaded', 'sleek-audio-player'),
+                'errAborted' => __('Playback aborted', 'sleek-audio-player'),
+                'errNetwork' => __('Network error', 'sleek-audio-player'),
+                'errDecode' => __('Audio decode error', 'sleek-audio-player'),
+                'errFormat' => __('Format not supported', 'sleek-audio-player'),
             ),
         ));
     }
