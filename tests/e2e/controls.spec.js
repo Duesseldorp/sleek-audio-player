@@ -312,8 +312,14 @@ test.describe("Keyboard operation", () => {
     const player = new Player(page);
     const slider = player.root.locator(".sap-volume-slider");
 
+    // The panel fades in over 0.2s and cannot take focus while it is still
+    // visibility:hidden - focus() then fails silently, the key reaches the
+    // document instead and the global 10 % step lands on 60. That is what made
+    // this test flaky rather than any double handling.
     await player.root.locator(".sap-volume-btn").focus();
+    await expect(slider).toBeVisible();
     await slider.focus();
+    await expect(slider).toBeFocused();
     await expect(slider).toHaveAttribute("aria-valuenow", "70");
 
     await page.keyboard.press("ArrowDown");
@@ -359,13 +365,24 @@ async function paintedPixels(player) {
   });
 }
 
-test.describe("Reduced motion", () => {
-  test.use({ reducedMotion: "reduce" });
+// Confirms the emulation is actually in effect before a test relies on it.
+// A silently inactive media query made two of these tests fail against
+// perfectly good CSS; this names that cause immediately instead of leaving a
+// wrong animation-name to be interpreted.
+async function expectReducedMotionActive(page) {
+  expect(
+    await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
+    "reduced-motion emulation is not in effect"
+  ).toBe(true);
+}
 
+test.describe("Reduced motion", () => {
   // Ken Burns runs for as long as the music plays and covers the whole cover
   // image - the kind of motion the setting exists for.
   test("the continuous cover animation stops", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/player-page/");
+    await expectReducedMotionActive(page);
     const player = new Player(page);
 
     await player.play();
@@ -378,8 +395,11 @@ test.describe("Reduced motion", () => {
   });
 
   test("the visualizer stays off", async ({ page }) => {
+    // Before goto: the player reads the setting once while initialising
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto("/player-page/");
     const player = new Player(page);
+    await expectReducedMotionActive(page);
 
     await player.play();
     await player.waitUntilPlaying();
@@ -395,6 +415,7 @@ test.describe("Reduced motion", () => {
   // The setting is a default, not a lock: someone who deliberately switches a
   // visualizer on should keep it.
   test("an explicit choice still wins over the system setting", async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(() => {
       localStorage.setItem("sap_visualizer_type", "bars");
     });
