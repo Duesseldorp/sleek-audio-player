@@ -21,7 +21,14 @@ Hard constraints (details in DEVELOPMENT.md):
 - Refactoring: never change structure and behaviour in the same commit; keep
   the public surface (options, post type, meta keys, shortcodes, CSS classes,
   AJAX actions) frozen; **a step is only done once it is released** (bump,
-  changelog, green CI, tag). Details in DEVELOPMENT.md.
+  changelog, green CI, **seen working on the local site**, tag). Details in
+  DEVELOPMENT.md.
+- Before tagging anything a visitor can see, open it on
+  https://duesseldorp-test.local/ and read the rendered result. Counting
+  keys, spot-checking a source file or re-reading your own diff proves what
+  you wrote, never what the site does — that is exactly how 2.6.0 shipped
+  translations that never loaded, with all seven CI jobs green. The site is
+  German; language-dependent changes must be checked there.
 - Frontend assets load only on pages that render a player — never add an
   unconditional `wp_enqueue_*` for them.
 - Player markup: no `<br>`/`<p>`, no whitespace-dependent layout

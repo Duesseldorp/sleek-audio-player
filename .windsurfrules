@@ -89,6 +89,13 @@ so. The only fixed wait allowed is when asserting something does NOT
 happen; there is one in menu.spec.js and it is commented as such.
 
 ## Testing before commit (browser behaviour is not automated)
+MANDATORY before tagging a release that changes anything a visitor can see:
+open the change on the local site and read the RENDERED result. Not the
+source, not the built file, not your own diff. Green CI does not replace
+this - CI runs in English and in 2.6.0 it passed all seven jobs while the
+bundled translations reached no site at all. The local site is German, so
+language-dependent changes must be verified there.
+
 A local test environment EXISTS: https://duesseldorp-test.local/ (LocalWP).
 This repo is junction-linked into its plugins folder — every edit is live
 there immediately, and SCRIPT_DEBUG serves the unminified sources, so you

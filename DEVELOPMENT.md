@@ -89,7 +89,23 @@ Then:
 6. Run both build steps above if sources changed
 7. `SLEEKAUDIO_VERSION` is the cache-buster for enqueued assets — shipping a code
    change without a version bump means cached sites never receive it
-8. **Publish the GitHub Release:** `git tag vX.Y.Z && git push origin vX.Y.Z` —
+8. **Look at the change on the running local site** (https://duesseldorp-test.local/)
+   before tagging, whenever the release touches anything a visitor can see. Open
+   the page and read the thing you changed. Not the source, not the built file,
+   not a diff — the rendered result.
+
+   This step exists because 2.6.0 shipped without it. Its translation work was
+   verified by counting keys, spot-checking the `.po` and recompiling the `.mo`;
+   all three passed, all three sit *above* the layer that was broken, and every
+   string on every site stayed English. Green CI does not substitute: CI runs in
+   English and is structurally blind to a missing translation. Neither does
+   reading the file you just wrote — that only proves what you wrote, never that
+   WordPress reads it.
+
+   For anything language-dependent, the check must happen on a site set to that
+   language. The local site is German; that is the point of it.
+
+9. **Publish the GitHub Release:** `git tag vX.Y.Z && git push origin vX.Y.Z` —
    the Release workflow (`.github/workflows/release.yml`) then verifies that
    `.min`/`.mo` files are in sync and the tag matches the plugin version,
    builds the distribution ZIP, and publishes the Release with changelog
