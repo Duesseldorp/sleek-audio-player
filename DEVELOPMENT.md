@@ -218,7 +218,7 @@ complies", not "it plays audio".
 ### End-to-end tests
 
 `tests/e2e/` drives a real browser against a real WordPress instance
-(`@wordpress/env` in Docker) on every push. 41 tests covering:
+(`@wordpress/env` in Docker) on every push. 52 tests covering:
 
 - **Playback**: starts, **track transitions at the end of a song** (the
   regression that shipped five times), next/previous, durations rendering
