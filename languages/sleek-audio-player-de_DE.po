@@ -3,9 +3,9 @@
 # German translation. Entries come from tools/make-pot.py; translate here.
 msgid ""
 msgstr ""
-"Project-Id-Version: Sleek Audio Player 2.7.0\n"
+"Project-Id-Version: Sleek Audio Player 2.7.1\n"
 "Report-Msgid-Bugs-To: https://www.duesseldorp.de\n"
-"POT-Creation-Date: 2026-08-15 10:53+0000\n"
+"POT-Creation-Date: 2026-08-15 11:12+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -237,390 +237,395 @@ msgstr "Ohne CORS-Header blockiert der Browser die Audiodateien!"
 msgid "Tap to Play"
 msgstr "Zum Abspielen tippen"
 
-#: includes/class-player.php:1035 includes/class-player.php:1734
+#. translators: %1$s is the elapsed time, %2$s the total length, e.g. "1:23 of 3:45"
+#: includes/class-player.php:1036
+msgid "%1$s of %2$s"
+msgstr "%1$s von %2$s"
+
+#: includes/class-player.php:1037 includes/class-player.php:1737
 msgid "Repeat: Off"
 msgstr "Wiederholen: Aus"
 
-#: includes/class-player.php:1036
+#: includes/class-player.php:1038
 msgid "Repeat: All"
 msgstr "Wiederholen: Alle"
 
-#: includes/class-player.php:1037
+#: includes/class-player.php:1039
 msgid "Repeat: One"
 msgstr "Wiederholen: Titel"
 
 #. translators: %s is the playback speed, e.g. 1.25
-#: includes/class-player.php:1039 includes/class-player.php:1738
+#: includes/class-player.php:1041 includes/class-player.php:1741
 msgid "Speed: %sx"
 msgstr "Tempo: %sx"
 
-#: includes/class-player.php:1040 includes/class-player.php:1743
+#: includes/class-player.php:1042 includes/class-player.php:1746
 msgid "Sleep Timer: Off"
 msgstr "Sleep-Timer: Aus"
 
-#: includes/class-player.php:1041
+#: includes/class-player.php:1043
 msgid "Sleep: End of Track"
 msgstr "Sleep: Ende des Titels"
 
 #. translators: %s is the remaining time, e.g. 4:59 or 45s
-#: includes/class-player.php:1043
+#: includes/class-player.php:1045
 msgid "Sleep: %s"
 msgstr "Sleep: %s"
 
-#: includes/class-player.php:1044
+#: includes/class-player.php:1046
 msgid "Cover: Off"
 msgstr "Cover: Aus"
 
-#: includes/class-player.php:1045 includes/class-player.php:1757
+#: includes/class-player.php:1047 includes/class-player.php:1760
 msgid "Cover: Ken Burns"
 msgstr "Cover: Ken Burns"
 
-#: includes/class-player.php:1046
+#: includes/class-player.php:1048
 msgid "Cover: Vinyl"
 msgstr "Cover: Vinyl"
 
-#: includes/class-player.php:1047
+#: includes/class-player.php:1049
 msgid "Adaptive Colors: On"
 msgstr "Adaptive Farben: An"
 
-#: includes/class-player.php:1048 includes/class-player.php:1766
+#: includes/class-player.php:1050 includes/class-player.php:1769
 msgid "Adaptive Colors: Off"
 msgstr "Adaptive Farben: Aus"
 
-#: includes/class-player.php:1049
+#: includes/class-player.php:1051
 msgid "✓ Copied!"
 msgstr "✓ Kopiert!"
 
-#: includes/class-player.php:1052
+#: includes/class-player.php:1054
 msgid "Bars"
 msgstr "Balken"
 
-#: includes/class-player.php:1053
+#: includes/class-player.php:1055
 msgid "Mirror"
 msgstr "Spiegel"
 
-#: includes/class-player.php:1054
+#: includes/class-player.php:1056
 msgid "Circular"
 msgstr "Kreis"
 
-#: includes/class-player.php:1055
+#: includes/class-player.php:1057
 msgid "Oscilloscope"
 msgstr "Oszilloskop"
 
-#: includes/class-player.php:1056
+#: includes/class-player.php:1058
 msgid "Dots"
 msgstr "Punkte"
 
-#: includes/class-player.php:1057
+#: includes/class-player.php:1059
 msgid "Wave"
 msgstr "Welle"
 
-#: includes/class-player.php:1058
+#: includes/class-player.php:1060
 msgid "Pulse"
 msgstr "Puls"
 
-#: includes/class-player.php:1059
+#: includes/class-player.php:1061
 msgid "Circular Bars"
 msgstr "Kreisbalken"
 
-#: includes/class-player.php:1060
+#: includes/class-player.php:1062
 msgid "Particles"
 msgstr "Partikel"
 
-#: includes/class-player.php:1061
+#: includes/class-player.php:1063
 msgid "Starburst"
 msgstr "Sternexplosion"
 
-#: includes/class-player.php:1062
+#: includes/class-player.php:1064
 msgid "Orbits"
 msgstr "Umlaufbahnen"
 
-#: includes/class-player.php:1065
+#: includes/class-player.php:1067
 msgid "Playback failed"
 msgstr "Wiedergabe fehlgeschlagen"
 
-#: includes/class-player.php:1066
+#: includes/class-player.php:1068
 msgid "Track could not be loaded"
 msgstr "Titel konnte nicht geladen werden"
 
-#: includes/class-player.php:1067
+#: includes/class-player.php:1069
 msgid "Playback aborted"
 msgstr "Wiedergabe abgebrochen"
 
-#: includes/class-player.php:1068
+#: includes/class-player.php:1070
 msgid "Network error"
 msgstr "Netzwerkfehler"
 
-#: includes/class-player.php:1069
+#: includes/class-player.php:1071
 msgid "Audio decode error"
 msgstr "Audio-Dekodierfehler"
 
-#: includes/class-player.php:1070
+#: includes/class-player.php:1072
 msgid "Format not supported"
 msgstr "Format nicht unterstützt"
 
-#: includes/class-player.php:1138 includes/class-player.php:1232
+#: includes/class-player.php:1140 includes/class-player.php:1234
 msgid "Select cover"
 msgstr "Cover auswählen"
 
-#: includes/class-player.php:1139 includes/class-player.php:1234 includes/class-waveform-manager.php:366
+#: includes/class-player.php:1141 includes/class-player.php:1236 includes/class-waveform-manager.php:366
 msgid "Title"
 msgstr "Titel"
 
-#: includes/class-player.php:1140 includes/class-player.php:1237
+#: includes/class-player.php:1142 includes/class-player.php:1239
 msgid "Artist"
 msgstr "Interpret"
 
-#: includes/class-player.php:1141 includes/class-player.php:1245
+#: includes/class-player.php:1143 includes/class-player.php:1247
 msgid "No file"
 msgstr "Keine Datei"
 
-#: includes/class-player.php:1161
+#: includes/class-player.php:1163
 msgid "Playlists"
 msgstr "Playlists"
 
-#: includes/class-player.php:1162 includes/class-player.php:1804 includes/class-theme-manager.php:544 includes/class-waveform-manager.php:367
+#: includes/class-player.php:1164 includes/class-player.php:1807 includes/class-theme-manager.php:544 includes/class-waveform-manager.php:367
 msgid "Playlist"
 msgstr "Playlist"
 
-#: includes/class-player.php:1163
+#: includes/class-player.php:1165
 msgid "Add New"
 msgstr "Neu hinzufügen"
 
-#: includes/class-player.php:1164
+#: includes/class-player.php:1166
 msgid "Add New Playlist"
 msgstr "Neue Playlist erstellen"
 
-#: includes/class-player.php:1165
+#: includes/class-player.php:1167
 msgid "Edit Playlist"
 msgstr "Playlist bearbeiten"
 
-#: includes/class-player.php:1166
+#: includes/class-player.php:1168
 msgid "View Playlist"
 msgstr "Playlist ansehen"
 
-#: includes/class-player.php:1167
+#: includes/class-player.php:1169
 msgid "All Playlists"
 msgstr "Alle Playlists"
 
-#: includes/class-player.php:1189
+#: includes/class-player.php:1191
 msgid "Tracks"
 msgstr "Tracks"
 
-#: includes/class-player.php:1246
+#: includes/class-player.php:1248
 msgid "Audio"
 msgstr "Audio"
 
-#: includes/class-player.php:1262
+#: includes/class-player.php:1264
 msgid "DL"
 msgstr "DL"
 
-#: includes/class-player.php:1269
+#: includes/class-player.php:1271
 msgid "Add Track"
 msgstr "Titel hinzufügen"
 
-#: includes/class-player.php:1270
+#: includes/class-player.php:1272
 msgid "Bulk add from Media Library"
 msgstr "Mehrere aus der Mediathek hinzufügen"
 
-#: includes/class-player.php:1275
+#: includes/class-player.php:1277
 msgid "Embed Shortcode:"
 msgstr "Einbettungs-Shortcode:"
 
-#: includes/class-player.php:1278
+#: includes/class-player.php:1280
 msgid "Standard:"
 msgstr "Standard:"
 
-#: includes/class-player.php:1279 includes/class-player.php:1283 includes/class-player.php:1288
+#: includes/class-player.php:1281 includes/class-player.php:1285 includes/class-player.php:1290
 msgid "Click to copy"
 msgstr "Zum Kopieren klicken"
 
-#: includes/class-player.php:1282
+#: includes/class-player.php:1284
 msgid "Wide Layout:"
 msgstr "Breites Layout:"
 
-#: includes/class-player.php:1287
+#: includes/class-player.php:1289
 msgid "iFrame (external):"
 msgstr "iFrame (extern):"
 
-#: includes/class-player.php:1326
+#: includes/class-player.php:1328
 msgid "Embed Codes"
 msgstr "Einbettungscodes"
 
-#: includes/class-player.php:1329
+#: includes/class-player.php:1331
 msgid "Shortcode:"
 msgstr "Shortcode:"
 
-#: includes/class-player.php:1333 includes/class-player.php:1342
+#: includes/class-player.php:1335 includes/class-player.php:1344
 msgid "Shortcode copied!"
 msgstr "Shortcode kopiert!"
 
-#: includes/class-player.php:1338
+#: includes/class-player.php:1340
 msgid "Shortcode (Wide Layout):"
 msgstr "Shortcode (Breites Layout):"
 
-#: includes/class-player.php:1347
+#: includes/class-player.php:1349
 msgid "iFrame Embed:"
 msgstr "iFrame-Einbettung:"
 
-#: includes/class-player.php:1349
+#: includes/class-player.php:1351
 msgid "Embed code copied!"
 msgstr "Einbettungscode kopiert!"
 
-#: includes/class-player.php:1351
+#: includes/class-player.php:1353
 msgid "For external websites"
 msgstr "Für externe Websites"
 
-#: includes/class-player.php:1354
+#: includes/class-player.php:1356
 msgid "Embed codes will be shown after publishing."
 msgstr "Einbettungscodes erscheinen nach dem Veröffentlichen."
 
-#: includes/class-player.php:1526
+#: includes/class-player.php:1528
 msgid "No playlist ID specified."
 msgstr "Keine Playlist-ID angegeben."
 
-#: includes/class-player.php:1536
+#: includes/class-player.php:1538
 msgid "No tracks found."
 msgstr "Keine Titel gefunden."
 
-#: includes/class-player.php:1603
+#: includes/class-player.php:1605
 msgid "No playable tracks found."
 msgstr "Keine abspielbaren Titel gefunden."
 
-#: includes/class-player.php:1657
+#: includes/class-player.php:1659
 msgid "Audio Player"
 msgstr "Audio-Player"
 
-#: includes/class-player.php:1680
+#: includes/class-player.php:1683
 msgid "Select a track"
 msgstr "Titel auswählen"
 
-#: includes/class-player.php:1690
+#: includes/class-player.php:1693
 msgid "Playback progress"
 msgstr "Wiedergabefortschritt"
 
-#: includes/class-player.php:1691
+#: includes/class-player.php:1694
 msgid "Time position"
 msgstr "Zeitposition"
 
-#: includes/class-player.php:1704
+#: includes/class-player.php:1707
 msgid "Audio controls"
 msgstr "Wiedergabesteuerung"
 
-#: includes/class-player.php:1705
+#: includes/class-player.php:1708
 msgid "Previous"
 msgstr "Zurück"
 
-#: includes/class-player.php:1705
+#: includes/class-player.php:1708
 msgid "Previous track"
 msgstr "Vorheriger Titel"
 
-#: includes/class-player.php:1708
+#: includes/class-player.php:1711
 msgid "Play/Pause"
 msgstr "Wiedergabe/Pause"
 
-#: includes/class-player.php:1708
+#: includes/class-player.php:1711
 msgid "Play or pause"
 msgstr "Wiedergabe oder Pause"
 
-#: includes/class-player.php:1712
+#: includes/class-player.php:1715
 msgid "Next"
 msgstr "Weiter"
 
-#: includes/class-player.php:1712
+#: includes/class-player.php:1715
 msgid "Next track"
 msgstr "Nächster Titel"
 
-#: includes/class-player.php:1716
+#: includes/class-player.php:1719
 msgid "More options"
 msgstr "Weitere Optionen"
 
-#: includes/class-player.php:1722
+#: includes/class-player.php:1725
 msgid "Share"
 msgstr "Teilen"
 
-#: includes/class-player.php:1726
+#: includes/class-player.php:1729
 msgid "Shuffle"
 msgstr "Zufällig"
 
-#: includes/class-player.php:1730
+#: includes/class-player.php:1733
 msgid "Download"
 msgstr "Herunterladen"
 
-#: includes/class-player.php:1746 includes/class-player.php:1760
+#: includes/class-player.php:1749 includes/class-player.php:1763
 msgid "Off"
 msgstr "Aus"
 
-#: includes/class-player.php:1747
+#: includes/class-player.php:1750
 msgid "5 Min"
 msgstr "5 Min"
 
-#: includes/class-player.php:1748
+#: includes/class-player.php:1751
 msgid "10 Min"
 msgstr "10 Min"
 
-#: includes/class-player.php:1749
+#: includes/class-player.php:1752
 msgid "15 Min"
 msgstr "15 Min"
 
-#: includes/class-player.php:1750
+#: includes/class-player.php:1753
 msgid "30 Min"
 msgstr "30 Min"
 
-#: includes/class-player.php:1751
+#: includes/class-player.php:1754
 msgid "45 Min"
 msgstr "45 Min"
 
-#: includes/class-player.php:1752
+#: includes/class-player.php:1755
 msgid "1 Hour"
 msgstr "1 Stunde"
 
-#: includes/class-player.php:1753
+#: includes/class-player.php:1756
 msgid "End of Track"
 msgstr "Am Ende des Tracks"
 
-#: includes/class-player.php:1771 includes/class-player.php:1828
+#: includes/class-player.php:1774 includes/class-player.php:1831
 msgid "Embed Player"
 msgstr "Player einbetten"
 
-#: includes/class-player.php:1789 includes/class-player.php:1794
+#: includes/class-player.php:1792 includes/class-player.php:1797
 msgid "Volume"
 msgstr "Lautstärke"
 
-#: includes/class-player.php:1789
+#: includes/class-player.php:1792
 msgid "Volume control"
 msgstr "Lautstärkeregler"
 
-#: includes/class-player.php:1829
+#: includes/class-player.php:1832
 msgid "Close"
 msgstr "Schließen"
 
-#: includes/class-player.php:1835
+#: includes/class-player.php:1838
 msgid "Layout"
 msgstr "Layout"
 
-#: includes/class-player.php:1839
+#: includes/class-player.php:1842
 msgid "Wide"
 msgstr "Breit"
 
-#: includes/class-player.php:1843
+#: includes/class-player.php:1846
 msgid "Mini"
 msgstr "Mini"
 
-#: includes/class-player.php:1848
+#: includes/class-player.php:1851
 msgid "Embed Code"
 msgstr "Einbettungscode"
 
-#: includes/class-player.php:1852
+#: includes/class-player.php:1855
 msgid "Copy Code"
 msgstr "Code kopieren"
 
-#: includes/class-player.php:1856
+#: includes/class-player.php:1859
 msgid "Preview"
 msgstr "Vorschau"
 
 #. translators: %s is the number of tracks in the playlist
-#: includes/class-player.php:1683 includes/class-theme-manager.php:1223
+#: includes/class-player.php:1686 includes/class-theme-manager.php:1223
 msgid "%s Track"
 msgid_plural "%s Tracks"
 msgstr[0] "%s Titel"

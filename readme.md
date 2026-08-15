@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.7.0
+**Current Version:** 2.7.1
 
 ---
 
@@ -166,6 +166,15 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.7.1 (2026-08-15)
+
+**Accessibility, first step — three defects rather than three enhancements:**
+- Both sliders carry `role="slider"`, which promises assistive technology a readable value. Nothing ever wrote `aria-valuenow`: the progress slider announced `0` for the entire track and the volume slider `70` regardless of the actual volume. Both now report their real value
+- The progress slider also exposes `aria-valuetext` with the time ("1:23 von 3:45"), which is far more useful than a percentage. It updates only on whole percent steps, so `timeupdate` firing four times a second does not turn into four announcements
+- The track title is now an `aria-live="polite"` region. A sighted user sees the title change; a screen reader user previously got nothing at all
+
+Still open on the accessibility list: keyboard operation of the two sliders (they have no `tabindex` and cannot be focused) and `prefers-reduced-motion` for the 23 animation declarations.
 
 ### Version 2.7.0 (2026-08-15)
 

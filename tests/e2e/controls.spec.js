@@ -167,6 +167,55 @@ test.describe("Accessible labels", () => {
     }
   });
 
+  // Both sliders carry role="slider", which promises a machine-readable value.
+  // Until 2.7.1 nothing ever wrote aria-valuenow, so assistive technology was
+  // told "0" for the whole track and "70" no matter the volume.
+  test("the progress slider reports its real position", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-waveform-container");
+
+    await expect(slider).toHaveAttribute("aria-valuenow", "0");
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    // Wait for the value to leave zero rather than for a fixed duration
+    await expect
+      .poll(async () => Number(await slider.getAttribute("aria-valuenow")), { timeout: 15_000 })
+      .toBeGreaterThan(0);
+
+    // aria-valuetext gives the time, which is far more useful than a percentage
+    const valueText = await slider.getAttribute("aria-valuetext");
+    expect(valueText, `aria-valuetext was "${valueText}"`).toMatch(/\d+:\d{2}.+\d+:\d{2}/);
+  });
+
+  test("the volume slider reports its real value", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-volume-slider");
+
+    const before = Number(await slider.getAttribute("aria-valuenow"));
+    expect(before).toBeGreaterThan(0);
+
+    await player.root.locator(".sap-volume-btn").click(); // mutes
+    await expect
+      .poll(async () => Number(await slider.getAttribute("aria-valuenow")), { timeout: 5_000 })
+      .toBe(0);
+  });
+
+  // Screen reader users get no visual cue that the track changed.
+  test("the now-playing element is a live region", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await expect(player.nowPlaying).toHaveAttribute("aria-live", "polite");
+
+    await player.play();
+    await player.waitUntilPlaying();
+    await expect(player.nowPlaying).toHaveText(/E2E Track One/i);
+  });
+
   // The track count is the plugin's only plural string; po2mo.py used to drop
   // plural entries on the floor, so the compiled .mo silently lost them.
   test("the track count uses the plural form", async ({ page }) => {

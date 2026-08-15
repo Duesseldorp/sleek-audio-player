@@ -2294,8 +2294,14 @@
         updateVolumeUI(currentVolume);
         
         function updateVolumeUI(vol) {
+            // Set before the guard below: the slider reports its value to
+            // assistive technology even when the visual parts are absent.
+            if (volumeSlider) {
+                volumeSlider.setAttribute('aria-valuenow', Math.round((isMuted ? 0 : vol) * 100));
+            }
+
             if (!volumeFill || !volumeHandle || !volumeBtn) return;
-            
+
             const percent = vol * 100;
             const isMobile = window.innerWidth <= 480;
             
@@ -3179,10 +3185,34 @@
             }
         }
 
+        // The waveform carries role="slider", so assistive technology reads its
+        // aria-valuenow rather than the visual bar. Until 2.7.1 nothing ever
+        // wrote that attribute, so it reported the initial 0 for the whole track.
+        let lastAnnouncedPercent = -1;
+
+        function updateProgressAria(percent) {
+            if (!waveformContainer || isNaN(percent)) return;
+
+            // timeupdate fires about four times a second; only whole percent
+            // steps are worth announcing.
+            const rounded = Math.round(percent);
+            if (rounded === lastAnnouncedPercent) return;
+            lastAnnouncedPercent = rounded;
+
+            waveformContainer.setAttribute('aria-valuenow', rounded);
+            waveformContainer.setAttribute(
+                'aria-valuetext',
+                sapText('progressValueText', '%1$s of %2$s')
+                    .replace('%1$s', formatTime(audio.currentTime))
+                    .replace('%2$s', formatTime(audio.duration))
+            );
+        }
+
         function updateProgress() {
             const percent = (audio.currentTime / audio.duration) * 100;
             if (progressBar) progressBar.style.width = percent + '%';
             if (currentTimeEl) currentTimeEl.textContent = formatTime(audio.currentTime);
+            updateProgressAria(percent);
             
             // Update remaining time if in that mode
             if (showRemainingTime) {

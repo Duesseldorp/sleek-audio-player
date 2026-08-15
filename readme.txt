@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.7.0
+Stable tag: 2.7.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.7.1 =
+* ♿ Fixed: the progress and volume sliders never reported their value to screen readers - they announced "0" for a whole track and "70" whatever the volume
+* ♿ The progress slider now reads out the time ("1:23 of 3:45") instead of a percentage
+* ♿ The track title is now a live region, so screen reader users hear which track started
 
 = 2.7.0 =
 * 🌍 The admin interface is now translatable as well: settings page, playlist editor, embed codes and the BunnyCDN guide - 74 further strings, German included

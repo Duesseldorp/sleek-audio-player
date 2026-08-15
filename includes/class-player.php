@@ -1032,6 +1032,8 @@ class SleekAudio_Player {
 
                 // More menu labels - full strings, not assembled from parts,
                 // so translations can put the words in their own order
+                /* translators: %1$s is the elapsed time, %2$s the total length, e.g. "1:23 of 3:45" */
+                'progressValueText' => __('%1$s of %2$s', 'sleek-audio-player'),
                 'repeatOff' => __('Repeat: Off', 'sleek-audio-player'),
                 'repeatAll' => __('Repeat: All', 'sleek-audio-player'),
                 'repeatOne' => __('Repeat: One', 'sleek-audio-player'),
@@ -1677,7 +1679,8 @@ class SleekAudio_Player {
                 
                 <!-- Track Info -->
                 <div class="sap-track-info">
-                    <div class="sap-now-playing"><?php echo esc_html__('Select a track', 'sleek-audio-player'); ?></div>
+                    <?php /* aria-live: the JS writes the track title here on every change, so screen reader users hear what started playing */ ?>
+                    <div class="sap-now-playing" aria-live="polite"><?php echo esc_html__('Select a track', 'sleek-audio-player'); ?></div>
                     <div class="sap-artist"></div>
                     <div class="sap-meta">
                         <span><?php /* translators: %s is the number of tracks in the playlist */ printf(esc_html(_n('%s Track', '%s Tracks', count($tracks), 'sleek-audio-player')), esc_html(number_format_i18n(count($tracks)))); ?></span>
