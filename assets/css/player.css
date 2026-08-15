@@ -404,6 +404,18 @@
     outline: none !important;
 }
 
+/* The rules above remove the outline so a mouse click does not leave a ring
+   behind. :focus-visible only matches keyboard focus, so this puts the ring
+   back for exactly the people who need it - without it, someone tabbing
+   through the player cannot tell which control they are on. Declared after
+   those rules on purpose: same specificity, later wins. */
+.sap-waveform-container:focus-visible,
+.sap-volume-slider:focus-visible {
+    outline: 2px solid var(--sap-accent) !important;
+    outline-offset: 3px !important;
+    border-radius: 3px;
+}
+
 .sap-waveform {
     position: absolute;
     top: 0;
@@ -671,7 +683,11 @@
     z-index: 100;
 }
 
+/* :focus-within opens the panel when the volume button receives keyboard
+   focus. Without it the slider stays visibility:hidden, which keeps it out of
+   the tab order entirely - so a keyboard user could never reach it. */
 .sap-volume-wrapper.active .sap-volume-slider,
+.sap-volume-wrapper:focus-within .sap-volume-slider,
 .sap-volume-wrapper:hover .sap-volume-slider {
     opacity: 1;
     visibility: visible;

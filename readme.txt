@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.8.0
+Stable tag: 2.9.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -224,6 +224,11 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 5. Embed Code Generator modal
 
 == Changelog ==
+
+= 2.9.0 =
+* ⌨️ The progress and volume sliders can now be focused and operated by keyboard - arrow keys, Page Up/Down, Home and End. They claimed to be sliders before without being reachable at all
+* 👁️ Keyboard focus is visible again on both sliders; the outline was previously removed for everyone
+* 🐛 Fixed: the global volume shortcuts changed the audio without moving the visible slider, updating the screen reader value or saving the setting
 
 = 2.8.0 =
 * 🕒 Hovering the waveform now shows the time under the cursor, so you can see where a click will land before making it - useful in long mixes

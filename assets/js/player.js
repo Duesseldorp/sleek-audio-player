@@ -2335,6 +2335,51 @@
             updateVolumeUI(vol);
         }
         
+        // Keyboard operation of the volume slider. The panel itself is
+        // visibility:hidden until the wrapper has hover or focus, so it only
+        // enters the tab order once the volume button has been reached.
+        if (volumeSlider) {
+            volumeSlider.addEventListener('keydown', function(e) {
+                const step = 0.05;
+                const current = isMuted ? 0 : currentVolume;
+                let handled = true;
+
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowUp':
+                        setVolume(Math.min(1, current + step));
+                        break;
+                    case 'ArrowLeft':
+                    case 'ArrowDown':
+                        setVolume(Math.max(0, current - step));
+                        break;
+                    case 'Home':
+                        setVolume(0);
+                        break;
+                    case 'End':
+                        setVolume(1);
+                        break;
+                    default:
+                        handled = false;
+                }
+
+                if (handled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        }
+
+        // The global shortcut handler is registered once, from the first
+        // player's scope, so it cannot call this player's setVolume() directly.
+        // It asks through the element instead, which keeps each player's state
+        // and its visible slider in step - setting audio.volume behind their
+        // back was what left the slider and aria-valuenow stale.
+        playerEl.addEventListener('sap:volume-step', function(e) {
+            const current = isMuted ? 0 : currentVolume;
+            setVolume(Math.max(0, Math.min(1, current + (e.detail && e.detail.delta || 0))));
+        });
+
         function getVolumeFromEvent(e, rect) {
             const isMobile = window.innerWidth <= 480;
             if (isMobile) {
@@ -2660,6 +2705,49 @@
             seekContainer.addEventListener('touchcancel', function() {
                 seekDragging = false;
             }, { passive: true });
+
+            // Keyboard operation of the progress slider. role="slider" promises
+            // this: a screen reader announces a slider, and its user expects to
+            // focus it and adjust it. stopPropagation keeps the global shortcut
+            // handler from seeking a second time for the same key press.
+            seekContainer.addEventListener('keydown', function(e) {
+                if (!audio.duration || isNaN(audio.duration)) return;
+
+                const small = 5;
+                const large = 30;
+                let handled = true;
+
+                switch (e.key) {
+                    case 'ArrowRight':
+                    case 'ArrowUp':
+                        audio.currentTime = Math.min(audio.duration, audio.currentTime + small);
+                        break;
+                    case 'ArrowLeft':
+                    case 'ArrowDown':
+                        audio.currentTime = Math.max(0, audio.currentTime - small);
+                        break;
+                    case 'PageUp':
+                        audio.currentTime = Math.min(audio.duration, audio.currentTime + large);
+                        break;
+                    case 'PageDown':
+                        audio.currentTime = Math.max(0, audio.currentTime - large);
+                        break;
+                    case 'Home':
+                        audio.currentTime = 0;
+                        break;
+                    case 'End':
+                        audio.currentTime = audio.duration;
+                        break;
+                    default:
+                        handled = false;
+                }
+
+                if (handled) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    updateProgress();
+                }
+            });
 
             // Show the time under the cursor, so you can see where a click will
             // land before making it. Only where hovering really exists - on a
@@ -3414,22 +3502,23 @@
                         break;
                     case 'ArrowUp':
                         e.preventDefault();
-                        const volUpBtn = targetPlayer.querySelector('.sap-volume-btn');
-                        flashButton(volUpBtn);
-                        targetAudio.volume = Math.min(1, targetAudio.volume + 0.1);
+                        flashButton(targetPlayer.querySelector('.sap-volume-btn'));
+                        // Through the player, not around it - see sap:volume-step
+                        targetPlayer.dispatchEvent(new CustomEvent('sap:volume-step', { detail: { delta: 0.1 } }));
                         handled = true;
                         break;
                     case 'ArrowDown':
                         e.preventDefault();
-                        const volDownBtn = targetPlayer.querySelector('.sap-volume-btn');
-                        flashButton(volDownBtn);
-                        targetAudio.volume = Math.max(0, targetAudio.volume - 0.1);
+                        flashButton(targetPlayer.querySelector('.sap-volume-btn'));
+                        targetPlayer.dispatchEvent(new CustomEvent('sap:volume-step', { detail: { delta: -0.1 } }));
                         handled = true;
                         break;
                     case 'KeyM':
                         const muteBtn = targetPlayer.querySelector('.sap-volume-btn');
                         flashButton(muteBtn);
-                        targetAudio.muted = !targetAudio.muted;
+                        // Click the real button like every other shortcut does,
+                        // so the icon, the stored value and aria-valuenow follow
+                        if (muteBtn) muteBtn.click();
                         handled = true;
                         break;
                     case 'KeyN':

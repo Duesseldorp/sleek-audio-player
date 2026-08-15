@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.8.0
+**Current Version:** 2.9.0
 
 ---
 
@@ -166,6 +166,18 @@ I document the design decisions and use cases behind this plugin openly on my si
 ---
 
 ## Changelog
+
+### Version 2.9.0 (2026-08-15)
+
+**The sliders keep their promise now.** Both carry `role="slider"`, which tells assistive technology "this can be focused and adjusted". Neither had a `tabindex`, so neither could be focused at all.
+
+- Arrow keys move by 5 seconds or 5 %, Page Up/Down by 30 seconds, Home and End jump to the ends
+- Keyboard focus is visible again. The stylesheet removed the outline with `!important` so a mouse click would not leave a ring behind; that also left keyboard users with no idea where they were. `:focus-visible` matches keyboard focus only, so the ring is back for exactly the people who need it
+- The volume panel is `visibility: hidden` until hovered, which keeps it out of the tab order. It now also opens on `:focus-within`, so tabbing to the volume button reveals the slider and the next Tab reaches it
+
+**A bug found while doing it:** the global keyboard shortcuts set `audio.volume` directly, past the player's own `setVolume()`. The sound got quieter, but the visible slider did not move, `aria-valuenow` stayed put, and the preference was never saved — undoing 2.7.1's work through the keyboard. The shortcut now asks the player through a `sap:volume-step` event, and Mute clicks the real button like every other shortcut already did.
+
+**Correction to an earlier claim:** I previously said seeking and volume were keyboard-inoperable. That was wrong — the global shortcuts have always worked. What was missing is that the sliders themselves could not be reached or operated, which is what `role="slider"` promises and what a screen reader user is told to expect.
 
 ### Version 2.8.0 (2026-08-15)
 

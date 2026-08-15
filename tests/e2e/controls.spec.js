@@ -250,6 +250,97 @@ test.describe("Accessible labels", () => {
   });
 });
 
+test.describe("Keyboard operation", () => {
+  // role="slider" promises that the element can be focused and adjusted.
+  // Before 2.9.0 neither slider had a tabindex, so the promise was empty.
+  test("the progress slider can be focused and operated", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-waveform-container");
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    await slider.focus();
+    await expect(slider).toBeFocused();
+
+    await page.keyboard.press("End");
+    await expect(slider).toHaveAttribute("aria-valuenow", "100");
+
+    await page.keyboard.press("Home");
+    await expect(slider).toHaveAttribute("aria-valuenow", "0");
+  });
+
+  // The document-level shortcuts also claim the arrow keys. Without
+  // stopPropagation a single press would seek twice - 5s from the slider plus
+  // 10s from the global handler.
+  test("a focused slider does not also trigger the global shortcut", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-waveform-container");
+
+    await player.play();
+    await player.waitUntilPlaying();
+    await slider.focus();
+    await page.keyboard.press("Home");
+
+    const before = await player.audio.evaluate((el) => {
+      el.pause();
+      return el.currentTime;
+    });
+    await page.keyboard.press("ArrowRight");
+    const after = await player.audio.evaluate((el) => el.currentTime);
+
+    expect(after - before, `expected one 5s step, got ${after - before}`).toBeGreaterThan(4.5);
+    expect(after - before, "the global handler seeked as well").toBeLessThan(6);
+  });
+
+  // The panel is visibility:hidden until the wrapper has hover or focus, which
+  // also keeps it out of the tab order - so it is only reachable once the
+  // volume button has focus.
+  test("the volume slider becomes reachable via the volume button", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-volume-slider");
+
+    await expect(slider).toBeHidden();
+
+    await player.root.locator(".sap-volume-btn").focus();
+    await expect(slider).toBeVisible();
+
+    await slider.focus();
+    await page.keyboard.press("Home");
+    await expect(slider).toHaveAttribute("aria-valuenow", "0");
+
+    await page.keyboard.press("End");
+    await expect(slider).toHaveAttribute("aria-valuenow", "100");
+  });
+
+  // Regression: the global shortcut used to set audio.volume directly, past
+  // the player's own setVolume(). The audio got quieter while the visible
+  // slider and aria-valuenow stayed where they were.
+  test("the global volume shortcut keeps the slider in step", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+    const slider = player.root.locator(".sap-volume-slider");
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    const before = Number(await slider.getAttribute("aria-valuenow"));
+    await page.keyboard.press("ArrowDown");
+
+    await expect
+      .poll(async () => Number(await slider.getAttribute("aria-valuenow")), { timeout: 5_000 })
+      .toBeLessThan(before);
+
+    // and the audio element agrees with what the slider claims
+    const reported = Number(await slider.getAttribute("aria-valuenow"));
+    const actual = await player.audio.evaluate((el) => Math.round(el.volume * 100));
+    expect(Math.abs(reported - actual), `slider says ${reported}, audio is ${actual}`).toBeLessThan(2);
+  });
+});
+
 test.describe("Compatibility", () => {
   // The legacy alias is a documented promise in readme.txt and DEVELOPMENT.md
   test("the legacy [simple_player] shortcode still renders a working player", async ({ page }) => {
