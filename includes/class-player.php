@@ -1674,12 +1674,29 @@ class SleekAudio_Player {
             <!-- Cover Carousel -->
             <div class="sap-cover-carousel" <?php if($is_wide) echo 'style="' . esc_attr('height:100%;flex-shrink:0;') . '"'; ?>>
                 <div class="sap-cover-track">
-                    <?php foreach ($tracks as $i => $t) : 
+                    <?php foreach ($tracks as $i => $t) :
                         $track_cover = !empty($t['cover_url']) ? $t['cover_url'] : $cover;
                         if ($track_cover) :
+                            // Only the first cover is on screen. Loading all of them
+                            // eagerly cost about 2.9 MB on an eleven-track playlist
+                            // for one visible image. The neighbours are warmed by
+                            // updateCarousel() so swiping stays instant.
+                            $is_first = ($i === 0);
+
+                            // srcset only when the source really is that attachment -
+                            // a manually set cover_url may point somewhere else
+                            $cover_id = !empty($t['cover_id']) ? intval($t['cover_id']) : 0;
+                            $srcset = '';
+                            if ($cover_id && wp_get_attachment_image_url($cover_id, 'large') === $track_cover) {
+                                $srcset = wp_get_attachment_image_srcset($cover_id, 'large');
+                            }
                     ?>
                         <div class="sap-cover-slide <?php echo esc_attr($i === 0 ? 'active' : ''); ?>" data-index="<?php echo esc_attr( $i ); ?>">
-                            <img src="<?php echo esc_url($track_cover); ?>" alt="<?php echo esc_attr($t['title']); ?>" loading="eager" decoding="async" />
+                            <img src="<?php echo esc_url($track_cover); ?>" alt="<?php echo esc_attr($t['title']); ?>"<?php
+                                if ($srcset) {
+                                    echo ' srcset="' . esc_attr($srcset) . '" sizes="(max-width: 520px) 100vw, 500px"';
+                                }
+                            ?> loading="<?php echo $is_first ? 'eager' : 'lazy'; ?>"<?php echo $is_first ? ' fetchpriority="high"' : ''; ?> decoding="async" />
                         </div>
                     <?php endif; endforeach; ?>
                 </div>

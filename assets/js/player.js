@@ -2666,10 +2666,31 @@
             }
         }
 
+        // Covers other than the first are lazy, so the one a swipe away could
+        // otherwise flash in blank. Warming the neighbours mirrors what
+        // preloadTrack() already does for audio: the visible one is loaded, the
+        // two reachable ones are ready, the rest cost nothing until needed.
+        function warmNeighbourCovers(index) {
+            [index - 1, index + 1].forEach(function(i) {
+                if (i < 0 || i >= coverSlides.length) return;
+                const img = coverSlides[i] && coverSlides[i].querySelector('img');
+                if (!img || img.dataset.sapWarmed) return;
+                img.dataset.sapWarmed = '1';
+
+                // Fetch through a detached image so the browser cache is filled
+                // regardless of how it treats a lazy <img> that is off screen
+                const warm = new Image();
+                if (img.srcset) warm.srcset = img.srcset;
+                if (img.sizes) warm.sizes = img.sizes;
+                warm.src = img.src;
+            });
+        }
+
         function updateCarousel() {
             if (coverTrack) {
                 coverTrack.style.transform = `translateX(-${currentIndex * 100}%)`;
             }
+            warmNeighbourCovers(currentIndex);
             coverSlides.forEach((slide, i) => {
                 const isActive = i === currentIndex;
                 slide.classList.toggle('active', isActive);
@@ -2683,6 +2704,10 @@
                 }
             });
         }
+
+        // At load, not just on the first change: a swipe reveals the neighbour
+        // while the finger is still moving, long before updateCarousel() runs.
+        warmNeighbourCovers(currentIndex);
         
         // Waveform/Progress seeking - click and touch drag support
         const seekContainer = waveformContainer || progressContainer;

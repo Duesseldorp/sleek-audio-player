@@ -1,4 +1,34 @@
 import { expect, test } from "@playwright/test";
+
+test.describe("Cover loading", () => {
+  // Every cover used to load eagerly. On the production playlist that was
+  // eleven images of ~260 KB - about 2.9 MB - for the one that is on screen.
+  test("only the cover on screen loads eagerly", async ({ page }) => {
+    await page.goto("/player-page/");
+    const covers = page.locator(".sap-player").first().locator(".sap-cover-slide img");
+
+    await expect(covers).toHaveCount(3);
+    await expect(covers.nth(0)).toHaveAttribute("loading", "eager");
+    await expect(covers.nth(0)).toHaveAttribute("fetchpriority", "high");
+    await expect(covers.nth(1)).toHaveAttribute("loading", "lazy");
+    await expect(covers.nth(2)).toHaveAttribute("loading", "lazy");
+  });
+
+  // Lazy alone would make a swipe reveal a blank slide, so the reachable
+  // neighbours are fetched ahead of time - the same idea as the audio preload.
+  test("the reachable neighbours are warmed, the rest are not", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = page.locator(".sap-player").first();
+    const warmed = player.locator(".sap-cover-slide img[data-sap-warmed]");
+
+    // Starting on the first track, only its one neighbour is worth fetching
+    await expect(warmed).toHaveCount(1);
+
+    // Moving on makes the next one reachable, and it gets warmed too
+    await player.locator(".sap-next").click();
+    await expect(warmed).toHaveCount(2);
+  });
+});
 import { Player, watchForErrors, watchPluginAssets } from "./helpers/player.js";
 
 test.describe("Asset loading", () => {

@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.11.0
+Stable tag: 2.12.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -274,6 +274,11 @@ Known gaps, stated plainly:
 This is not a claim of WCAG 2.1 AA conformance - it is a list of what is verified and what is not.
 
 == Changelog ==
+
+= 2.12.0 =
+* ⚡ Only the cover on screen is loaded now. A playlist with eleven covers pulled about 2.9 MB on every page view for the one image anyone could see
+* 🎠 Swiping stays instant: the reachable neighbours are fetched ahead of time, the same way the next track's audio already is
+* 📐 Covers now offer responsive sizes, so a phone no longer downloads the 1024 px version for a 400 px slot
 
 = 2.11.0 =
 * 🌍 The block editor can now be translated: its labels were marked up correctly but never reached a translator, and no translation could have loaded

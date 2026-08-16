@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.11.0
+**Current Version:** 2.12.0
 
 ---
 
@@ -203,6 +203,17 @@ What is checked, how, and what is not — so the claim can be judged rather than
 This is deliberately not a claim of WCAG 2.1 AA conformance. It is a list of what is checked and what is not.
 
 ## Changelog
+
+### Version 2.12.0 (2026-08-16)
+
+**Every cover was loaded eagerly, including the ten nobody sees.** Measured on the production playlist: eleven images at roughly 260 KB each, about 2.9 MB per page view, for the single cover that is on screen. It hit every visitor, including those who never pressed play.
+
+- The active cover keeps `loading="eager"` and gains `fetchpriority="high"`
+- The rest are `loading="lazy"`
+- **Swiping stays instant** because the reachable neighbours are fetched ahead of time — the same approach the player already uses to preload the next track's audio. Lazy loading alone would have made a swipe reveal a blank slide while the finger is still moving
+- Covers carry `srcset`/`sizes` where the source really is that attachment, so a phone can take a smaller size instead of the 1024 px original for a ~400 px slot
+
+Found by measuring rather than reading: the audio metadata requests I had suspected turned out to cost almost nothing — the files carry a Xing header, so duration comes from the first few kilobytes. The covers were a thousand times larger, and invisible until counted.
 
 ### Version 2.11.0 (2026-08-16)
 
