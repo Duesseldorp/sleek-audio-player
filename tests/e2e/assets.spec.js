@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { Player, watchForErrors, watchPluginAssets } from "./helpers/player.js";
 
 test.describe("Cover loading", () => {
   // Every cover used to load eagerly. On the production playlist that was
@@ -32,7 +33,6 @@ test.describe("Cover loading", () => {
     await expect(cover(2)).toHaveAttribute("data-sap-warmed", "1");
   });
 });
-import { Player, watchForErrors, watchPluginAssets } from "./helpers/player.js";
 
 test.describe("Asset loading", () => {
   // Regression test for 2.5.0: before conditional loading, ~200 KB of plugin
