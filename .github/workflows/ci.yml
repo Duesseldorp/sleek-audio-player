@@ -115,6 +115,17 @@ jobs:
             exit 1
           fi
 
+      # The block editor gets its translations from .json, not from the .mo.
+      # A stale one is invisible: the editor simply stays English.
+      - name: JavaScript translations match their sources
+        run: |
+          python tools/make-json.py
+          # The timestamp changes on every run and is not a content change
+          if ! git diff --exit-code -I'translation-revision-date' -- languages/; then
+            echo "::error::JavaScript translation files are out of date. Run 'python tools/make-json.py' and commit the result."
+            exit 1
+          fi
+
       - name: Distribution ZIP builds and contains no development files
         run: |
           python tools/build-zip.py

@@ -26,6 +26,10 @@ INCLUDE = [
     "languages/*.pot",
     "languages/*.po",
     "languages/*.mo",
+    # JavaScript translations for the block editor. Without this line the file
+    # exists in the repository, CI is green, and the block editor is English in
+    # every installed copy.
+    "languages/*.json",
 ]
 
 version = re.search(

@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.10.1
+Stable tag: 2.11.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -223,6 +223,36 @@ The audio visualizer uses the Web Audio API, which requires the audio to be serv
 4. Backend: Settings
 5. Embed Code Generator modal
 
+== Translating the plugin ==
+
+The plugin ships in English and German. Any other language can be added without
+changing the plugin and without waiting for a release.
+
+WordPress looks for plugin translations in wp-content/languages/plugins/ before
+it looks inside the plugin, so a file placed there is picked up and survives
+every plugin update.
+
+1. Open languages/sleek-audio-player.pot in Poedit (https://poedit.net/) or any
+   gettext editor and translate it
+2. Save it as sleek-audio-player-<locale>.po, for example
+   sleek-audio-player-fr_FR.po. The locale must match the site language exactly
+   (Settings -> General)
+3. Poedit compiles the .mo file next to it when you save
+4. Copy the .mo file to wp-content/languages/plugins/
+
+Notes for translators:
+
+* Strings containing placeholders carry a "translators:" comment explaining what
+  each placeholder holds
+* Stateful labels are complete sentences rather than assembled fragments, so you
+  are free to use your own word order
+* Plural forms are supported
+* Right-to-left languages are not supported yet: the stylesheet still uses fixed
+  left/right rules, so the translation would work but the layout would not
+
+Translations are welcome as pull requests too - see CONTRIBUTING.md in the
+repository.
+
 == Accessibility ==
 
 Checked automatically on every push:
@@ -244,6 +274,10 @@ Known gaps, stated plainly:
 This is not a claim of WCAG 2.1 AA conformance - it is a list of what is verified and what is not.
 
 == Changelog ==
+
+= 2.11.0 =
+* 🌍 The block editor can now be translated: its labels were marked up correctly but never reached a translator, and no translation could have loaded
+* 📖 New "Translating the plugin" section: any language can be added by dropping a .mo into wp-content/languages/plugins/ - no pull request, no code, survives updates
 
 = 2.10.1 =
 * 🎨 Fixed: the artist name and the time display were too faint to meet the contrast minimum (3.91:1 instead of 4.5:1). Slightly brighter now, at 4.85:1

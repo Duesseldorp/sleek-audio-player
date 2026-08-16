@@ -65,9 +65,42 @@ test against a production site.
 
 ## Translations
 
-Translations are very welcome. Copy `languages/sleek-audio-player.pot` to
-`languages/sleek-audio-player-<locale>.po`, translate it, run
-`python tools/po2mo.py`, and open a pull request with both files.
+Translations are very welcome, and there are two ways to make one.
+
+### Just use it on your own site — no pull request needed
+
+WordPress looks for plugin translations in `wp-content/languages/plugins/`
+before it looks inside the plugin. So you can translate the plugin for your own
+site without touching it, and your file survives every plugin update:
+
+1. Open `languages/sleek-audio-player.pot` in [Poedit](https://poedit.net/)
+   (or any gettext editor) and translate it
+2. Save it as `sleek-audio-player-<locale>.po` — for example
+   `sleek-audio-player-fr_FR.po`. The locale must match your site's language
+   exactly; you can see it under Settings → General
+3. Poedit writes the compiled `.mo` next to it when you save
+4. Copy **the `.mo`** to `wp-content/languages/plugins/`
+
+That is all. No code, no build step, no waiting for a release.
+
+### Contribute it back
+
+If you would like the translation to ship with the plugin, put the `.po` in
+`languages/`, run `python tools/po2mo.py` to compile it, and open a pull
+request with both files. CI checks that the `.mo` matches its `.po`.
+
+### What to expect when translating
+
+- The template is generated from the sources (`python tools/make-pot.py`) and
+  CI fails when a translatable string is missing from it, so it is never stale
+- Strings with placeholders carry a `translators:` comment explaining what each
+  placeholder contains
+- Stateful labels are complete sentences ("Repeat: One") rather than pieces
+  glued together, so you are free to use your language's word order
+- Plural forms are supported; `%s Track` / `%s Tracks` is a real plural entry
+- **Right-to-left languages are not supported yet.** The stylesheet still uses
+  fixed left/right rules, so Arabic or Hebrew would render with a broken
+  layout. The translation itself would work; the layout would not
 
 ## License
 

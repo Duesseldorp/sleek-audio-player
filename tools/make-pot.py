@@ -27,12 +27,19 @@ POT_PATH = LANG_DIR / "sleek-audio-player.pot"
 DOMAIN = "sleek-audio-player"
 
 # Files scanned, in the order their strings appear in the .pot
+#
+# block.js is included because the Gutenberg block calls wp.i18n.__() directly
+# rather than receiving its strings from PHP. Without it those labels would be
+# marked up as translatable and still never reach a translator - which is
+# exactly how they stayed English until 2.11.0. Its translations are delivered
+# as .json (see tools/make-json.py), not through the .mo.
 SOURCES = [
     "sleek-audio-player.php",
     "includes/class-player.php",
     "includes/class-theme-manager.php",
     "includes/class-waveform-manager.php",
     "uninstall.php",
+    "assets/js/block.js",
 ]
 
 # A single-quoted PHP string, allowing \' escapes

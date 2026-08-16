@@ -385,6 +385,19 @@ class SleekAudio_Player {
             SLEEKAUDIO_VERSION,
             true
         );
+
+        // The block calls wp.i18n.__() itself, and JavaScript translations come
+        // from a .json rather than the .mo. Without this line the labels stay
+        // English however complete the .po is - and nothing says so.
+        // The file is built by tools/make-json.py; its name contains an md5 of
+        // 'assets/js/block.js', so the path above must stay in step with it.
+        if (function_exists('wp_set_script_translations')) {
+            wp_set_script_translations(
+                'sap-block-editor',
+                'sleek-audio-player',
+                SLEEKAUDIO_PLUGIN_DIR . 'languages'
+            );
+        }
         
         // Block registrieren
         register_block_type('sleek-audio-player/player', array(

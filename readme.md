@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.10.1
+**Current Version:** 2.11.0
 
 ---
 
@@ -203,6 +203,19 @@ What is checked, how, and what is not — so the claim can be judged rather than
 This is deliberately not a claim of WCAG 2.1 AA conformance. It is a list of what is checked and what is not.
 
 ## Changelog
+
+### Version 2.11.0 (2026-08-16)
+
+**The block editor was marked up for translation but could never be translated.** Its labels sit in `wp.i18n.__()` calls with the correct text domain, so the code looked right — but `tools/make-pot.py` only read PHP, so a translator never saw the strings, and `wp_set_script_translations()` was missing, so even a finished translation would not have loaded. The same shape as the text-domain path bug: markup promising something the plumbing never delivered.
+
+- `make-pot.py` now reads `block.js` too — six further strings
+- `tools/make-json.py` builds the `.json` files WordPress loads for scripts, named with the md5 of the script path that `load_script_textdomain()` expects
+- `wp_set_script_translations()` connects the two
+- `build-zip.py` ships the `.json` — it was not on the whitelist, so the file would have existed in the repository, CI would have been green, and every installed copy would still have been English
+
+Done the standard way rather than through `wp_localize_script` on purpose: if the plugin is ever listed on wordpress.org, translate.wordpress.org generates exactly these `.json` files automatically — but only for plugins that call `wp_set_script_translations()`.
+
+**Translating the plugin is now documented.** The important part was undocumented: WordPress reads `wp-content/languages/plugins/` before the plugin's own folder, so anyone can translate the plugin for their site by dropping a `.mo` there. No pull request, no build step, and it survives updates. Right-to-left languages are named as unsupported rather than left to be discovered.
 
 ### Version 2.10.1 (2026-08-15)
 
