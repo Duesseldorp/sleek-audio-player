@@ -15,7 +15,14 @@ export default defineConfig({
 
   fullyParallel: false, // one WordPress instance, keep state predictable
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // No retries, deliberately. DEVELOPMENT.md says flaky tests get fixed at the
+  // cause rather than calmed down - and a retry does exactly the calming. With
+  // one retry a test that fails and then passes is reported as "flaky" while
+  // the run still goes green, so nobody looks. That happened on 2026-08-16:
+  // the volume-focus test was failing for a real reason (focus() silently does
+  // nothing while the panel is still visibility:hidden) and would have slipped
+  // through unnoticed.
+  retries: 0,
   workers: 1,
 
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : [["list"]],

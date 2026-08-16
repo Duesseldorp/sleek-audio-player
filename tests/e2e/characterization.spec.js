@@ -1,4 +1,51 @@
 import { expect, test } from "@playwright/test";
+import {
+  TRACK_COUNT,
+  TRACK_DURATION_LABEL,
+  TRACK_SECONDS,
+  TRACKS_HAVE_COVERS,
+} from "./fixtures.js";
+
+// Pins what the other tests are allowed to assume about the seeded data.
+// Without it, changing the fixtures breaks a handful of unrelated tests with
+// misleading messages - which is exactly what happened on 2026-08-16, twice.
+test.describe("Test data", () => {
+  test("the fixtures are what the tests assume", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = page.locator(".sap-player").first();
+
+    await expect(player.locator(".sap-track"), "track count changed").toHaveCount(TRACK_COUNT);
+
+    await expect(
+      player.locator(".sap-track-duration").first(),
+      "track length changed - seek steps in other tests are sized for this"
+    ).toHaveText(TRACK_DURATION_LABEL);
+
+    // Measured on a detached element: touching the player's own audio would
+    // change the state the rest of the suite runs against
+    const url = await player.locator(".sap-track").first().getAttribute("data-url");
+    const seconds = await page.evaluate(
+      (src) =>
+        new Promise((done) => {
+          const probe = new Audio();
+          probe.preload = "metadata";
+          probe.addEventListener("loadedmetadata", () => done(probe.duration), { once: true });
+          probe.addEventListener("error", () => done(null), { once: true });
+          probe.src = src;
+        }),
+      url
+    );
+
+    expect(Math.round(seconds), "the generated audio is no longer 3s long").toBe(TRACK_SECONDS);
+
+    if (TRACKS_HAVE_COVERS) {
+      await expect(
+        player.locator(".sap-cover-slide"),
+        "covers vanished - the carousel tests have nothing to look at"
+      ).toHaveCount(TRACK_COUNT);
+    }
+  });
+});
 
 /**
  * Characterization tests - the safety net for refactoring.
