@@ -16,17 +16,20 @@ test.describe("Cover loading", () => {
 
   // Lazy alone would make a swipe reveal a blank slide, so the reachable
   // neighbours are fetched ahead of time - the same idea as the audio preload.
+  // Asserted per slide rather than by counting: what matters is which cover is
+  // ready, and a count also has to track every slide warmed earlier.
   test("the reachable neighbours are warmed, the rest are not", async ({ page }) => {
     await page.goto("/player-page/");
     const player = page.locator(".sap-player").first();
-    const warmed = player.locator(".sap-cover-slide img[data-sap-warmed]");
+    const cover = (n) => player.locator(".sap-cover-slide").nth(n).locator("img");
 
-    // Starting on the first track, only its one neighbour is worth fetching
-    await expect(warmed).toHaveCount(1);
+    // On the first track its one neighbour is ready, the far one is not
+    await expect(cover(1)).toHaveAttribute("data-sap-warmed", "1");
+    await expect(cover(2)).not.toHaveAttribute("data-sap-warmed", "1");
 
-    // Moving on makes the next one reachable, and it gets warmed too
+    // Moving on brings the next one within reach, so it is fetched too
     await player.locator(".sap-next").click();
-    await expect(warmed).toHaveCount(2);
+    await expect(cover(2)).toHaveAttribute("data-sap-warmed", "1");
   });
 });
 import { Player, watchForErrors, watchPluginAssets } from "./helpers/player.js";
