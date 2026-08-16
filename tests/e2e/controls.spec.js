@@ -432,6 +432,48 @@ test.describe("Reduced motion", () => {
   });
 });
 
+test.describe("Visualizer frequency mapping", () => {
+  // The fixtures are pure sine tones (tests/make-fixtures.mjs), which makes
+  // this deterministic: track one is 440 Hz. Spread evenly across 0-24 kHz
+  // that lands on bar 1 of 64 - the far left edge. Given a musical interval
+  // each, it lands near bar 27, close to the middle. So the horizontal
+  // position of the painted pixels tells us which mapping is in use.
+  test("a mid-range tone is drawn away from the left edge", async ({ page }) => {
+    await page.goto("/player-page/");
+    const player = new Player(page);
+
+    await player.play();
+    await player.waitUntilPlaying();
+
+    const canvas = player.root.locator(".sap-visualizer");
+    const centre = async () =>
+      canvas.evaluate((el) => {
+        if (!el.width || !el.height) return null;
+        const data = el.getContext("2d").getImageData(0, 0, el.width, el.height).data;
+        let weighted = 0;
+        let total = 0;
+        for (let x = 0; x < el.width; x++) {
+          let painted = 0;
+          for (let y = 0; y < el.height; y++) {
+            if (data[(y * el.width + x) * 4 + 3] > 0) painted++;
+          }
+          weighted += x * painted;
+          total += painted;
+        }
+        return total ? weighted / total / el.width : null;
+      });
+
+    // Wait for the visualizer to draw at all rather than for a fixed time
+    await expect.poll(centre, { timeout: 15_000 }).not.toBeNull();
+
+    const position = await centre();
+    expect(
+      position,
+      `440 Hz sat at ${(position * 100).toFixed(1)}% of the width - below 15% means the bars are still spread evenly across the spectrum`
+    ).toBeGreaterThan(0.15);
+  });
+});
+
 test.describe("Compatibility", () => {
   // The legacy alias is a documented promise in readme.txt and DEVELOPMENT.md
   test("the legacy [simple_player] shortcode still renders a working player", async ({ page }) => {

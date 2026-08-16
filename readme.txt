@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.12.0
+Stable tag: 2.13.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -274,6 +274,10 @@ Known gaps, stated plainly:
 This is not a claim of WCAG 2.1 AA conformance - it is a list of what is verified and what is not.
 
 == Changelog ==
+
+= 2.13.0 =
+* 🎚️ All eleven visualizers now follow the frequency scale human hearing uses. Two thirds of the bars used to sit above 8 kHz, where music has almost no energy, so the right-hand side barely moved while a single bar had to cover the entire bass range
+* 🎵 Bass now gets 22 bars instead of 1, and the voice and melody range 21 instead of 5
 
 = 2.12.0 =
 * ⚡ Only the cover on screen is loaded now. A playlist with eleven covers pulled about 2.9 MB on every page view for the one image anyone could see

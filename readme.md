@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.12.0
+**Current Version:** 2.13.0
 
 ---
 
@@ -203,6 +203,23 @@ What is checked, how, and what is not — so the claim can be judged rather than
 This is deliberately not a claim of WCAG 2.1 AA conformance. It is a list of what is checked and what is not.
 
 ## Changelog
+
+### Version 2.13.0 (2026-08-16)
+
+**The visualizers were spreading their bars evenly across 0–24 kHz.** Hearing does not work that way: 100 Hz to 200 Hz is an octave, 10 000 Hz to 10 100 Hz is nothing. Measured with 64 bars at a 48 kHz sample rate:
+
+| Range | before | after |
+|---|---|---|
+| Bass, below 250 Hz | **1 bar** | **22** |
+| 250 Hz – 2 kHz (voice, melody) | **5** | **21** |
+| 2 – 8 kHz | 16 | 14 |
+| Above 8 kHz, almost no energy | **42** | **7** |
+
+Two thirds of the display was showing frequencies music barely uses. Sampled on a real track beforehand, the top quarter of the canvas never moved at all and the rest fell away in a straight ramp — the classic look of a linear FFT.
+
+Every bar now covers a musical interval instead. One change in one helper, used by all eleven visualizers, so they all improve together. The loudest bin within a band is taken rather than the average, because averaging washes a single strong tone out into its quiet neighbours.
+
+Covered by an end-to-end test that exploits the fixtures being pure sine tones: 440 Hz belongs near the middle of the display, not at the left edge.
 
 ### Version 2.12.0 (2026-08-16)
 

@@ -542,6 +542,45 @@
         }
         
         // Classic frequency bars - drawn at bottom of cover
+        // Hearing is logarithmic: 100 Hz to 200 Hz is an octave, 10000 Hz to
+        // 10100 Hz is nothing. Spreading bars evenly across 0-22 kHz therefore
+        // spends most of the display on frequencies music barely uses. Measured
+        // on a real track before this change: the top quarter of the canvas
+        // never moved at all and the rest fell off in a straight ramp.
+        //
+        // Giving every bar a musical interval instead puts the bass where it
+        // has room and folds the quiet top end together, so the whole width
+        // responds. This is used by every visualizer, so they all benefit.
+        const VIZ_MIN_HZ = 30;
+        const VIZ_MAX_HZ = 16000;
+
+        function bandValue(dataArray, index, count) {
+            // Without an AudioContext the sample rate is unknown; fall back to
+            // the old even split rather than guessing
+            if (!audioContext) {
+                return dataArray[Math.floor(index * dataArray.length / count)];
+            }
+
+            const nyquist = audioContext.sampleRate / 2;
+            const ratio = VIZ_MAX_HZ / VIZ_MIN_HZ;
+            const lowHz = VIZ_MIN_HZ * Math.pow(ratio, index / count);
+            const highHz = VIZ_MIN_HZ * Math.pow(ratio, (index + 1) / count);
+
+            let low = Math.floor((lowHz / nyquist) * dataArray.length);
+            let high = Math.ceil((highHz / nyquist) * dataArray.length);
+            low = Math.max(0, Math.min(dataArray.length - 1, low));
+            high = Math.max(low + 1, Math.min(dataArray.length, high));
+
+            // The loudest bin in the band, not the average: averaging washes
+            // out a single strong tone into its quiet neighbours, which is
+            // exactly the detail worth showing
+            let peak = 0;
+            for (let bin = low; bin < high; bin++) {
+                if (dataArray[bin] > peak) peak = dataArray[bin];
+            }
+            return peak;
+        }
+
         function drawBars(dataArray, width, height, vizColor) {
             const barCount = 64;
             const barWidth = width / barCount;
@@ -549,8 +588,7 @@
             const maxBarHeight = height * 0.30; // Limit bar height to 30% of cover
             
             for (let i = 0; i < barCount; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / barCount);
-                const value = dataArray[dataIndex];
+                const value = bandValue(dataArray, i, barCount);
                 const barHeight = (value / 255) * maxBarHeight;
                 
                 const x = i * barWidth;
@@ -575,8 +613,7 @@
             const centerY = height / 2;
             
             for (let i = 0; i < barCount; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / barCount);
-                const value = dataArray[dataIndex];
+                const value = bandValue(dataArray, i, barCount);
                 const barHeight = (value / 255) * centerY * 0.4;
                 
                 const x = startX + (i * barWidth);
@@ -605,8 +642,7 @@
             const barCount = 96;
             
             for (let i = 0; i < barCount; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / barCount);
-                const value = dataArray[dataIndex];
+                const value = bandValue(dataArray, i, barCount);
                 const barHeight = (value / 255) * radius * 2.0;
                 
                 const angle = (i / barCount) * Math.PI * 2 - Math.PI / 2;
@@ -661,8 +697,7 @@
             const maxDotSize = 20;
             
             for (let i = 0; i < dotCount; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / dotCount);
-                const value = dataArray[dataIndex];
+                const value = bandValue(dataArray, i, dotCount);
                 const dotSize = (value / 255) * maxDotSize + 3;
                 
                 const x = (i / dotCount) * width + (width / dotCount / 2);
@@ -783,8 +818,7 @@
             visualizerCtx.shadowColor = vizColor;
             
             for (let i = 0; i < barCount; i++) {
-                const dataIndex = Math.floor(i * dataArray.length / barCount);
-                const value = dataArray[dataIndex] / 255;
+                const value = bandValue(dataArray, i, barCount) / 255;
                 const barLength = (0.1 + value * 0.9) * maxBarLength;
                 const angle = (i / barCount) * Math.PI * 2 - Math.PI / 2;
                 
