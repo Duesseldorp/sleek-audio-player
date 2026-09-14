@@ -130,6 +130,25 @@ class SleekAudio_Player {
     }
     
     /**
+     * Whether an active SEO plugin already prints Open Graph tags.
+     *
+     * Detected by the constant or function each plugin defines when it loads.
+     * A site that switched its SEO plugin's social output off can hand the
+     * job back to the player through the filter.
+     *
+     * @return bool
+     */
+    private function seo_plugin_prints_open_graph() {
+        $active = defined('WPSEO_VERSION')               // Yoast SEO
+            || function_exists('aioseo')                 // All in One SEO, free and Pro
+            || defined('RANK_MATH_VERSION')              // Rank Math
+            || defined('SEOPRESS_VERSION')               // SEOPress
+            || defined('THE_SEO_FRAMEWORK_VERSION');     // The SEO Framework
+
+        return (bool) apply_filters('sleekaudio_seo_plugin_prints_open_graph', $active);
+    }
+
+    /**
      * Add Open Graph meta tags for playlist pages (SEO & Social Sharing)
      */
     public function add_open_graph_tags() {
@@ -137,7 +156,15 @@ class SleekAudio_Player {
         if (is_admin()) {
             return;
         }
-        
+
+        // An SEO plugin that prints Open Graph tags owns the preview. A second
+        // set left share crawlers two og:image candidates: the image chosen
+        // for sharing, and the track cover - on the production site a 1.3 to
+        // 2 MB PNG, and shared links showed no image at all.
+        if ($this->seo_plugin_prints_open_graph()) {
+            return;
+        }
+
         // Check if sharing a specific track via URL parameters
         // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public read-only share URLs (?playlist=X&track=Y); no state change, nonces don't apply to unauthenticated GET views
         $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;

@@ -76,6 +76,22 @@ test.describe("Embed code generator", () => {
   });
 });
 
+test.describe("Social previews", () => {
+  // With an SEO plugin active, a shared link carried two sets of Open Graph
+  // tags: the SEO plugin's share image and the player's track cover. On the
+  // production site the cover was a 1.3-2 MB PNG and the preview showed no
+  // image. tests/mu-plugins/sap-e2e-seo.php plays the SEO plugin.
+  test("an SEO plugin's tags are not duplicated on a shared track link", async ({ page }) => {
+    await page.goto("/playlist/e2e-playlist/?e2e_seo=1&track=2");
+
+    const images = page.locator('meta[property="og:image"]');
+    await expect(images).toHaveCount(1);
+    await expect(images).toHaveAttribute("content", "https://example.org/seo-share.jpg");
+    await expect(page.locator('meta[property="og:title"]')).toHaveCount(1);
+    await expect(page.locator('meta[name="twitter:image"]')).toHaveCount(0);
+  });
+});
+
 test.describe("Embed view", () => {
   test("?embed=1 renders a standalone player", async ({ page }) => {
     await page.goto("/playlist/e2e-playlist/?embed=1");

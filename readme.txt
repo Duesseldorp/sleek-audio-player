@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.0
-Stable tag: 2.13.0
+Stable tag: 2.14.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -274,6 +274,10 @@ Known gaps, stated plainly:
 This is not a claim of WCAG 2.1 AA conformance - it is a list of what is verified and what is not.
 
 == Changelog ==
+
+= 2.14.0 =
+* 🔗 With an SEO plugin active, shared links no longer carry two sets of preview tags. The SEO plugin's share image used to compete with the track cover, which on the production site was a 1.3 to 2 MB PNG, and the preview showed no image
+* 🔌 Detects Yoast SEO, All in One SEO, Rank Math, SEOPress and The SEO Framework. Without one nothing changes. If your SEO plugin's social output is switched off, the filter `sleekaudio_seo_plugin_prints_open_graph` hands the job back to the player
 
 = 2.13.0 =
 * 🎚️ All eleven visualizers now follow the frequency scale human hearing uses. Two thirds of the bars used to sit above 8 kHz, where music has almost no energy, so the right-hand side barely moved while a single bar had to cover the entire bass range

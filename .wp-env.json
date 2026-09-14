@@ -2,7 +2,8 @@
   "core": null,
   "plugins": ["."],
   "mappings": {
-    "wp-content/uploads/sap-test": "./tests/fixtures/audio"
+    "wp-content/uploads/sap-test": "./tests/fixtures/audio",
+    "wp-content/mu-plugins": "./tests/mu-plugins"
   },
   "config": {
     "WP_DEBUG": true,

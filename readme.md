@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.13.0
+**Current Version:** 2.14.0
 
 ---
 
@@ -203,6 +203,19 @@ What is checked, how, and what is not — so the claim can be judged rather than
 This is deliberately not a claim of WCAG 2.1 AA conformance. It is a list of what is checked and what is not.
 
 ## Changelog
+
+### Version 2.14.0 (2026-09-14)
+
+**Shared links showed no preview image on a site with an SEO plugin.** The player prints Open Graph tags for a shared track, and so does every SEO plugin. The page then offers WhatsApp, Facebook and the rest two `og:image` candidates. Measured on the production site with All in One SEO: the SEO plugin offered the 240 KB JPEG made for sharing, the player the track cover, a 1024 px PNG of 1.3 to 2 MB.
+
+- With Yoast SEO, All in One SEO, Rank Math, SEOPress or The SEO Framework active, the player prints no Open Graph or Twitter tags of its own. The preview belongs to the SEO plugin
+- Without an SEO plugin nothing changes
+- The trade-off: sharing one song out of a playlist with several now shows the page's preview rather than that song's title and cover
+- If your SEO plugin's social output is switched off, hand the job back: `add_filter('sleekaudio_seo_plugin_prints_open_graph', '__return_false');`
+
+Links shared before the update can keep their old preview for a while, because the services store one per address. Facebook's Sharing Debugger fetches a page again on request.
+
+Covered by an end-to-end test with a stand-in SEO plugin, active only on requests that ask for it.
 
 ### Version 2.13.0 (2026-08-16)
 
