@@ -5,7 +5,7 @@ Author URI: https://www.duesseldorp.de
 Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
-Tested up to: 7.0
+Tested up to: 7.1
 Stable tag: 2.14.0
 Requires PHP: 7.4
 License: GPLv2 or later

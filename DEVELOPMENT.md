@@ -86,7 +86,10 @@ Version lives in **four places** — all must match:
 Then:
 
 5. Changelog entry in **both** `readme.md` (detailed) and `readme.txt` (bullet style)
-6. Run both build steps above if sources changed
+6. Run both build steps above if sources changed — and after every version
+   bump, even without source changes: the `.min` files carry the version in
+   their banner, and the `.pot` carries line numbers that shift with any edit
+   to a PHP file
 7. `SLEEKAUDIO_VERSION` is the cache-buster for enqueued assets — shipping a code
    change without a version bump means cached sites never receive it
 8. **Look at the change on the running local site** (https://duesseldorp-test.local/)
