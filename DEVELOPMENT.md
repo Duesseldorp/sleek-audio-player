@@ -221,7 +221,7 @@ complies", not "it plays audio".
 ### End-to-end tests
 
 `tests/e2e/` drives a real browser against a real WordPress instance
-(`@wordpress/env` in Docker) on every push. 57 tests covering:
+(`@wordpress/env` in Docker) on every push. 59 tests covering:
 
 - **Playback**: starts, **track transitions at the end of a song** (the
   regression that shipped five times), next/previous, durations rendering
@@ -243,8 +243,12 @@ complies", not "it plays audio".
 - **Embedding**: Gutenberg block, oEmbed endpoint (valid document, and 404 for
   a non-playlist URL), embed-code generator incl. layout switch, `?embed=1`
 - **Social previews**: beside an SEO plugin the player prints no second set of
-  Open Graph tags. `tests/mu-plugins/sap-e2e-seo.php` plays the SEO plugin, only
-  on requests carrying `?e2e_seo=1`
+  Open Graph tags; with All in One SEO a shared track still shows that track,
+  and without a track AIOSEO's preview stays untouched.
+  `tests/mu-plugins/sap-e2e-seo.php` plays the SEO plugins, only on requests
+  carrying `?e2e_seo=yoast` or `?e2e_seo=aioseo`. The AIOSEO stand-in copies
+  how its source prints tags (filters, empty values dropped, `esc_attr`) — if
+  AIOSEO changes that, the stand-in has to follow
 - **Labels**: no menu label is empty or renders `undefined`, every control has
   a non-empty accessible name, the track count uses the plural form. The suite
   runs in English, so it guards the plumbing, not the German wording — that

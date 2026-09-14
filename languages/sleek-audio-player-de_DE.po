@@ -1016,3 +1016,17 @@ msgstr "Eine Playlist in der Seitenleiste auswählen."
 msgid "Player preview is shown in the frontend."
 msgstr "Die Player-Vorschau erscheint im Frontend."
 
+
+#. translators: Share preview text for one song. 1: song title, 2: artist, 3: playlist title
+msgid "\"%1$s\" by %2$s - %3$s"
+msgstr "„%1$s“ von %2$s – %3$s"
+
+#. translators: Share preview text for one song. 1: song title, 2: playlist title
+msgid "\"%1$s\" - %2$s"
+msgstr "„%1$s“ – %2$s"
+
+#. translators: Share preview text for a playlist. 1: playlist title, 2: number of songs
+msgid "%1$s - %2$d track"
+msgid_plural "%1$s - %2$d tracks"
+msgstr[0] "%1$s – %2$d Titel"
+msgstr[1] "%1$s – %2$d Titel"

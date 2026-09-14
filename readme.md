@@ -11,7 +11,7 @@ Built for music, podcasts and playlists – with strong UX, clean SEO and reliab
 
 👉 Product page & background: https://www.duesseldorp.de/sleek-audio-player/
 
-**Current Version:** 2.14.0
+**Current Version:** 2.15.0
 
 ---
 
@@ -203,6 +203,20 @@ What is checked, how, and what is not — so the claim can be judged rather than
 This is deliberately not a claim of WCAG 2.1 AA conformance. It is a list of what is checked and what is not.
 
 ## Changelog
+
+### Version 2.15.0 (2026-09-14)
+
+**2.14.0 brought the preview image back, but a shared song showed the page instead of the song.** With an SEO plugin active the player stepped aside entirely, so sharing "Die Stadt steht Kopf!" out of the carnival playlist showed the carnival page's title and picture.
+
+All in One SEO knows the page, not the songs inside a player: to it, `?playlist=10548&track=2` is an unknown query string. The player now tells it which song was shared, through AIOSEO's own `aioseo_facebook_tags` and `aioseo_twitter_tags` filters:
+
+- Title, description, `og:url` and image are swapped inside the one set of tags AIOSEO prints. `og:url` too, because Facebook follows it and would otherwise show the page again
+- Without a track in the link, AIOSEO's preview stays untouched
+- **The image is the largest size of the cover that stays under 300 KB**, the limit WhatsApp is commonly reported to apply. On the production site that is the 300 px version at 116 to 143 KB rather than the 1024 px PNG of 1.3 to 2 MB. The player's own tags on sites without an SEO plugin use the same choice now
+- Yoast SEO, Rank Math, SEOPress and The SEO Framework keep the 2.14.0 behaviour for now: one set of tags, the page's preview
+- The preview text of a shared song is translatable; it used to say "by" on German sites too
+
+Covered by end-to-end tests with a stand-in that prints its tags the way All in One SEO's source does.
 
 ### Version 2.14.0 (2026-09-14)
 

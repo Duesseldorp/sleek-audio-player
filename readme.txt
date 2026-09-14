@@ -6,7 +6,7 @@ Plugin URI: https://www.duesseldorp.de/sleek-audio-player
 Tags: audio, music, player, playlist, mp3
 Requires at least: 5.0
 Tested up to: 7.1
-Stable tag: 2.14.0
+Stable tag: 2.15.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -274,6 +274,11 @@ Known gaps, stated plainly:
 This is not a claim of WCAG 2.1 AA conformance - it is a list of what is verified and what is not.
 
 == Changelog ==
+
+= 2.15.0 =
+* 🖼️ With All in One SEO, a shared song shows that song again: its title and cover instead of the page. The player hands both to the tags AIOSEO prints, so there is still exactly one preview image
+* 🪶 Share previews use the largest cover size under 300 KB instead of the 1024 px version, which on the production site was a PNG of up to 2 MB
+* 🌍 The preview text of a shared song is translatable
 
 = 2.14.0 =
 * 🔗 With an SEO plugin active, shared links no longer carry two sets of preview tags. The SEO plugin's share image used to compete with the track cover, which on the production site was a 1.3 to 2 MB PNG, and the preview showed no image

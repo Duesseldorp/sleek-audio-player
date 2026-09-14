@@ -78,6 +78,9 @@ class SleekAudio_Player {
         
         // SEO: Add Open Graph meta tags for playlist pages
         add_action('wp_head', array($this, 'add_open_graph_tags'));
+        // ...or hand a shared track to the tags All in One SEO prints
+        add_filter('aioseo_facebook_tags', array($this, 'filter_aioseo_facebook_tags'));
+        add_filter('aioseo_twitter_tags', array($this, 'filter_aioseo_twitter_tags'));
         
         // oEmbed: Register as provider for playlist URLs
         add_action('rest_api_init', array($this, 'register_oembed_endpoint'));
@@ -149,6 +152,209 @@ class SleekAudio_Player {
     }
 
     /**
+     * The largest generated size of an image that is still light enough to share.
+     *
+     * Share crawlers download the image for every preview. On the production
+     * site the covers are 1024 px PNGs of 1.3 to 2 MB, while WhatsApp is
+     * commonly reported to drop preview images above about 300 KB; there the
+     * pick is the 300 px size at 116 to 143 KB. Sizes of unknown weight are
+     * skipped rather than guessed.
+     *
+     * @param int $attachment_id Image attachment ID.
+     * @return array|null Array with url, width and height, or null if no size fits.
+     */
+    private function share_image($attachment_id) {
+        $max_bytes = 300 * 1024;
+        $meta = wp_get_attachment_metadata($attachment_id);
+        $file = get_attached_file($attachment_id);
+        if (!is_array($meta) || empty($meta['width']) || !$file) {
+            return null;
+        }
+
+        $candidates = array(
+            'full' => array((int) $meta['width'], $this->image_bytes($meta, $file)),
+        );
+        if (!empty($meta['sizes']) && is_array($meta['sizes'])) {
+            foreach ($meta['sizes'] as $name => $size) {
+                if (empty($size['width']) || empty($size['file'])) {
+                    continue;
+                }
+                $candidates[$name] = array((int) $size['width'], $this->image_bytes($size, path_join(dirname($file), $size['file'])));
+            }
+        }
+
+        $best = '';
+        $best_width = 0;
+        foreach ($candidates as $name => $candidate) {
+            list($width, $bytes) = $candidate;
+            // Facebook ignores images narrower than 200 px
+            if ($bytes > 0 && $bytes <= $max_bytes && $width >= 200 && $width > $best_width) {
+                $best = $name;
+                $best_width = $width;
+            }
+        }
+        if ($best === '') {
+            return null;
+        }
+
+        $src = wp_get_attachment_image_src($attachment_id, $best);
+        if (!$src) {
+            return null;
+        }
+
+        return array(
+            'url'    => self::cdn_url($src[0]),
+            'width'  => (int) $src[1],
+            'height' => (int) $src[2],
+        );
+    }
+
+    /**
+     * File size of an image or one of its generated sizes in bytes, 0 if unknown.
+     *
+     * WordPress stores it in the attachment metadata since 6.0. Older uploads
+     * are measured on disk; offloaded files that are not on disk stay unknown.
+     *
+     * @param array  $meta Attachment metadata, or one entry of its sizes.
+     * @param string $path Where that file would be on disk.
+     * @return int
+     */
+    private function image_bytes($meta, $path) {
+        if (!empty($meta['filesize'])) {
+            return (int) $meta['filesize'];
+        }
+        return file_exists($path) ? (int) filesize($path) : 0;
+    }
+
+    /**
+     * What a share preview of the current request shows, or null.
+     *
+     * Covers a playlist page itself and any page opened through a player's
+     * share link (?playlist=ID&track=N). Used by the player's own tags and by
+     * the All in One SEO filters alike.
+     *
+     * @return array|null Keys: playlist_id, track (0 unless a track is shared),
+     *                    title, description, url, image (see share_image()), track_count.
+     */
+    private function social_preview() {
+        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public read-only share URLs (?playlist=X&track=Y); no state change, nonces don't apply to unauthenticated GET views
+        $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;
+        $shared_playlist = isset($_GET['playlist']) ? absint($_GET['playlist']) : 0;
+        // phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+        // If no playlist ID in URL, try to get from current post (if it's a playlist page)
+        global $post;
+        $playlist_id = 0;
+
+        if ($shared_playlist > 0) {
+            // Playlist ID from URL parameter
+            $playlist_id = $shared_playlist;
+        } elseif ($post && isset($post->ID) && $post->post_type === 'sap_playlist') {
+            // Current page is a playlist
+            $playlist_id = $post->ID;
+        }
+
+        // Without a shared track, only a playlist page itself has a preview
+        if (!$playlist_id || $shared_track <= 0) {
+            if (!is_singular('sap_playlist')) {
+                return null;
+            }
+            $playlist_id = $post->ID;
+        }
+
+        $playlist_post = get_post($playlist_id);
+        if (!$playlist_post || $playlist_post->post_type !== 'sap_playlist' || $playlist_post->post_status !== 'publish') {
+            return null;
+        }
+
+        $playlist_title = wp_strip_all_tags(get_the_title($playlist_id));
+        $tracks = get_post_meta($playlist_id, '_sap_tracks', true);
+        $track_count = is_array($tracks) ? count($tracks) : 0;
+        $thumbnail_id = get_post_thumbnail_id($playlist_id);
+
+        $preview = array(
+            'playlist_id' => $playlist_id,
+            'track'       => 0,
+            'title'       => $playlist_title,
+            'description' => '',
+            'url'         => get_permalink($playlist_id),
+            'image'       => $thumbnail_id ? $this->share_image($thumbnail_id) : null,
+            'track_count' => $track_count,
+        );
+
+        if ($shared_track > 0 && is_array($tracks) && isset($tracks[$shared_track - 1])) {
+            $track = $tracks[$shared_track - 1];
+            $track_title = isset($track['title']) ? wp_strip_all_tags($track['title']) : '';
+            $track_artist = isset($track['artist']) ? wp_strip_all_tags($track['artist']) : '';
+
+            if ($track_title) {
+                $preview['track'] = $shared_track;
+                $preview['title'] = $track_title . ($track_artist ? ' - ' . $track_artist : '');
+
+                if ($track_artist) {
+                    /* translators: Share preview text for one song. 1: song title, 2: artist, 3: playlist title */
+                    $preview['description'] = sprintf(__('"%1$s" by %2$s - %3$s', 'sleek-audio-player'), $track_title, $track_artist, $playlist_title);
+                } else {
+                    /* translators: Share preview text for one song. 1: song title, 2: playlist title */
+                    $preview['description'] = sprintf(__('"%1$s" - %2$s', 'sleek-audio-player'), $track_title, $playlist_title);
+                }
+
+                // A cover attachment can be shared in a light size. A bare URL
+                // has an unknown weight and is used as it is.
+                $track_image = null;
+                if (!empty($track['cover_id'])) {
+                    $track_image = $this->share_image(intval($track['cover_id']));
+                } elseif (!empty($track['cover_url'])) {
+                    $track_image = array('url' => self::cdn_url($track['cover_url']), 'width' => 0, 'height' => 0);
+                }
+                if ($track_image && filter_var($track_image['url'], FILTER_VALIDATE_URL)) {
+                    $preview['image'] = $track_image;
+                }
+            }
+
+            // Include track parameter in URL
+            $preview['url'] = add_query_arg('track', $shared_track, $preview['url']);
+        }
+
+        if (!$preview['url'] || !filter_var($preview['url'], FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        if ($preview['image'] && !filter_var($preview['image']['url'], FILTER_VALIDATE_URL)) {
+            $preview['image'] = null;
+        }
+
+        // The excerpt only when no track replaced it: it runs the content filters
+        if ($preview['track'] === 0) {
+            $preview['description'] = wp_strip_all_tags(get_the_excerpt($playlist_id));
+        }
+        if (empty($preview['description'])) {
+            /* translators: Share preview text for a playlist. 1: playlist title, 2: number of songs */
+            $preview['description'] = sprintf(_n('%1$s - %2$d track', '%1$s - %2$d tracks', $track_count, 'sleek-audio-player'), $playlist_title, $track_count);
+        }
+
+        // Limit description length for meta tags
+        if (mb_strlen($preview['description']) > 200) {
+            $preview['description'] = mb_substr($preview['description'], 0, 197) . '...';
+        }
+
+        return $preview;
+    }
+
+    /**
+     * The preview of a shared track, or null when the link shares none.
+     *
+     * @return array|null See social_preview().
+     */
+    private function shared_track_preview() {
+        if (is_admin()) {
+            return null;
+        }
+        $preview = $this->social_preview();
+        return ($preview && $preview['track'] > 0) ? $preview : null;
+    }
+
+    /**
      * Add Open Graph meta tags for playlist pages (SEO & Social Sharing)
      */
     public function add_open_graph_tags() {
@@ -157,141 +363,107 @@ class SleekAudio_Player {
             return;
         }
 
-        // An SEO plugin that prints Open Graph tags owns the preview. A second
-        // set left share crawlers two og:image candidates: the image chosen
-        // for sharing, and the track cover - on the production site a 1.3 to
-        // 2 MB PNG, and shared links showed no image at all.
+        // An SEO plugin that prints Open Graph tags owns the tags. A second set
+        // left share crawlers two og:image candidates, and shared links showed
+        // no image at all. All in One SEO still receives a shared track through
+        // filter_aioseo_facebook_tags().
         if ($this->seo_plugin_prints_open_graph()) {
             return;
         }
 
-        // Check if sharing a specific track via URL parameters
-        // phpcs:disable WordPress.Security.NonceVerification.Recommended -- public read-only share URLs (?playlist=X&track=Y); no state change, nonces don't apply to unauthenticated GET views
-        $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;
-        $shared_playlist = isset($_GET['playlist']) ? absint($_GET['playlist']) : 0;
-        // phpcs:enable WordPress.Security.NonceVerification.Recommended
-        
-        // If no playlist ID in URL, try to get from current post (if it's a playlist page)
-        global $post;
-        $playlist_id = 0;
-        
-        if ($shared_playlist > 0) {
-            // Playlist ID from URL parameter
-            $playlist_id = $shared_playlist;
-        } elseif ($post && isset($post->ID) && $post->post_type === 'sap_playlist') {
-            // Current page is a playlist
-            $playlist_id = $post->ID;
-        }
-        
-        // If no playlist found and no track being shared, exit
-        if (!$playlist_id || $shared_track <= 0) {
-            // Fall back to original behavior for playlist pages without track parameter
-            if (!is_singular('sap_playlist')) {
-                return;
-            }
-            $playlist_id = $post->ID;
-        }
-        
-        // Get playlist data
-        $playlist_post = get_post($playlist_id);
-        if (!$playlist_post || $playlist_post->post_type !== 'sap_playlist' || $playlist_post->post_status !== 'publish') {
+        $preview = $this->social_preview();
+        if (!$preview) {
             return;
         }
-        
-        // Sanitize all output data
-        $playlist_title = wp_strip_all_tags(get_the_title($playlist_id));
-        $url = esc_url(get_permalink($playlist_id));
-        $cover = get_the_post_thumbnail_url($playlist_id, 'large');
-        $excerpt = wp_strip_all_tags(get_the_excerpt($playlist_id));
-        $tracks = get_post_meta($playlist_id, '_sap_tracks', true);
-        $track_count = is_array($tracks) ? count($tracks) : 0;
-        
-        // Check if a specific track is being shared
-        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- public read-only share URL parameter, absint-sanitized
-        $shared_track = isset($_GET['track']) ? absint($_GET['track']) : 0;
-        $title = $playlist_title;
-        
-        if ($shared_track > 0 && is_array($tracks) && isset($tracks[$shared_track - 1])) {
-            $track = $tracks[$shared_track - 1];
-            $track_title = isset($track['title']) ? wp_strip_all_tags($track['title']) : '';
-            $track_artist = isset($track['artist']) ? wp_strip_all_tags($track['artist']) : '';
-            
-            if ($track_title) {
-                $title = $track_title . ($track_artist ? ' - ' . $track_artist : '');
-                $excerpt = '"' . $track_title . '"' . ($track_artist ? ' by ' . $track_artist : '') . ' - ' . $playlist_title;
-                
-                // Use track cover if available
-                // Priority: cover_id (always fresh) > cover_url > playlist cover
-                $track_cover = '';
-                
-                // First try cover_id (most reliable - generates fresh URL)
-                if (!empty($track['cover_id'])) {
-                    $track_cover = wp_get_attachment_image_url(intval($track['cover_id']), 'large');
-                    if ($track_cover) {
-                        $track_cover = self::cdn_url($track_cover);
-                    }
-                }
-                
-                // Fallback to stored cover_url
-                if (empty($track_cover) && !empty($track['cover_url'])) {
-                    $track_cover = self::cdn_url($track['cover_url']);
-                }
-                
-                // Set cover if valid URL found
-                if ($track_cover && filter_var($track_cover, FILTER_VALIDATE_URL)) {
-                    $cover = $track_cover;
-                }
-            }
-            
-            // Include track parameter in URL
-            $url = add_query_arg('track', $shared_track, $url);
-        }
-        
-        // Validate URL
-        if (!$url || !filter_var($url, FILTER_VALIDATE_URL)) {
-            return;
-        }
-        
-        // Validate cover URL if present
-        if ($cover && !filter_var($cover, FILTER_VALIDATE_URL)) {
-            $cover = '';
-        }
-        
-        // Default description if no excerpt (sanitized)
-        if (empty($excerpt)) {
-            $excerpt = sprintf('%s - %d Tracks', $playlist_title, $track_count);
-        }
-        
-        // Limit excerpt length for meta tags
-        if (mb_strlen($excerpt) > 200) {
-            $excerpt = mb_substr($excerpt, 0, 197) . '...';
-        }
-        
-        // Site name (sanitized)
+
+        $cover = $preview['image'] ? $preview['image']['url'] : '';
         $site_name = wp_strip_all_tags(get_bloginfo('name'));
-        
+
         ?>
         <!-- Sleek Audio Player - Open Graph Tags -->
         <meta property="og:type" content="music.playlist">
-        <meta property="og:title" content="<?php echo esc_attr($title); ?>">
-        <meta property="og:description" content="<?php echo esc_attr($excerpt); ?>">
-        <meta property="og:url" content="<?php echo esc_url($url); ?>">
+        <meta property="og:title" content="<?php echo esc_attr($preview['title']); ?>">
+        <meta property="og:description" content="<?php echo esc_attr($preview['description']); ?>">
+        <meta property="og:url" content="<?php echo esc_url($preview['url']); ?>">
         <meta property="og:site_name" content="<?php echo esc_attr($site_name); ?>">
         <?php if ($cover) : ?>
         <meta property="og:image" content="<?php echo esc_url($cover); ?>">
         <?php endif; ?>
-        <meta property="music:song_count" content="<?php echo absint($track_count); ?>">
-        
+        <meta property="music:song_count" content="<?php echo absint($preview['track_count']); ?>">
+
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" content="<?php echo esc_attr($title); ?>">
-        <meta name="twitter:description" content="<?php echo esc_attr($excerpt); ?>">
+        <meta name="twitter:title" content="<?php echo esc_attr($preview['title']); ?>">
+        <meta name="twitter:description" content="<?php echo esc_attr($preview['description']); ?>">
         <?php if ($cover) : ?>
         <meta name="twitter:image" content="<?php echo esc_url($cover); ?>">
         <?php endif; ?>
         <?php
     }
-    
+
+    /**
+     * Hand a shared track to All in One SEO's Open Graph tags.
+     *
+     * AIOSEO knows the page, not the songs inside a player: to it,
+     * ?playlist=10548&track=2 is an unknown query string. So for a shared
+     * track the player swaps title, description, URL and image inside the one
+     * set of tags AIOSEO prints. og:url too, because Facebook follows it and
+     * would show the page again. Without a track in the link AIOSEO's own
+     * preview stays untouched.
+     *
+     * AIOSEO escapes every value with esc_attr() and drops empty ones, so plain
+     * text goes in, and an unknown image size removes its width and height.
+     *
+     * @param array $meta Tags keyed by property, as built by AIOSEO.
+     * @return array
+     */
+    public function filter_aioseo_facebook_tags($meta) {
+        $preview = $this->shared_track_preview();
+        if (!$preview || !is_array($meta)) {
+            return $meta;
+        }
+
+        $meta['og:title'] = $preview['title'];
+        $meta['og:description'] = $preview['description'];
+
+        if (!empty($meta['og:url'])) {
+            $meta['og:url'] = esc_url(add_query_arg(array(
+                'playlist' => $preview['playlist_id'],
+                'track'    => $preview['track'],
+            ), html_entity_decode($meta['og:url'])));
+        }
+
+        if ($preview['image']) {
+            $meta['og:image'] = $preview['image']['url'];
+            $meta['og:image:secure_url'] = is_ssl() ? $preview['image']['url'] : '';
+            $meta['og:image:width'] = $preview['image']['width'] ? $preview['image']['width'] : '';
+            $meta['og:image:height'] = $preview['image']['height'] ? $preview['image']['height'] : '';
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Hand a shared track to All in One SEO's Twitter tags.
+     *
+     * @param array $meta Tags keyed by name, as built by AIOSEO.
+     * @return array
+     */
+    public function filter_aioseo_twitter_tags($meta) {
+        $preview = $this->shared_track_preview();
+        if (!$preview || !is_array($meta)) {
+            return $meta;
+        }
+
+        $meta['twitter:title'] = $preview['title'];
+        $meta['twitter:description'] = $preview['description'];
+        if ($preview['image']) {
+            $meta['twitter:image'] = $preview['image']['url'];
+        }
+
+        return $meta;
+    }
+
     /**
      * Register oEmbed REST API endpoint
      */
